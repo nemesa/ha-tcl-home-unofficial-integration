@@ -10,10 +10,15 @@ from .config_entry import ConfigData, New_NameConfigEntry, convertToConfigData
 from .const import DOMAIN
 from .tcl import (
     DoAccountAuthResponse,
+    GetAwsCredentialsResponse,
+    GetThingsResponse,
     RefreshTokensResponse,
-    do_account_auth,
-    refreshTokens,
+    check_if_expired,
     check_if_jwt_expired,
+    do_account_auth,
+    get_aws_credentials,
+    get_things,
+    refreshTokens,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -23,6 +28,7 @@ _LOGGER = logging.getLogger(__name__)
 class StorageData:
     authData: DoAccountAuthResponse | None = None
     refreshTokensData: RefreshTokensResponse | None = None
+    awsCredentialsData: GetAwsCredentialsResponse | None = None
 
 
 class SessionManager:
@@ -40,11 +46,15 @@ class SessionManager:
         self._store: storage.Store[dict] = storage.Store(
             hass=hass, version=1, key=DOMAIN
         )
-        self.storageData = StorageData(authData=None, refreshTokensData=None)
+        self.storageData = StorageData(
+            authData=None, refreshTokensData=None, awsCredentialsData=None
+        )
 
     async def async_load(self) -> StorageData:
         """Load the stored data."""
-        storageData = StorageData(authData=None, refreshTokensData=None)
+        storageData = StorageData(
+            authData=None, refreshTokensData=None, awsCredentialsData=None
+        )
         data = await self._store.async_load()
         if data is None:
             _LOGGER.info(
@@ -57,6 +67,11 @@ class SessionManager:
             if data.get("refreshTokensData") is not None:
                 storageData.refreshTokensData = RefreshTokensResponse(
                     data["refreshTokensData"]
+                )
+
+            if data.get("awsCredentialsData") is not None:
+                storageData.awsCredentialsData = GetAwsCredentialsResponse(
+                    data["awsCredentialsData"]
                 )
 
         _LOGGER.info("SessionManager.async_load done")
@@ -124,3 +139,36 @@ class SessionManager:
             return self.storageData.refreshTokensData
 
         return await self.async_force_refresh_tokens()
+
+    async def async_force_aws_credentials(self) -> GetAwsCredentialsResponse:
+        refreshTokensData = await self.async_refresh_tokens()
+
+        awsCredentials = await get_aws_credentials(
+            cognitoToken=refreshTokensData.data.cognito_token
+        )
+
+        self.storageData.awsCredentialsData = awsCredentials
+        await self._store.async_save(data=self.storageData)
+        return awsCredentials
+
+    async def async_aws_credentials(self) -> GetAwsCredentialsResponse:
+        if self.storageData.awsCredentialsData is not None:
+            _LOGGER.info("SessionManager.async_refresh_tokens.resolve from storage")
+
+            if check_if_expired(
+                self.storageData.awsCredentialsData.Credentials.expiration
+            ):
+                return await self.async_force_aws_credentials()
+
+            return self.storageData.awsCredentialsData
+
+        return await self.async_force_aws_credentials()
+
+    async def async_get_things_not_stored(self) -> GetThingsResponse:
+        authResult = await self.async_get_auth_data()
+        refreshTokensResult = await self.async_refresh_tokens()
+        saas_token = refreshTokensResult.data.saas_token
+
+        things = await get_things(saas_token, authResult.user.country_abbr)
+
+        return things

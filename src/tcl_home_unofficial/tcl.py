@@ -77,6 +77,63 @@ class RefreshTokensResponse:
     data: RefreshTokensResponseData
 
 
+@dataclass
+class GetThingsResponseData:
+    def __init__(self, data: dict) -> None:
+        self.device_id = getValue(data, ["device_id", "deviceId"])
+        self.product_key = getValue(data, ["product_key", "productKey"])
+        self.platform = getValue(data, ["platform"])
+        self.nick_name = getValue(data, ["nick_name", "nickName"])
+        self.device_name = getValue(data, ["device_name", "deviceName"])
+        self.category = getValue(data, ["category"])
+        self.firmware_version = getValue(data, ["firmware_version", "firmwareVersion"])
+        self.is_online = getValue(data, ["is_online", "isOnline"])
+
+    device_id: str
+    platform: str
+    nick_name: str
+    device_name: str
+    category: str
+    firmware_version: str
+    is_online: str
+
+
+@dataclass
+class GetThingsResponse:
+    def __init__(self, data: dict) -> None:
+        self.code = getValue(data, ["code"])
+        self.message = getValue(data, ["message"])
+        self.data = [GetThingsResponseData(item) for item in data["data"]]
+
+    code: int
+    message: str
+    data: list[GetThingsResponseData]
+
+
+@dataclass
+class GetAwsCredentialsResponseCredentials:
+    def __init__(self, data: dict) -> None:
+        self.access_key_id = getValue(data, ["access_key_id", "AccessKeyId"])
+        self.expiration = int(getValue(data, ["expiration", "Expiration"]))
+        self.secret_key = getValue(data, ["secret_key", "SecretKey"])
+        self.session_token = getValue(data, ["session_token", "SessionToken"])
+
+    access_key_id: str
+    expiration: int
+    secret_key: str
+    session_token: str
+
+
+@dataclass
+class GetAwsCredentialsResponse:
+    def __init__(self, data: dict) -> None:
+        self.Credentials = GetAwsCredentialsResponseCredentials(data["Credentials"])
+        self.identity_id = getValue(data, ["IdentityId", "identity_id"])
+
+    identity_id: str
+    Credentials: GetAwsCredentialsResponseCredentials
+
+
 async def do_account_auth(
     username: str, password: str, clientId: str
 ) -> DoAccountAuthResponse:
@@ -109,8 +166,6 @@ async def do_account_auth(
         response = await client.post(url, json=payload, headers=headers)
 
         response_obj = response.json()
-        # _LOGGER.info("do_account_auth response: %s", response_obj)
-
         return DoAccountAuthResponse(response_obj)
 
 
@@ -138,7 +193,9 @@ async def refreshTokens(
         return RefreshTokensResponse(response_obj)
 
 
-async def get_aws_credentials(identity_pool_id: str, cognitoToken: str) -> dict:
+async def get_aws_credentials(cognitoToken: str) -> GetAwsCredentialsResponse:
+    identity_pool_id = get_sub_from_jwt_token(cognitoToken)
+
     _LOGGER.info("tcl.get_aws_credentials")
     url = f"https://cognito-identity.eu-central-1.amazonaws.com/"
 
@@ -155,10 +212,12 @@ async def get_aws_credentials(identity_pool_id: str, cognitoToken: str) -> dict:
 
     async with httpx.AsyncClient() as client:
         response = await client.post(url, json=payload, headers=headers)
-        return response.json()
+        response_obj = response.json()
+        _LOGGER.info("get_aws_credentials response: %s", response_obj)
+        return GetAwsCredentialsResponse(response_obj)
 
 
-async def get_things(saas_token: str, country_abbr: str) -> dict:
+async def get_things(saas_token: str, country_abbr: str) -> GetThingsResponse:
     _LOGGER.info("tcl.get_things")
     timestamp = str(int(time.time() * 1000))
     nonce = "".join(
@@ -187,7 +246,8 @@ async def get_things(saas_token: str, country_abbr: str) -> dict:
         )
         if response.status_code != 200:
             raise Exception("Error at get_things: " + response.text)
-        return response.json()
+        response_obj = response.json()
+        return GetThingsResponse(response_obj)
 
 
 def calculate_md5_hash_bytes(input_str: str) -> str:
@@ -236,3 +296,10 @@ def check_if_jwt_expired(
     except Exception as e:
         _LOGGER.error("Error decoding JWT token: %s", e)
         return ""
+
+
+def check_if_expired(exp) -> bool:
+    """Check if the given expiration time is in the past."""
+    now = datetime.datetime.now().timestamp()
+    is_expired = exp < now
+    return is_expired
