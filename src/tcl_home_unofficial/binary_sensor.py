@@ -13,6 +13,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .config_entry import New_NameConfigEntry
 from .const import DOMAIN
+from .coordinator import IotDeviceCoordinator
 from .device import Device, toDeviceInfo
 
 _LOGGER = logging.getLogger(__name__)
@@ -24,32 +25,31 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ):
     """Set up the Binary Sensors."""
-    # This gets the data update coordinator from the config entry runtime data as specified in your __init__.py
-    # coordinator: ExampleCoordinator = config_entry.runtime_data.coordinator
 
-    # Enumerate all the binary sensors in your data value from your DataUpdateCoordinator and add an instance of your binary sensor class
-    # to a list for each one.
-    # This maybe different in your specific case, depending on how your data is structured
+    coordinator = config_entry.runtime_data.coordinator
 
     sensors = []
     for device in config_entry.devices:
-        sensors.append(PowerStateBinarySensor(device))
-        sensors.append(BeepSwitchBinarySensor(device))
+        sensors.append(PowerStateBinarySensor(coordinator, device))
+        sensors.append(BeepSwitchBinarySensor(coordinator, device))
 
     # Create the binary sensors.
     async_add_entities(sensors)
 
 
-class PowerStateBinarySensor(BinarySensorEntity):
+class PowerStateBinarySensor(CoordinatorEntity, BinarySensorEntity):
     """Implementation of a sensor."""
 
-    def __init__(self, device: Device) -> None:
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
+        super().__init__(coordinator)
         _LOGGER.info("Creating PowerStateBinarySensor for device: %s", device)
         self.device = device
 
     @callback
     def _handle_coordinator_update(self) -> None:
         _LOGGER.info("PowerStateBinarySensor._handle_coordinator_update")
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        self.async_write_ha_state()
 
     @property
     def device_class(self) -> str:
@@ -74,7 +74,7 @@ class PowerStateBinarySensor(BinarySensorEntity):
     def is_on(self) -> bool | None:
         """Return if the binary sensor is on."""
         # This needs to enumerate to true or false
-        return self.device.power_state
+        return self.device.data.power_state
 
     @property
     def unique_id(self) -> str:
@@ -92,16 +92,19 @@ class PowerStateBinarySensor(BinarySensorEntity):
         return attrs
 
 
-class BeepSwitchBinarySensor(BinarySensorEntity):
+class BeepSwitchBinarySensor(CoordinatorEntity, BinarySensorEntity):
     """Implementation of a sensor."""
 
-    def __init__(self, device: Device) -> None:
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
+        super().__init__(coordinator)
         _LOGGER.info("Creating BeepSwitchBinarySensor for device: %s", device)
         self.device = device
 
     @callback
     def _handle_coordinator_update(self) -> None:
         _LOGGER.info("BeepSwitchBinarySensor._handle_coordinator_update")
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        self.async_write_ha_state()
 
     @property
     def device_class(self) -> str:
@@ -126,7 +129,7 @@ class BeepSwitchBinarySensor(BinarySensorEntity):
     def is_on(self) -> bool | None:
         """Return if the binary sensor is on."""
         # This needs to enumerate to true or false
-        return self.device.beep_switch_state
+        return self.device.data.beep_switch_state
 
     @property
     def unique_id(self) -> str:

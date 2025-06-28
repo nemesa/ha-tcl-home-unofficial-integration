@@ -9,9 +9,9 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
 from .aws_iot import AwsIot
-from .config_entry import New_NameConfigEntry
+from .config_entry import New_NameConfigEntry, RuntimeData
+from .coordinator import IotDeviceCoordinator
 from .device import Device
-from .session_manager import SessionManager
 
 _PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.SWITCH]
 
@@ -33,24 +33,22 @@ async def async_setup_entry(
 
     things = await aws_iot.get_all_things()
 
-    for device in things.data:
-        aws_thing = await aws_iot.async_getThing(device.device_id)
-
-        beep_switch_state = int(aws_thing["state"]["reported"]["beepSwitch"])
-        power_state = int(aws_thing["state"]["reported"]["powerSwitch"])
-        target_temperature = int(aws_thing["state"]["reported"]["targetTemperature"])
+    for thing in things.data:
+        aws_thing = await aws_iot.async_getThing(thing.device_id)
 
         config_entry.devices.append(
             Device(
-                device_id=device.device_id,
-                device_type=device.device_name,
-                name=device.nick_name,
-                firmware_version=device.firmware_version,
-                power_state=power_state,
-                beep_switch_state=beep_switch_state,
-                target_temperature=target_temperature,
+                device_id=thing.device_id,
+                device_type=thing.device_name,
+                name=thing.nick_name,
+                firmware_version=thing.firmware_version,
+                aws_thing=aws_thing,
             )
         )
+
+    coordinator = IotDeviceCoordinator(hass, config_entry, aws_iot)
+    await coordinator.async_config_entry_first_refresh()
+    config_entry.runtime_data = RuntimeData(coordinator)
 
     await hass.config_entries.async_forward_entry_setups(config_entry, _PLATFORMS)
 

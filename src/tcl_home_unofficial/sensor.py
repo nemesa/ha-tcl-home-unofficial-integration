@@ -15,6 +15,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .config_entry import New_NameConfigEntry
 from .const import DOMAIN
+from .coordinator import IotDeviceCoordinator
 from .device import Device, toDeviceInfo
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,29 +27,30 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ):
     """Set up the Sensors."""
-    # This gets the data update coordinator from the config entry runtime data as specified in your __init__.py
 
-    # Enumerate all the sensors in your data value from your DataUpdateCoordinator and add an instance of your sensor class
-    # to a list for each one.
-    # This maybe different in your specific case, depending on how your data is structured
+    coordinator = config_entry.runtime_data.coordinator
+
     sensors = []
     for device in config_entry.devices:
-        sensors.append(TargetTemperatureSensor(device))
+        sensors.append(TargetTemperatureSensor(coordinator, device))
 
     # Create the binary sensors.
     async_add_entities(sensors)
 
 
-class TargetTemperatureSensor(SensorEntity):
+class TargetTemperatureSensor(CoordinatorEntity, SensorEntity):
     """Implementation of a sensor."""
 
-    def __init__(self, device: Device) -> None:
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
         """Initialise sensor."""
+        super().__init__(coordinator)
         self.device = device
 
     @callback
     def _handle_coordinator_update(self) -> None:
         _LOGGER.info("TargetTemperatureSensor._handle_coordinator_update")
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        self.async_write_ha_state()
 
     @property
     def device_class(self) -> str:
@@ -74,7 +76,7 @@ class TargetTemperatureSensor(SensorEntity):
         """Return the state of the entity."""
         # Using native value and native unit of measurement, allows you to change units
         # in Lovelace and HA will automatically calculate the correct value.
-        return float(self.device.target_temperature)
+        return float(self.device.data.target_temperature)
 
     @property
     def native_unit_of_measurement(self) -> str | None:

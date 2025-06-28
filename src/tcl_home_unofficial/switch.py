@@ -7,10 +7,12 @@ from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .aws_iot import AwsIot
 from .config_entry import New_NameConfigEntry
 from .const import DOMAIN
+from .coordinator import IotDeviceCoordinator
 from .device import Device, toDeviceInfo
 
 _LOGGER = logging.getLogger(__name__)
@@ -22,6 +24,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ):
     """Set up the Binary Sensors."""
+    coordinator = config_entry.runtime_data.coordinator
     # This gets the data update coordinator from the config entry runtime data as specified in your __init__.py
 
     aws_iot = AwsIot(
@@ -32,20 +35,26 @@ async def async_setup_entry(
 
     switches = []
     for device in config_entry.devices:
-        switches.append(PowerSwitch(device, aws_iot))
+        switches.append(PowerSwitch(coordinator, device, aws_iot))
 
     async_add_entities(switches)
 
 
-class PowerSwitch(SwitchEntity):
-    def __init__(self, device: Device, aws_iot: AwsIot) -> None:
+class PowerSwitch(CoordinatorEntity, SwitchEntity):
+    def __init__(
+        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
+    ) -> None:
         """Initialise sensor."""
+        super().__init__(coordinator)
         self.device = device
         self.aws_iot = aws_iot
 
     @callback
     def _handle_coordinator_update(self) -> None:
-        _LOGGER.info("PowerSwitch._handle_coordinator_update")
+        d = self.coordinator.get_device_by_id(self.device.device_id)
+        _LOGGER.info("PowerSwitch._handle_coordinator_update: %s", d)
+        self.device = d
+        self.async_write_ha_state()
 
     @property
     def device_class(self) -> str:
@@ -77,7 +86,9 @@ class PowerSwitch(SwitchEntity):
     def is_on(self) -> bool | None:
         """Return if the binary sensor is on."""
         # This needs to enumerate to true or false
-        return self.device.power_state
+        d = self.coordinator.get_device_by_id(self.device.device_id)
+        _LOGGER.info("PowerSwitch.is_on: %s", d)
+        return d.data.power_state
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the entity on."""
@@ -85,12 +96,14 @@ class PowerSwitch(SwitchEntity):
         await self.hass.async_add_executor_job(
             self.aws_iot.turnOn, self.device.device_id
         )
+        self.device.data.power_state = 1
+        self.coordinator.set_device(self.device)
         # ----------------------------------------------------------------------------
         # Use async_refresh on the DataUpdateCoordinator to perform immediate update.
         # Using self.async_update or self.coordinator.async_request_refresh may delay update due
         # to trying to batch requests.
         # ----------------------------------------------------------------------------
-        # await self.coordinator.async_refresh()
+        await self.coordinator.async_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the entity off."""
@@ -98,6 +111,8 @@ class PowerSwitch(SwitchEntity):
         await self.hass.async_add_executor_job(
             self.aws_iot.turnOff, self.device.device_id
         )
+        self.device.data.power_state = 0
+        self.coordinator.set_device(self.device)
         # await self.hass.async_add_executor_job(
         #     self.coordinator.api.set_data, self.device_id, self.parameter, "OFF"
         # )
@@ -106,7 +121,7 @@ class PowerSwitch(SwitchEntity):
         # Using self.async_update or self.coordinator.async_request_refresh may delay update due
         # to trying to batch requests.
         # ----------------------------------------------------------------------------
-        # await self.coordinator.async_refresh()
+        await self.coordinator.async_refresh()
 
     @property
     def extra_state_attributes(self):

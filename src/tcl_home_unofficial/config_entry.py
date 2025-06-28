@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .device import Device
 
@@ -25,6 +26,7 @@ class ConfigData:
 class RuntimeData:
     """Class to hold your data."""
 
+    coordinator: DataUpdateCoordinator
     devices: list[Device] | None = None
 
 

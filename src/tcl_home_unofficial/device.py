@@ -8,16 +8,44 @@ from .const import DOMAIN
 
 
 @dataclass
+class DeviceData:
+    def __init__(self, device_id: str, aws_thing: dict) -> None:
+        self.beep_switch_state = int(aws_thing["state"]["reported"]["beepSwitch"])
+        self.power_state = int(aws_thing["state"]["reported"]["powerSwitch"])
+        self.target_temperature = int(
+            aws_thing["state"]["reported"]["targetTemperature"]
+        )
+        self.device_id = device_id
+
+    device_id: str
+    power_state: int | bool
+    beep_switch_state: int | bool
+    target_temperature: int
+
+
+@dataclass
 class Device:
     """Device."""
+
+    def __init__(
+        self,
+        device_id: str,
+        device_type: str,
+        name: str,
+        firmware_version: str,
+        aws_thing: dict,
+    ) -> None:
+        self.device_id = device_id
+        self.device_type = device_type
+        self.name = name
+        self.firmware_version = firmware_version
+        self.data = DeviceData(device_id, aws_thing)
 
     device_id: int
     device_type: str
     name: str
     firmware_version: str
-    power_state: int | bool
-    beep_switch_state: int | bool
-    target_temperature: int
+    data: DeviceData | None = None
 
 
 def toDeviceInfo(device: Device) -> DeviceInfo:
