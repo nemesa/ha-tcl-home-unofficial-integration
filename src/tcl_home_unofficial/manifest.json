@@ -1,0 +1,11 @@
+{
+  "domain": "tcl_home_unofficial",
+  "name": "TCL Home - Unofficial",
+  "codeowners": [
+    "@nemesa"
+  ],
+  "config_flow": true,
+  "documentation": "https://www.home-assistant.io/integrations/tcl_home_unofficial",
+  "iot_class": "cloud_polling",
+  "version": "1.0.1"
+}
