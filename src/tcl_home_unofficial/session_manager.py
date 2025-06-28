@@ -11,13 +11,11 @@ from .const import DOMAIN
 from .tcl import (
     DoAccountAuthResponse,
     GetAwsCredentialsResponse,
-    GetThingsResponse,
     RefreshTokensResponse,
     check_if_expired,
     check_if_jwt_expired,
     do_account_auth,
     get_aws_credentials,
-    get_things,
     refreshTokens,
 )
 
@@ -163,12 +161,3 @@ class SessionManager:
             return self.storageData.awsCredentialsData
 
         return await self.async_force_aws_credentials()
-
-    async def async_get_things_not_stored(self) -> GetThingsResponse:
-        authResult = await self.async_get_auth_data()
-        refreshTokensResult = await self.async_refresh_tokens()
-        saas_token = refreshTokensResult.data.saas_token
-
-        things = await get_things(saas_token, authResult.user.country_abbr)
-
-        return things

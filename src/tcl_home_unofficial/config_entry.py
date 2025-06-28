@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 
-from .aws_iot import AwsIot
 from .device import Device
 
 type New_NameConfigEntry = ConfigEntry[RuntimeData]
@@ -27,7 +26,6 @@ class RuntimeData:
     """Class to hold your data."""
 
     devices: list[Device] | None = None
-    aws_iot: AwsIot | None = None
 
 
 def convertToConfigData(

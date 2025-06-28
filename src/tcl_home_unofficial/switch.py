@@ -24,9 +24,15 @@ async def async_setup_entry(
     """Set up the Binary Sensors."""
     # This gets the data update coordinator from the config entry runtime data as specified in your __init__.py
 
+    aws_iot = AwsIot(
+        hass=hass,
+        config_entry=config_entry,
+    )
+    await aws_iot.async_init()
+
     switches = []
     for device in config_entry.devices:
-        switches.append(PowerSwitch(device, config_entry.aws_iot))
+        switches.append(PowerSwitch(device, aws_iot))
 
     async_add_entities(switches)
 

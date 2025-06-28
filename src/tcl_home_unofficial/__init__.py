@@ -25,25 +25,16 @@ async def async_setup_entry(
 
     config_entry.devices = []
 
-    sessionManager: SessionManager = SessionManager(
-        hass=hass, config_entry=config_entry
+    aws_iot = AwsIot(
+        hass=hass,
+        config_entry=config_entry,
     )
-    await sessionManager.async_load()
+    await aws_iot.async_init()
 
-    things = await sessionManager.async_get_things_not_stored()
-    awsCred = await sessionManager.async_aws_credentials()
-
-    config_entry.aws_iot = AwsIot(
-        region_name=config_entry.data["aws_region"],
-        access_key_id=awsCred.Credentials.access_key_id,
-        secret_access_key=awsCred.Credentials.secret_key,
-        session_token=awsCred.Credentials.session_token,
-    )
+    things = await aws_iot.get_all_things()
 
     for device in things.data:
-        aws_thing = await hass.async_add_executor_job(
-            config_entry.aws_iot.getThing, device.device_id
-        )
+        aws_thing = await aws_iot.async_getThing(device.device_id)
 
         beep_switch_state = int(aws_thing["state"]["reported"]["beepSwitch"])
         power_state = int(aws_thing["state"]["reported"]["powerSwitch"])
