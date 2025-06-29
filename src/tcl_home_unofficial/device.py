@@ -9,17 +9,19 @@ from .const import DOMAIN
 
 @dataclass
 class DeviceData:
-    def __init__(self, device_id: str, aws_thing: dict) -> None:
-        self.beep_switch_state = int(aws_thing["state"]["reported"]["beepSwitch"])
-        self.power_state = int(aws_thing["state"]["reported"]["powerSwitch"])
+    def __init__(self, device_id: str, aws_thing_state: dict, delta: dict) -> None:
+        self.beep_switch = int(delta.get("beepSwitch", aws_thing_state["beepSwitch"]))
+        self.power_switch = int(
+            delta.get("powerSwitch", aws_thing_state["powerSwitch"])
+        )
         self.target_temperature = int(
-            aws_thing["state"]["reported"]["targetTemperature"]
+            delta.get("targetTemperature", aws_thing_state["targetTemperature"])
         )
         self.device_id = device_id
 
     device_id: str
-    power_state: int | bool
-    beep_switch_state: int | bool
+    power_switch: int | bool
+    beep_switch: int | bool
     target_temperature: int
 
 
@@ -39,13 +41,19 @@ class Device:
         self.device_type = device_type
         self.name = name
         self.firmware_version = firmware_version
-        self.data = DeviceData(device_id, aws_thing)
+        self.data = DeviceData(
+            device_id,
+            aws_thing["state"]["reported"],
+            aws_thing["state"].get("delta", {}),
+        )
+        self.data_desired = DeviceData(device_id, aws_thing["state"]["desired"], {})
 
     device_id: int
     device_type: str
     name: str
     firmware_version: str
     data: DeviceData | None = None
+    data_desired: DeviceData | None = None
 
 
 def toDeviceInfo(device: Device) -> DeviceInfo:

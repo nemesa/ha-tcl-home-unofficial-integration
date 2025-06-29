@@ -72,7 +72,7 @@ class SessionManager:
                     data["awsCredentialsData"]
                 )
 
-        _LOGGER.info("SessionManager.async_load done")
+        _LOGGER.debug("SessionManager.async_load done")
         self.storageData = storageData
         return storageData
 
@@ -89,7 +89,6 @@ class SessionManager:
 
     async def async_get_auth_data(self) -> DoAccountAuthResponse:
         if self.storageData.authData is not None:
-            _LOGGER.info("SessionManager.async_get_auth_data.resolve from storage")
             if check_if_jwt_expired(
                 "authData.token", self.storageData.authData.token, "exp"
             ):
@@ -118,7 +117,7 @@ class SessionManager:
 
     async def async_refresh_tokens(self) -> RefreshTokensResponse:
         if self.storageData.refreshTokensData is not None:
-            _LOGGER.info("SessionManager.async_refresh_tokens.resolve from storage")
+            _LOGGER.debug("SessionManager.async_refresh_tokens.resolve from storage")
 
             if check_if_jwt_expired(
                 "saas_token",
@@ -151,7 +150,7 @@ class SessionManager:
 
     async def async_aws_credentials(self) -> GetAwsCredentialsResponse:
         if self.storageData.awsCredentialsData is not None:
-            _LOGGER.info("SessionManager.async_refresh_tokens.resolve from storage")
+            _LOGGER.debug("SessionManager.async_refresh_tokens.resolve from storage")
 
             if check_if_expired(
                 self.storageData.awsCredentialsData.Credentials.expiration

@@ -25,7 +25,6 @@ async def async_setup_entry(
 ):
     """Set up the Binary Sensors."""
     coordinator = config_entry.runtime_data.coordinator
-    # This gets the data update coordinator from the config entry runtime data as specified in your __init__.py
 
     aws_iot = AwsIot(
         hass=hass,
@@ -44,91 +43,48 @@ class PowerSwitch(CoordinatorEntity, SwitchEntity):
     def __init__(
         self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
     ) -> None:
-        """Initialise sensor."""
         super().__init__(coordinator)
         self.device = device
         self.aws_iot = aws_iot
 
     @callback
     def _handle_coordinator_update(self) -> None:
-        d = self.coordinator.get_device_by_id(self.device.device_id)
-        _LOGGER.info("PowerSwitch._handle_coordinator_update: %s", d)
-        self.device = d
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
         self.async_write_ha_state()
 
     @property
     def device_class(self) -> str:
-        """Return device class."""
-        # https://developers.home-assistant.io/docs/core/entity/sensor/#available-device-classes
         return SwitchDeviceClass.SWITCH
 
     @property
     def unique_id(self) -> str:
-        """Return unique id."""
-        # All entities must have a unique id.  Think carefully what you want this to be as
-        # changing it later will cause HA to create new entities.
         return f"{DOMAIN}-PowerSwitch-{self.device.device_id}"
 
     @property
     def device_info(self) -> DeviceInfo:
-        """Return device information."""
-        # Identifiers are what group entities into the same device.
-        # If your device is created elsewhere, you can just specify the indentifiers parameter.
-        # If your device connects via another device, add via_device parameter with the indentifiers of that device.
         return toDeviceInfo(self.device)
 
     @property
     def name(self) -> str:
-        """Return the name of the sensor."""
         return "Power Switch"
 
     @property
     def is_on(self) -> bool | None:
-        """Return if the binary sensor is on."""
-        # This needs to enumerate to true or false
-        d = self.coordinator.get_device_by_id(self.device.device_id)
-        _LOGGER.info("PowerSwitch.is_on: %s", d)
-        return d.data.power_state
+        device = self.coordinator.get_device_by_id(self.device.device_id)
+        return device.data.power_switch
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        """Turn the entity on."""
-        _LOGGER.info("PowerSwitch.async_turn_on")
         await self.hass.async_add_executor_job(
             self.aws_iot.turnOn, self.device.device_id
         )
-        self.device.data.power_state = 1
+        self.device.data.power_switch = 1
         self.coordinator.set_device(self.device)
-        # ----------------------------------------------------------------------------
-        # Use async_refresh on the DataUpdateCoordinator to perform immediate update.
-        # Using self.async_update or self.coordinator.async_request_refresh may delay update due
-        # to trying to batch requests.
-        # ----------------------------------------------------------------------------
         await self.coordinator.async_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        """Turn the entity off."""
-        _LOGGER.info("PowerSwitch.async_turn_off")
         await self.hass.async_add_executor_job(
             self.aws_iot.turnOff, self.device.device_id
         )
-        self.device.data.power_state = 0
+        self.device.data.power_switch = 0
         self.coordinator.set_device(self.device)
-        # await self.hass.async_add_executor_job(
-        #     self.coordinator.api.set_data, self.device_id, self.parameter, "OFF"
-        # )
-        # ----------------------------------------------------------------------------
-        # Use async_refresh on the DataUpdateCoordinator to perform immediate update.
-        # Using self.async_update or self.coordinator.async_request_refresh may delay update due
-        # to trying to batch requests.
-        # ----------------------------------------------------------------------------
         await self.coordinator.async_refresh()
-
-    @property
-    def extra_state_attributes(self):
-        """Return the extra state attributes."""
-        # Add any additional attributes you want on your sensor.
-        attrs = {}
-        # attrs["last_rebooted"] = self.coordinator.get_device_parameter(
-        #     self.device_id, "last_reboot"
-        # )
-        return attrs

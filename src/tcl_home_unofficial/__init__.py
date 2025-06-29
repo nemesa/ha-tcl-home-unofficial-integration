@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 
-# from homeassistant.const import Platform
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
@@ -57,5 +56,4 @@ async def async_setup_entry(
 
 async def async_unload_entry(hass: HomeAssistant, entry: New_NameConfigEntry) -> bool:
     """Unload a config entry."""
-    _LOGGER.info("init.async_unload_entry %s", entry)
     return await hass.config_entries.async_unload_platforms(entry, _PLATFORMS)

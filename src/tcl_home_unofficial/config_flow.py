@@ -25,7 +25,6 @@ from .session_manager import SessionManager
 
 _LOGGER = logging.getLogger(__name__)
 
-# TODO adjust the data schema to the data that you need
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(
@@ -40,11 +39,7 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
-    """Validate the user input allows us to connect.
-
-    Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
-    """
-    # _LOGGER.info("validate_input: %s", data)
+    """Validate the user input allows us to connect."""
 
     sessionManager = SessionManager(
         hass=hass,
@@ -63,15 +58,6 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 
     if authResult.token:
         return {"title": f"TCL Home integration - {data[CONF_USERNAME]}"}
-
-    data["sessionManager"] = sessionManager
-
-    # authResult = await do_account_auth(
-    #     data[CONF_USERNAME], data[CONF_PASSWORD], data["app_client_id"]
-    # )
-    # if authResult["token"]:
-    #     data["authResult"] = authResult
-    #     return {"title": f"TCL Home integration - {data[CONF_USERNAME]}"}
 
     raise InvalidAuth
 

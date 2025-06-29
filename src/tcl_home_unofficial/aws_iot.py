@@ -46,9 +46,6 @@ class AwsIot:
             aws_secret_access_key=awsCred.Credentials.secret_key,
             aws_session_token=awsCred.Credentials.session_token,
         )
-
-        # _LOGGER.info("AwsIot.get_available_services: %s", s.get_available_services())
-
         self.client = boto3Session.client(service_name="iot-data")
 
     async def get_all_things(self) -> GetThingsResponse:
@@ -67,6 +64,7 @@ class AwsIot:
         """List all things in AWS IoT."""
         response = self.client.get_thing_shadow(thingName=device_id)
         payload = response["payload"].read().decode("utf-8")
+        _LOGGER.debug("AwsIot.getThing: %s", payload)
         return json.loads(payload)
 
     def turnOn(self, device_id: str) -> None:

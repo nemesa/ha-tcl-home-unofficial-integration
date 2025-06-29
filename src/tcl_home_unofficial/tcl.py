@@ -19,7 +19,6 @@ def getValue(data: dict, keys: list[str]) -> str:
     value = None
 
     for key in keys:
-        # Check if the key exists in the data dictionary
         if key in data:
             value = data[key]
             break
@@ -194,9 +193,9 @@ async def refreshTokens(
 
 
 async def get_aws_credentials(cognitoToken: str) -> GetAwsCredentialsResponse:
+    _LOGGER.info("tcl.get_aws_credentials")
     identity_pool_id = get_sub_from_jwt_token(cognitoToken)
 
-    _LOGGER.info("tcl.get_aws_credentials")
     url = f"https://cognito-identity.eu-central-1.amazonaws.com/"
 
     payload = {
@@ -284,7 +283,7 @@ def check_if_jwt_expired(
         now = datetime.datetime.now().timestamp()
 
         is_expired = exp < now
-        _LOGGER.info(
+        _LOGGER.debug(
             "JWT token (%s) expiration check: exp=%s, now=%s (is_expired=%s)",
             tokenName,
             exp,
