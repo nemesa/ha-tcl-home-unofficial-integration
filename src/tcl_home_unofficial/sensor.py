@@ -13,7 +13,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device, getModeFromDeviceData
+from .device import Device, getModeFromDeviceData, getWindSpeedFromDeviceData
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -32,6 +32,7 @@ async def async_setup_entry(
     for device in config_entry.devices:
         sensors.append(TargetTemperatureSensor(coordinator, device))
         sensors.append(ModeSensor(coordinator, device))
+        sensors.append(WindSpeedSensor(coordinator, device))
 
     # Create the binary sensors.
     async_add_entities(sensors)
@@ -70,9 +71,39 @@ class ModeSensor(TclEntityBase, SensorEntity):
         return SensorDeviceClass.ENUM
 
     @property
+    def icon(self):
+        return "mdi:set-none"
+
+    @property
     def native_value(self) -> int | float:
         self.device: Device = self.coordinator.get_device_by_id(self.device.device_id)
         return getModeFromDeviceData(self.device.data)
+
+    @property
+    def native_unit_of_measurement(self) -> str | None:
+        return None
+
+    @property
+    def state_class(self) -> str | None:
+        return SensorStateClass.MEASUREMENT
+
+
+class WindSpeedSensor(TclEntityBase, SensorEntity):
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
+        TclEntityBase.__init__(self, coordinator, "WindSpeed", "Wind Speed", device)
+
+    @property
+    def device_class(self) -> str:
+        return SensorDeviceClass.ENUM
+
+    @property
+    def icon(self):
+        return "mdi:weather-windy"
+
+    @property
+    def native_value(self) -> int | float:
+        self.device: Device = self.coordinator.get_device_by_id(self.device.device_id)
+        return getWindSpeedFromDeviceData(self.device.data)
 
     @property
     def native_unit_of_measurement(self) -> str | None:

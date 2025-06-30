@@ -10,7 +10,7 @@ import boto3.session
 from homeassistant.core import HomeAssistant
 
 from .config_entry import New_NameConfigEntry
-from .device import getModeFromDeviceData, ModeEnum
+from .device import ModeEnum, WindSeedEnum
 from .session_manager import SessionManager
 from .tcl import GetThingsResponse, get_things
 
@@ -266,6 +266,84 @@ class AwsIot:
             payload=payload,
         )
 
+    async def async_set_wind_speed(self, device_id: str, value: WindSeedEnum) -> None:
+        await self.hass.async_add_executor_job(self.set_wind_speed, device_id, value)
+
+    def set_wind_speed(self, device_id: str, value: WindSeedEnum) -> None:
+        """target_temperature"""
+
+        desired = {}
+        match value:
+            case WindSeedEnum.STRONG:
+                desired = {
+                    "highTemperatureWind": 0,
+                    "turbo": 1,
+                    "silenceSwitch": 0,
+                    "windSpeed": 6,
+                }
+            case WindSeedEnum.HEIGH:
+                desired = {
+                    "highTemperatureWind": 0,
+                    "turbo": 0,
+                    "silenceSwitch": 0,
+                    "windSpeed": 6,
+                }
+            case WindSeedEnum.MID_HEIGH:
+                desired = {
+                    "highTemperatureWind": 0,
+                    "turbo": 0,
+                    "silenceSwitch": 0,
+                    "windSpeed": 5,
+                }
+            case WindSeedEnum.MEDIUM:
+                desired = {
+                    "highTemperatureWind": 0,
+                    "turbo": 0,
+                    "silenceSwitch": 0,
+                    "windSpeed": 4,
+                }
+            case WindSeedEnum.MID_LOW:
+                desired = {
+                    "highTemperatureWind": 0,
+                    "turbo": 0,
+                    "silenceSwitch": 0,
+                    "windSpeed": 3,
+                }
+            case WindSeedEnum.LOW:
+                desired = {
+                    "highTemperatureWind": 0,
+                    "turbo": 0,
+                    "silenceSwitch": 0,
+                    "windSpeed": 2,
+                }
+            case WindSeedEnum.MUTE:
+                desired = {
+                    "highTemperatureWind": 0,
+                    "turbo": 0,
+                    "silenceSwitch": 1,
+                    "windSpeed": 2,
+                }
+            case WindSeedEnum.AUTO:
+                desired = {
+                    "highTemperatureWind": 0,
+                    "turbo": 0,
+                    "silenceSwitch": 0,
+                    "windSpeed": 0,
+                }
+
+        payload = json.dumps(
+            {
+                "state": {"desired": desired},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+
+        self.client.publish(
+            topic=getTopic(device_id),
+            qos=1,
+            payload=payload,
+        )
+
 
 """
 
@@ -274,16 +352,6 @@ ECO
     off:    {"state":{"desired":{"ECO":0}},"clientToken":"mobile_1751204342594"}
     on:     {"state":{"desired":{"ECO":1,"highTemperatureWind":0,"turbo":0,"silenceSwitch":0,"windSpeed":0}},"clientToken":"mobile_1751204352037"}
 
-
-Wind speed
-    Strong:     {"state":{"desired":{"highTemperatureWind":0,"turbo":1,"silenceSwitch":0,"windSpeed":6}},"clientToken":"mobile_1751204651154"}
-    High:       {"state":{"desired":{"highTemperatureWind":0,"turbo":0,"silenceSwitch":0,"windSpeed":6}},"clientToken":"mobile_1751204631338"}
-    Mid-heigh:  {"state":{"desired":{"highTemperatureWind":0,"turbo":0,"silenceSwitch":0,"windSpeed":5}},"clientToken":"mobile_1751204672229"}
-    Medium:     {"state":{"desired":{"highTemperatureWind":0,"turbo":0,"silenceSwitch":0,"windSpeed":4}},"clientToken":"mobile_1751204690883"}
-    Meid-low:   {"state":{"desired":{"highTemperatureWind":0,"turbo":0,"silenceSwitch":0,"windSpeed":3}},"clientToken":"mobile_1751204700777"}
-    Low:        {"state":{"desired":{"highTemperatureWind":0,"turbo":0,"silenceSwitch":0,"windSpeed":2}},"clientToken":"mobile_1751204730849"}
-    Mute:       {"state":{"desired":{"highTemperatureWind":0,"turbo":0,"silenceSwitch":1,"windSpeed":2}},"clientToken":"mobile_1751204605846"}
-    Auto:       {"state":{"desired":{"highTemperatureWind":0,"turbo":0,"silenceSwitch":0,"windSpeed":0}},"clientToken":"mobile_1751204747959"}
 
 Vector air suply
     Up and down air supply:

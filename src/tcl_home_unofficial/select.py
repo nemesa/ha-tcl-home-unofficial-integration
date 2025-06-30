@@ -11,7 +11,13 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .aws_iot import AwsIot
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device, getModeFromDeviceData, ModeEnum
+from .device import (
+    Device,
+    getModeFromDeviceData,
+    ModeEnum,
+    WindSeedEnum,
+    getWindSpeedFromDeviceData,
+)
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -34,6 +40,7 @@ async def async_setup_entry(
     switches = []
     for device in config_entry.devices:
         switches.append(ModeSelect(coordinator, device, aws_iot))
+        switches.append(WindSpeedSelect(coordinator, device, aws_iot))
 
     async_add_entities(switches)
 
@@ -56,13 +63,31 @@ class ModeSelect(TclEntityBase, SelectEntity):
     def icon(self):
         return "mdi:set-none"
 
-    @property
-    def is_on(self) -> bool | None:
-        device = self.coordinator.get_device_by_id(self.device.device_id)
-        return device.data.power_switch
-
     async def async_select_option(self, option: str) -> None:
         await self.aws_iot.async_set_mode(self.device.device_id, option)
+        self._attr_current_option = option
+        self.async_write_ha_state()
+        await self.coordinator.async_refresh()
+
+
+class WindSpeedSelect(TclEntityBase, SelectEntity):
+    def __init__(
+        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
+    ) -> None:
+        TclEntityBase.__init__(
+            self, coordinator, "WindSpeedSelect", "Wind Speed", device
+        )
+
+        self.aws_iot = aws_iot
+        self._attr_current_option = getWindSpeedFromDeviceData(device.data)
+        self._attr_options = [e.value for e in WindSeedEnum]
+
+    @property
+    def icon(self):
+        return "mdi:weather-windy"
+
+    async def async_select_option(self, option: str) -> None:
+        await self.aws_iot.async_set_wind_speed(self.device.device_id, option)
         self._attr_current_option = option
         self.async_write_ha_state()
         await self.coordinator.async_refresh()

@@ -9,12 +9,21 @@ from .const import DOMAIN
 
 
 class ModeEnum(StrEnum):
-    """Mode states."""
-
     COOL = "Cool"
     HEAT = "Heat"
     DEHUMIDIFICATION = "Dehumidification"
     FAN = "Fan"
+    AUTO = "Auto"
+
+
+class WindSeedEnum(StrEnum):
+    STRONG = "Strong"
+    HEIGH = "Heigh"
+    MID_HEIGH = "Mid-heigh"
+    MID_LOW = "Mid-low"
+    MEDIUM = "Medium"
+    LOW = "Low"
+    MUTE = "Mute"
     AUTO = "Auto"
 
 
@@ -29,17 +38,27 @@ class DeviceData:
             delta.get("targetTemperature", aws_thing_state["targetTemperature"])
         )
         self.work_mode = int(delta.get("workMode", aws_thing_state["workMode"]))
+        self.high_temperature_wind = int(
+            delta.get("highTemperatureWind", aws_thing_state["highTemperatureWind"])
+        )
+        self.turbo = int(delta.get("turbo", aws_thing_state["turbo"]))
+        self.silence_switch = int(
+            delta.get("silenceSwitch", aws_thing_state["silenceSwitch"])
+        )
+        self.wind_speed = int(delta.get("windSpeed", aws_thing_state["windSpeed"]))
         self.device_id = device_id
 
     device_id: str
     power_switch: int | bool
     beep_switch: int | bool
     target_temperature: int
-    work_mode: int
+    high_temperature_wind: int
+    turbo: int
+    silence_switch: int
+    wind_speed: int
 
 
 def getModeFromDeviceData(data: DeviceData) -> ModeEnum:
-    """Get the mode as a ModeEnum."""
     match data.work_mode:
         case 0:
             return ModeEnum.AUTO
@@ -53,6 +72,24 @@ def getModeFromDeviceData(data: DeviceData) -> ModeEnum:
             return ModeEnum.HEAT
         case _:
             return ModeEnum.AUTO
+
+
+def getWindSpeedFromDeviceData(data: DeviceData) -> WindSeedEnum:
+    match data.wind_speed:
+        case 6:
+            return WindSeedEnum.STRONG if data.turbo == 1 else WindSeedEnum.HEIGH
+        case 5:
+            return WindSeedEnum.MID_HEIGH
+        case 4:
+            return WindSeedEnum.MEDIUM
+        case 3:
+            return WindSeedEnum.MID_LOW
+        case 2:
+            return WindSeedEnum.MUTE if data.silence_switch == 1 else WindSeedEnum.LOW
+        case 0:
+            return WindSeedEnum.AUTO
+        case _:
+            return WindSeedEnum.AUTO
 
 
 @dataclass
