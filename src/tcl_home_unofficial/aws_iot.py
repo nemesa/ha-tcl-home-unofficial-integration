@@ -141,6 +141,31 @@ class AwsIot:
             payload=payload,
         )
 
+    async def async_set_target_temperature(self, device_id: str, value: int) -> dict:
+        return await self.hass.async_add_executor_job(
+            self.set_target_temperature, device_id, value
+        )
+
+    def set_target_temperature(self, device_id: str, value: int) -> None:
+        """target_temperature"""
+
+        if value < 16 or value > 36:
+            _LOGGER.error("Invalid target temperature: %s (Min:16 Max:36)", value)
+            return
+
+        payload = json.dumps(
+            {
+                "state": {"desired": {"targetTemperature": value}},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+
+        self.client.publish(
+            topic=getTopic(device_id),
+            qos=1,
+            payload=payload,
+        )
+
 
 """
 Set temp:

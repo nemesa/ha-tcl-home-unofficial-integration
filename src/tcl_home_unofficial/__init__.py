@@ -12,7 +12,12 @@ from .config_entry import New_NameConfigEntry, RuntimeData
 from .coordinator import IotDeviceCoordinator
 from .device import Device
 
-_PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.SENSOR, Platform.SWITCH]
+_PLATFORMS: list[Platform] = [
+    Platform.BINARY_SENSOR,
+    Platform.SENSOR,
+    Platform.SWITCH,
+    Platform.NUMBER
+]
 
 _LOGGER = logging.getLogger(__name__)
 

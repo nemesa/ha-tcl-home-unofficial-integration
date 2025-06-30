@@ -74,17 +74,15 @@ class PowerSwitch(CoordinatorEntity, SwitchEntity):
         return device.data.power_switch
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.hass.async_add_executor_job(
-            self.aws_iot.turnOn, self.device.device_id
-        )
+        await self.aws_iot.turnOn(self.device.device_id)
+
         self.device.data.power_switch = 1
         self.coordinator.set_device(self.device)
         await self.coordinator.async_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.hass.async_add_executor_job(
-            self.aws_iot.turnOff, self.device.device_id
-        )
+        await self.aws_iot.async_turnOff(self.device.device_id)
+
         self.device.data.power_switch = 0
         self.coordinator.set_device(self.device)
         await self.coordinator.async_refresh()
