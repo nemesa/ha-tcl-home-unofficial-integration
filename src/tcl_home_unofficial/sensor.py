@@ -8,15 +8,13 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.const import UnitOfTemperature
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .config_entry import New_NameConfigEntry
-from .const import DOMAIN
 from .coordinator import IotDeviceCoordinator
-from .device import Device, toDeviceInfo
+from .device import Device, getModeFromDeviceData
+from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,35 +31,25 @@ async def async_setup_entry(
     sensors = []
     for device in config_entry.devices:
         sensors.append(TargetTemperatureSensor(coordinator, device))
+        sensors.append(ModeSensor(coordinator, device))
 
     # Create the binary sensors.
     async_add_entities(sensors)
 
 
-class TargetTemperatureSensor(CoordinatorEntity, SensorEntity):
+class TargetTemperatureSensor(TclEntityBase, SensorEntity):
     def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        super().__init__(coordinator)
-        self.device = device
-
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        self.async_write_ha_state()
+        TclEntityBase.__init__(
+            self, coordinator, "TargetTemperature", "Target Temperature", device
+        )
 
     @property
     def device_class(self) -> str:
         return SensorDeviceClass.TEMPERATURE
 
     @property
-    def device_info(self) -> DeviceInfo:
-        return toDeviceInfo(self.device)
-
-    @property
-    def name(self) -> str:
-        return "Target Temperature"
-
-    @property
     def native_value(self) -> int | float:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
         return float(self.device.data.target_temperature)
 
     @property
@@ -72,6 +60,24 @@ class TargetTemperatureSensor(CoordinatorEntity, SensorEntity):
     def state_class(self) -> str | None:
         return SensorStateClass.MEASUREMENT
 
+
+class ModeSensor(TclEntityBase, SensorEntity):
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
+        TclEntityBase.__init__(self, coordinator, "Mode", "Mode", device)
+
     @property
-    def unique_id(self) -> str:
-        return f"{DOMAIN}-TargetTemperature-{self.device.device_id}"
+    def device_class(self) -> str:
+        return SensorDeviceClass.ENUM
+
+    @property
+    def native_value(self) -> int | float:
+        self.device: Device = self.coordinator.get_device_by_id(self.device.device_id)
+        return getModeFromDeviceData(self.device.data)
+
+    @property
+    def native_unit_of_measurement(self) -> str | None:
+        return None
+
+    @property
+    def state_class(self) -> str | None:
+        return SensorStateClass.MEASUREMENT

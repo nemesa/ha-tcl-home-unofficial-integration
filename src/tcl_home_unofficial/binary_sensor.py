@@ -6,16 +6,13 @@ from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
 )
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.device_registry import DeviceInfo
-from homeassistant.helpers.entity import generate_entity_id
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .config_entry import New_NameConfigEntry
-from .const import DOMAIN
 from .coordinator import IotDeviceCoordinator
-from .device import Device, toDeviceInfo
+from .device import Device
+from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -37,63 +34,38 @@ async def async_setup_entry(
     async_add_entities(sensors)
 
 
-class PowerStateBinarySensor(CoordinatorEntity, BinarySensorEntity):
+class PowerStateBinarySensor(TclEntityBase, BinarySensorEntity):
     def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        super().__init__(coordinator)
-        self.device = device
-
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        self.async_write_ha_state()
+        TclEntityBase.__init__(self, coordinator, "PowerState", "Power State", device)
 
     @property
     def device_class(self) -> str:
         return BinarySensorDeviceClass.POWER
 
     @property
-    def device_info(self) -> DeviceInfo:
-        return toDeviceInfo(self.device)
-
-    @property
-    def name(self) -> str:
-        return "Power State"
-
-    @property
     def is_on(self) -> bool | None:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
         return self.device.data.power_switch
 
-    @property
-    def unique_id(self) -> str:
-        return f"{DOMAIN}-PowerState-{self.device.device_id}"
 
-
-class BeepSwitchBinarySensor(CoordinatorEntity, BinarySensorEntity):
+class BeepSwitchBinarySensor(TclEntityBase, BinarySensorEntity):
     def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        super().__init__(coordinator)
-        self.device = device
+        TclEntityBase.__init__(
+            self, coordinator, "BeepSwitch", "Beep Switch State", device
+        )
 
-    @callback
-    def _handle_coordinator_update(self) -> None:
+    @property
+    def icon(self):
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        self.async_write_ha_state()
+        if self.device.data.beep_switch == 1:
+            return "mdi:volume-high"
+        return "mdi:volume-off"
 
     @property
     def device_class(self) -> str:
-        return BinarySensorDeviceClass.SOUND
-
-    @property
-    def device_info(self) -> DeviceInfo:
-        return toDeviceInfo(self.device)
-
-    @property
-    def name(self) -> str:
-        return "Beep Switch State"
+        return BinarySensorDeviceClass.POWER
 
     @property
     def is_on(self) -> bool | None:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
         return self.device.data.beep_switch
-
-    @property
-    def unique_id(self) -> str:
-        return f"{DOMAIN}-BeepSwitch-{self.device.device_id}"

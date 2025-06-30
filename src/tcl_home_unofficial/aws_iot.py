@@ -10,6 +10,7 @@ import boto3.session
 from homeassistant.core import HomeAssistant
 
 from .config_entry import New_NameConfigEntry
+from .device import getModeFromDeviceData, ModeEnum
 from .session_manager import SessionManager
 from .tcl import GetThingsResponse, get_things
 
@@ -68,8 +69,8 @@ class AwsIot:
         _LOGGER.debug("AwsIot.getThing: %s", payload)
         return json.loads(payload)
 
-    async def async_turnOn(self, device_id: str) -> dict:
-        return await self.hass.async_add_executor_job(self.turnOn, device_id)
+    async def async_turnOn(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.turnOn, device_id)
 
     def turnOn(self, device_id: str) -> None:
         """Turn on the device."""
@@ -86,8 +87,8 @@ class AwsIot:
             payload=payload,
         )
 
-    async def async_turnOff(self, device_id: str) -> dict:
-        return await self.hass.async_add_executor_job(self.turnOff, device_id)
+    async def async_turnOff(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.turnOff, device_id)
 
     def turnOff(self, device_id: str) -> None:
         """Turn off the device."""
@@ -105,8 +106,8 @@ class AwsIot:
             payload=payload,
         )
 
-    async def async_beepModeOn(self, device_id: str) -> dict:
-        return await self.hass.async_add_executor_job(self.beepModeOn, device_id)
+    async def async_beepModeOn(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.beepModeOn, device_id)
 
     def beepModeOn(self, device_id: str) -> None:
         """Turn on the device."""
@@ -123,8 +124,8 @@ class AwsIot:
             payload=payload,
         )
 
-    async def async_beepModeOff(self, device_id: str) -> dict:
-        return await self.hass.async_add_executor_job(self.beepModeOff, device_id)
+    async def async_beepModeOff(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.beepModeOff, device_id)
 
     def beepModeOff(self, device_id: str) -> None:
         """Turn on the device."""
@@ -141,8 +142,8 @@ class AwsIot:
             payload=payload,
         )
 
-    async def async_set_target_temperature(self, device_id: str, value: int) -> dict:
-        return await self.hass.async_add_executor_job(
+    async def async_set_target_temperature(self, device_id: str, value: int) -> None:
+        await self.hass.async_add_executor_job(
             self.set_target_temperature, device_id, value
         )
 
@@ -166,17 +167,107 @@ class AwsIot:
             payload=payload,
         )
 
+    async def async_set_mode(self, device_id: str, value: ModeEnum) -> None:
+        await self.hass.async_add_executor_job(self.set_mode, device_id, value)
+
+    def set_mode(self, device_id: str, value: ModeEnum) -> None:
+        """target_temperature"""
+
+        desired = {}
+        match value:
+            case ModeEnum.AUTO:
+                desired = {
+                    "ECO": 0,
+                    "sleep": 0,
+                    "eightAddHot": 0,
+                    "highTemperatureWind": 0,
+                    "workMode": 0,
+                    "horizontalSwitch": 0,
+                    "healthy": 0,
+                    "turbo": 0,
+                    "antiMoldew": 0,
+                    "verticalSwitch": 0,
+                    "silenceSwitch": 0,
+                    "windSpeed": 0,
+                }
+            case ModeEnum.COOL:
+                desired = {
+                    "ECO": 0,
+                    "sleep": 0,
+                    "eightAddHot": 0,
+                    "highTemperatureWind": 0,
+                    "workMode": 1,
+                    "horizontalSwitch": 0,
+                    "healthy": 0,
+                    "turbo": 0,
+                    "antiMoldew": 0,
+                    "verticalSwitch": 0,
+                    "silenceSwitch": 0,
+                    "windSpeed": 0,
+                    "targetTemperature": 24,
+                }
+            case ModeEnum.DEHUMIDIFICATION:
+                desired = {
+                    "ECO": 0,
+                    "sleep": 0,
+                    "eightAddHot": 0,
+                    "highTemperatureWind": 0,
+                    "workMode": 2,
+                    "horizontalSwitch": 0,
+                    "healthy": 0,
+                    "turbo": 0,
+                    "antiMoldew": 0,
+                    "verticalSwitch": 0,
+                    "silenceSwitch": 0,
+                    "windSpeed": 2,
+                }
+            case ModeEnum.FAN:
+                desired = {
+                    "ECO": 0,
+                    "sleep": 0,
+                    "eightAddHot": 0,
+                    "highTemperatureWind": 0,
+                    "workMode": 3,
+                    "horizontalSwitch": 0,
+                    "healthy": 0,
+                    "turbo": 0,
+                    "antiMoldew": 0,
+                    "verticalSwitch": 0,
+                    "silenceSwitch": 0,
+                    "windSpeed": 0,
+                }
+            case ModeEnum.HEAT:
+                desired = {
+                    "ECO": 0,
+                    "sleep": 0,
+                    "eightAddHot": 0,
+                    "highTemperatureWind": 0,
+                    "workMode": 4,
+                    "horizontalSwitch": 0,
+                    "healthy": 0,
+                    "turbo": 0,
+                    "antiMoldew": 0,
+                    "verticalSwitch": 0,
+                    "silenceSwitch": 0,
+                    "windSpeed": 0,
+                    "targetTemperature": 26,
+                }
+
+        payload = json.dumps(
+            {
+                "state": {"desired": desired},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+
+        self.client.publish(
+            topic=getTopic(device_id),
+            qos=1,
+            payload=payload,
+        )
+
 
 """
-Set temp:
-{"state":{"desired":{"targetTemperature":24}},"clientToken":"mobile_1751204074276"}
-
-Mode:
-    Heat:               {"state":{"desired":{"ECO":0,"sleep":0,"eightAddHot":0,"highTemperatureWind":0,"workMode":4,"horizontalSwitch":0,"healthy":0,"turbo":0,"antiMoldew":0,"verticalSwitch":0,"silenceSwitch":0,"windSpeed":0,"targetTemperature":26}},"clientToken":"mobile_1751204153486"}
-    Cool:               {"state":{"desired":{"ECO":0,"sleep":0,"eightAddHot":0,"highTemperatureWind":0,"workMode":1,"horizontalSwitch":0,"healthy":0,"turbo":0,"antiMoldew":0,"verticalSwitch":0,"silenceSwitch":0,"windSpeed":0,"targetTemperature":24}},"clientToken":"mobile_1751204177597"}
-    Dehumidification:   {"state":{"desired":{"ECO":0,"sleep":0,"eightAddHot":0,"highTemperatureWind":0,"workMode":2,"horizontalSwitch":0,"healthy":0,"turbo":0,"antiMoldew":0,"verticalSwitch":0,"silenceSwitch":0,"windSpeed":2}},"clientToken":"mobile_1751204217632"}
-    Fan:                {"state":{"desired":{"ECO":0,"sleep":0,"eightAddHot":0,"highTemperatureWind":0,"workMode":3,"horizontalSwitch":0,"healthy":0,"turbo":0,"antiMoldew":0,"verticalSwitch":0,"silenceSwitch":0,"windSpeed":0}},"clientToken":"mobile_1751204240310"}
-    Auto:               {"state":{"desired":{"ECO":0,"sleep":0,"eightAddHot":0,"highTemperatureWind":0,"workMode":0,"horizontalSwitch":0,"healthy":0,"turbo":0,"antiMoldew":0,"verticalSwitch":0,"silenceSwitch":0,"windSpeed":0}},"clientToken":"mobile_1751204294720"}
 
 
 ECO

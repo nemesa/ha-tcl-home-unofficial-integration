@@ -1,10 +1,21 @@
 """."""
 
 from dataclasses import dataclass
+from enum import StrEnum
 
 from homeassistant.helpers.device_registry import DeviceInfo
 
 from .const import DOMAIN
+
+
+class ModeEnum(StrEnum):
+    """Mode states."""
+
+    COOL = "Cool"
+    HEAT = "Heat"
+    DEHUMIDIFICATION = "Dehumidification"
+    FAN = "Fan"
+    AUTO = "Auto"
 
 
 @dataclass
@@ -17,12 +28,31 @@ class DeviceData:
         self.target_temperature = int(
             delta.get("targetTemperature", aws_thing_state["targetTemperature"])
         )
+        self.work_mode = int(delta.get("workMode", aws_thing_state["workMode"]))
         self.device_id = device_id
 
     device_id: str
     power_switch: int | bool
     beep_switch: int | bool
     target_temperature: int
+    work_mode: int
+
+
+def getModeFromDeviceData(data: DeviceData) -> ModeEnum:
+    """Get the mode as a ModeEnum."""
+    match data.work_mode:
+        case 0:
+            return ModeEnum.AUTO
+        case 1:
+            return ModeEnum.COOL
+        case 2:
+            return ModeEnum.DEHUMIDIFICATION
+        case 3:
+            return ModeEnum.FAN
+        case 4:
+            return ModeEnum.HEAT
+        case _:
+            return ModeEnum.AUTO
 
 
 @dataclass
