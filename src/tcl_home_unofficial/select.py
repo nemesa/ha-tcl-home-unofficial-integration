@@ -18,7 +18,7 @@ from .device import (
     WindSeedEnum,
     UpAndDownAirSupplyVectorEnum,
     LeftAndRightAirSupplyVectorEnum,
-    SleepModeEnum
+    SleepModeEnum,
 )
 from .tcl_entity_base import TclEntityBase
 
@@ -95,12 +95,17 @@ class WindSpeedSelect(TclEntityBase, SelectEntity):
         self.async_write_ha_state()
         await self.coordinator.async_refresh()
 
+
 class UpAndDownAirSupplyVectorSelect(TclEntityBase, SelectEntity):
     def __init__(
         self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
     ) -> None:
         TclEntityBase.__init__(
-            self, coordinator, "UpAndDownAirSupplyVectorSelect", "Up and down air supply", device
+            self,
+            coordinator,
+            "UpAndDownAirSupplyVectorSelect",
+            "Up and down air supply",
+            device,
         )
 
         self.aws_iot = aws_iot
@@ -110,20 +115,27 @@ class UpAndDownAirSupplyVectorSelect(TclEntityBase, SelectEntity):
 
     @property
     def icon(self):
-        return "mdi:weather-windy"
+        return "mdi:swap-vertical"
 
     async def async_select_option(self, option: str) -> None:
-        await self.aws_iot.async_set_up_and_down_air_supply_vector(self.device.device_id, option)
+        await self.aws_iot.async_set_up_and_down_air_supply_vector(
+            self.device.device_id, option
+        )
         self._attr_current_option = option
         self.async_write_ha_state()
         await self.coordinator.async_refresh()
+
 
 class LeftAndRightAirSupplyVectorSelect(TclEntityBase, SelectEntity):
     def __init__(
         self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
     ) -> None:
         TclEntityBase.__init__(
-            self, coordinator, "LeftAndRightAirSupplyVectorSelect", "Left and right air supply", device
+            self,
+            coordinator,
+            "LeftAndRightAirSupplyVectorSelect",
+            "Left and right air supply",
+            device,
         )
 
         self.aws_iot = aws_iot
@@ -133,13 +145,16 @@ class LeftAndRightAirSupplyVectorSelect(TclEntityBase, SelectEntity):
 
     @property
     def icon(self):
-        return "mdi:weather-windy"
+        return "mdi:swap-horizontal"
 
     async def async_select_option(self, option: str) -> None:
-        await self.aws_iot.async_set_left_and_right_air_supply_vector(self.device.device_id, option)
+        await self.aws_iot.async_set_left_and_right_air_supply_vector(
+            self.device.device_id, option
+        )
         self._attr_current_option = option
         self.async_write_ha_state()
         await self.coordinator.async_refresh()
+
 
 class SleepModeSelect(TclEntityBase, SelectEntity):
     def __init__(
@@ -156,10 +171,10 @@ class SleepModeSelect(TclEntityBase, SelectEntity):
 
     @property
     def icon(self):
-        return "mdi:weather-windy"
+        return "mdi:sleep"
 
     async def async_select_option(self, option: str) -> None:
         await self.aws_iot.async_set_sleep_mode(self.device.device_id, option)
         self._attr_current_option = option
         self.async_write_ha_state()
-        await self.coordinator.async_refresh()                
+        await self.coordinator.async_refresh()

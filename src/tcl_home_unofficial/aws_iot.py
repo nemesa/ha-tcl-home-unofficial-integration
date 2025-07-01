@@ -10,7 +10,13 @@ import boto3.session
 from homeassistant.core import HomeAssistant
 
 from .config_entry import New_NameConfigEntry
-from .device import ModeEnum, WindSeedEnum
+from .device import (
+    LeftAndRightAirSupplyVectorEnum,
+    ModeEnum,
+    SleepModeEnum,
+    UpAndDownAirSupplyVectorEnum,
+    WindSeedEnum,
+)
 from .session_manager import SessionManager
 from .tcl import GetThingsResponse, get_things
 
@@ -350,12 +356,20 @@ class AwsIot:
     def eco_turn_on(self, device_id: str) -> None:
         payload = json.dumps(
             {
-                "state": {"desired": {"ECO":1,"highTemperatureWind":0,"turbo":0,"silenceSwitch":0,"windSpeed":0}},
+                "state": {
+                    "desired": {
+                        "ECO": 1,
+                        "highTemperatureWind": 0,
+                        "turbo": 0,
+                        "silenceSwitch": 0,
+                        "windSpeed": 0,
+                    }
+                },
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
         )
 
-        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
     async def async_eco_turn_off(self, device_id: str) -> None:
         await self.hass.async_add_executor_job(self.eco_turn_off, device_id)
@@ -363,12 +377,12 @@ class AwsIot:
     def eco_turn_off(self, device_id: str) -> None:
         payload = json.dumps(
             {
-                "state": {"desired": {"ECO":0}},
+                "state": {"desired": {"ECO": 0}},
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
         )
 
-        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
     async def async_healthy_turn_on(self, device_id: str) -> None:
         await self.hass.async_add_executor_job(self.healthy_turn_on, device_id)
@@ -376,12 +390,12 @@ class AwsIot:
     def healthy_turn_on(self, device_id: str) -> None:
         payload = json.dumps(
             {
-                "state": {"desired": {"healthy":1}},
+                "state": {"desired": {"healthy": 1}},
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
         )
 
-        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
     async def async_healthy_turn_off(self, device_id: str) -> None:
         await self.hass.async_add_executor_job(self.healthy_turn_off, device_id)
@@ -389,12 +403,12 @@ class AwsIot:
     def healthy_turn_off(self, device_id: str) -> None:
         payload = json.dumps(
             {
-                "state": {"desired": {"healthy":0}},
+                "state": {"desired": {"healthy": 0}},
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
         )
 
-        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
     async def async_drying__turn_on(self, device_id: str) -> None:
         await self.hass.async_add_executor_job(self.drying__turn_on, device_id)
@@ -402,12 +416,12 @@ class AwsIot:
     def drying_turn_on(self, device_id: str) -> None:
         payload = json.dumps(
             {
-                "state": {"desired": {"antiMoldew":1}},
+                "state": {"desired": {"antiMoldew": 1}},
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
         )
 
-        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
     async def async_drying_turn_off(self, device_id: str) -> None:
         await self.hass.async_add_executor_job(self.drying_turn_off, device_id)
@@ -415,35 +429,41 @@ class AwsIot:
     def drying_turn_off(self, device_id: str) -> None:
         payload = json.dumps(
             {
-                "state": {"desired": {"antiMoldew":0}},
+                "state": {"desired": {"antiMoldew": 0}},
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
         )
 
-        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
-    async def async_set_up_and_down_air_supply_vector(self, device_id: str, value: UpAndDownAirSupplyVectorEnum) -> None:
-        await self.hass.async_add_executor_job(self.set_up_and_down_air_supply_vector, device_id, value)
+    async def async_set_up_and_down_air_supply_vector(
+        self, device_id: str, value: UpAndDownAirSupplyVectorEnum
+    ) -> None:
+        await self.hass.async_add_executor_job(
+            self.set_up_and_down_air_supply_vector, device_id, value
+        )
 
-    def set_up_and_down_air_supply_vector(self, device_id: str, value: UpAndDownAirSupplyVectorEnum) -> None:
+    def set_up_and_down_air_supply_vector(
+        self, device_id: str, value: UpAndDownAirSupplyVectorEnum
+    ) -> None:
         desired = {}
         match value:
             case UpAndDownAirSupplyVectorEnum.UP_AND_DOWN_SWING:
-                desired = {"verticalSwitch":1,"verticalDirection":1}
+                desired = {"verticalSwitch": 1, "verticalDirection": 1}
             case UpAndDownAirSupplyVectorEnum.UPWARDS_SWING:
-                desired = {"verticalSwitch":1,"verticalDirection":2}
+                desired = {"verticalSwitch": 1, "verticalDirection": 2}
             case UpAndDownAirSupplyVectorEnum.DOWNWARDS_SWING:
-                desired = {"verticalSwitch":1,"verticalDirection":3}
+                desired = {"verticalSwitch": 1, "verticalDirection": 3}
             case UpAndDownAirSupplyVectorEnum.TOP_FIX:
-                desired = {"verticalSwitch":0,"verticalDirection":9}
+                desired = {"verticalSwitch": 0, "verticalDirection": 9}
             case UpAndDownAirSupplyVectorEnum.UPPER_FIX:
-                desired = {"verticalSwitch":0,"verticalDirection":10}
+                desired = {"verticalSwitch": 0, "verticalDirection": 10}
             case UpAndDownAirSupplyVectorEnum.MIDDLE_FIX:
-                desired = {"verticalSwitch":0,"verticalDirection":11}
+                desired = {"verticalSwitch": 0, "verticalDirection": 11}
             case UpAndDownAirSupplyVectorEnum.LOWER_FIX:
-                desired = {"verticalSwitch":0,"verticalDirection":12}
+                desired = {"verticalSwitch": 0, "verticalDirection": 12}
             case UpAndDownAirSupplyVectorEnum.BOTTOM_FIX:
-                desired = {"verticalSwitch":0,"verticalDirection":13}
+                desired = {"verticalSwitch": 0, "verticalDirection": 13}
 
         payload = json.dumps(
             {
@@ -452,32 +472,38 @@ class AwsIot:
             }
         )
 
-        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
-    async def async_set_left_and_right_air_supply_vector(self, device_id: str, value: LeftAndRightAirSupplyVectorEnum) -> None:
-        await self.hass.async_add_executor_job(self.set_left_and_right_air_supply_vector, device_id, value)
+    async def async_set_left_and_right_air_supply_vector(
+        self, device_id: str, value: LeftAndRightAirSupplyVectorEnum
+    ) -> None:
+        await self.hass.async_add_executor_job(
+            self.set_left_and_right_air_supply_vector, device_id, value
+        )
 
-    def set_left_and_right_air_supply_vector(self, device_id: str, value: LeftAndRightAirSupplyVectorEnum) -> None:
+    def set_left_and_right_air_supply_vector(
+        self, device_id: str, value: LeftAndRightAirSupplyVectorEnum
+    ) -> None:
         desired = {}
         match value:
             case LeftAndRightAirSupplyVectorEnum.LEFT_AND_RIGHT_SWING:
-                desired = {"horizontalDirection":1,"horizontalSwitch":1}
+                desired = {"horizontalDirection": 1, "horizontalSwitch": 1}
             case LeftAndRightAirSupplyVectorEnum.LEFT_SWING:
-                desired = {"horizontalDirection":2,"horizontalSwitch":1}
+                desired = {"horizontalDirection": 2, "horizontalSwitch": 1}
             case LeftAndRightAirSupplyVectorEnum.MIDDLE_SWING:
-                desired = {"horizontalDirection":3,"horizontalSwitch":1}
+                desired = {"horizontalDirection": 3, "horizontalSwitch": 1}
             case LeftAndRightAirSupplyVectorEnum.RIGHT_SWING:
-                desired = {"horizontalDirection":4,"horizontalSwitch":1}
+                desired = {"horizontalDirection": 4, "horizontalSwitch": 1}
             case LeftAndRightAirSupplyVectorEnum.LEFT_FIX:
-                desired = {"horizontalDirection":9,"horizontalSwitch":0}
+                desired = {"horizontalDirection": 9, "horizontalSwitch": 0}
             case LeftAndRightAirSupplyVectorEnum.CENTER_LEFT_FIX:
-                desired = {"horizontalDirection":10,"horizontalSwitch":0}
+                desired = {"horizontalDirection": 10, "horizontalSwitch": 0}
             case LeftAndRightAirSupplyVectorEnum.MIDDLE_FIX:
-                desired = {"horizontalDirection":11,"horizontalSwitch":0}
+                desired = {"horizontalDirection": 11, "horizontalSwitch": 0}
             case LeftAndRightAirSupplyVectorEnum.CENTER_RIGHT_FIX:
-                desired = {"horizontalDirection":12,"horizontalSwitch":0}
+                desired = {"horizontalDirection": 12, "horizontalSwitch": 0}
             case LeftAndRightAirSupplyVectorEnum.RIGHT_FIX:
-                desired = {"horizontalDirection":13,"horizontalSwitch":0}
+                desired = {"horizontalDirection": 13, "horizontalSwitch": 0}
 
         payload = json.dumps(
             {
@@ -486,7 +512,7 @@ class AwsIot:
             }
         )
 
-        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
     async def async_set_sleep_mode(self, device_id: str, value: SleepModeEnum) -> None:
         await self.hass.async_add_executor_job(self.set_sleep_mode, device_id, value)
@@ -495,13 +521,13 @@ class AwsIot:
         desired = {}
         match value:
             case SleepModeEnum.STANDARD:
-                desired = {"sleep":1}
+                desired = {"sleep": 1}
             case SleepModeEnum.ELDERLY:
-                desired = {"sleep":2}
+                desired = {"sleep": 2}
             case SleepModeEnum.CHILD:
-                desired = {"sleep":3}
+                desired = {"sleep": 3}
             case SleepModeEnum.OFF:
-                desired = {"sleep":0}
+                desired = {"sleep": 0}
 
         payload = json.dumps(
             {
@@ -510,4 +536,4 @@ class AwsIot:
             }
         )
 
-        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)

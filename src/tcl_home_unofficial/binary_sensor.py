@@ -32,14 +32,16 @@ async def async_setup_entry(
         sensors.append(BeepSwitchBinarySensor(coordinator, device))
         sensors.append(EcoSwitchBinarySensor(coordinator, device))
         sensors.append(HealthySwitchBinarySensor(coordinator, device))
-        sensors.append(BeepSwitchBinarySensor(coordinator, device))
+        sensors.append(DryingSwitchBinarySensor(coordinator, device))
 
     async_add_entities(sensors)
 
 
 class PowerStateBinarySensor(TclEntityBase, BinarySensorEntity):
     def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(self, coordinator, "Power-State-sensor", "Power State", device)
+        TclEntityBase.__init__(
+            self, coordinator, "Power-State-sensor", "Power State", device
+        )
 
     @property
     def device_class(self) -> str:
@@ -73,6 +75,7 @@ class BeepSwitchBinarySensor(TclEntityBase, BinarySensorEntity):
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
         return self.device.data.beep_switch
 
+
 class EcoSwitchBinarySensor(TclEntityBase, BinarySensorEntity):
     def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
         TclEntityBase.__init__(
@@ -83,8 +86,8 @@ class EcoSwitchBinarySensor(TclEntityBase, BinarySensorEntity):
     def icon(self):
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
         if self.device.data.eco == 1:
-            return "mdi:volume-high"
-        return "mdi:volume-off"
+            return "mdi:leaf"
+        return "mdi:leaf-off"
 
     @property
     def device_class(self) -> str:
@@ -106,8 +109,8 @@ class HealthySwitchBinarySensor(TclEntityBase, BinarySensorEntity):
     def icon(self):
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
         if self.device.data.healthy == 1:
-            return "mdi:volume-high"
-        return "mdi:volume-off"
+            return "mdi:heart"
+        return "mdi:heart-off"
 
     @property
     def device_class(self) -> str:
@@ -129,8 +132,8 @@ class DryingSwitchBinarySensor(TclEntityBase, BinarySensorEntity):
     def icon(self):
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
         if self.device.data.anti_moldew == 1:
-            return "mdi:volume-high"
-        return "mdi:volume-off"
+            return "mdi:water-opacity"
+        return "mdi:water-off-outline"
 
     @property
     def device_class(self) -> str:
@@ -139,4 +142,4 @@ class DryingSwitchBinarySensor(TclEntityBase, BinarySensorEntity):
     @property
     def is_on(self) -> bool | None:
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        return self.device.data.anti_moldew                
+        return self.device.data.anti_moldew

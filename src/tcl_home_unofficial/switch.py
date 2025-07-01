@@ -119,7 +119,6 @@ class BeepSwitch(TclEntityBase, SwitchEntity):
         await self.coordinator.async_refresh()
 
 
-
 class EcoSwitch(TclEntityBase, SwitchEntity):
     def __init__(
         self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
@@ -136,8 +135,8 @@ class EcoSwitch(TclEntityBase, SwitchEntity):
     def icon(self):
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
         if self.device.data.eco == 1:
-            return "mdi:volume-high"
-        return "mdi:volume-off"
+            return "mdi:leaf"
+        return "mdi:leaf-off"
 
     @property
     def is_on(self) -> bool | None:
@@ -159,7 +158,6 @@ class EcoSwitch(TclEntityBase, SwitchEntity):
         await self.coordinator.async_refresh()
 
 
-
 class HealthySwitch(TclEntityBase, SwitchEntity):
     def __init__(
         self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
@@ -176,8 +174,8 @@ class HealthySwitch(TclEntityBase, SwitchEntity):
     def icon(self):
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
         if self.device.data.healthy == 1:
-            return "mdi:volume-high"
-        return "mdi:volume-off"
+            return "mdi:heart"
+        return "mdi:heart-off"
 
     @property
     def is_on(self) -> bool | None:
@@ -215,8 +213,8 @@ class DryingSwitch(TclEntityBase, SwitchEntity):
     def icon(self):
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
         if self.device.data.anti_moldew == 1:
-            return "mdi:volume-high"
-        return "mdi:volume-off"
+            return "mdi:water-opacity"
+        return "mdi:water-off-outline"
 
     @property
     def is_on(self) -> bool | None:
@@ -235,4 +233,4 @@ class DryingSwitch(TclEntityBase, SwitchEntity):
 
         self.device.data.anti_moldew = 0
         self.coordinator.set_device(self.device)
-        await self.coordinator.async_refresh()        
+        await self.coordinator.async_refresh()

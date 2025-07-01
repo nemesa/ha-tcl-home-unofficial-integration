@@ -26,6 +26,7 @@ class WindSeedEnum(StrEnum):
     MUTE = "Mute"
     AUTO = "Auto"
 
+
 class UpAndDownAirSupplyVectorEnum(StrEnum):
     UP_AND_DOWN_SWING = "Up and down swing"
     UPWARDS_SWING = "Upwards swing"
@@ -35,6 +36,7 @@ class UpAndDownAirSupplyVectorEnum(StrEnum):
     MIDDLE_FIX = "Middle fix"
     LOWER_FIX = "Lower fix"
     BOTTOM_FIX = "Bottom fix"
+
 
 class LeftAndRightAirSupplyVectorEnum(StrEnum):
     LEFT_AND_RIGHT_SWING = "Left and right swing"
@@ -47,11 +49,13 @@ class LeftAndRightAirSupplyVectorEnum(StrEnum):
     CENTER_RIGHT_FIX = "Center-right fix"
     RIGHT_FIX = "Right fix"
 
+
 class SleepModeEnum(StrEnum):
     STANDARD = "Standard"
     ELDERLY = "Elderly"
     CHILD = "Child"
     OFF = "off"
+
 
 @dataclass
 class TCL_SplitAC_DeviceData:
@@ -73,11 +77,19 @@ class TCL_SplitAC_DeviceData:
         )
         self.wind_speed = int(delta.get("windSpeed", aws_thing_state["windSpeed"]))
 
-        self.vertical_switch = int(delta.get("verticalSwitch", aws_thing_state["verticalSwitch"]))
-        self.vertical_direction = int(delta.get("verticalDirection", aws_thing_state["verticalDirection"]))
+        self.vertical_switch = int(
+            delta.get("verticalSwitch", aws_thing_state["verticalSwitch"])
+        )
+        self.vertical_direction = int(
+            delta.get("verticalDirection", aws_thing_state["verticalDirection"])
+        )
 
-        self.horizontal_switch = int(delta.get("horizontalSwitch", aws_thing_state["horizontalSwitch"]))
-        self.horizontal_direction = int(delta.get("horizontalDirection", aws_thing_state["horizontalDirection"]))
+        self.horizontal_switch = int(
+            delta.get("horizontalSwitch", aws_thing_state["horizontalSwitch"])
+        )
+        self.horizontal_direction = int(
+            delta.get("horizontalDirection", aws_thing_state["horizontalDirection"])
+        )
 
         self.sleep = int(delta.get("sleep", aws_thing_state["sleep"]))
         self.eco = int(delta.get("ECO", aws_thing_state["ECO"]))
@@ -102,9 +114,9 @@ class TCL_SplitAC_DeviceData:
     eco: int
     anti_moldew: int
 
-class TCL_SplitAC_DeviceData_Helper
 
-    def __init__(self, data:TCL_SplitAC_DeviceData) -> None:
+class TCL_SplitAC_DeviceData_Helper:
+    def __init__(self, data: TCL_SplitAC_DeviceData) -> None:
         self.data = data
 
     def getMode(self) -> ModeEnum:
@@ -122,11 +134,12 @@ class TCL_SplitAC_DeviceData_Helper
             case _:
                 return ModeEnum.AUTO
 
-
     def getWindSpeed(self) -> WindSeedEnum:
         match self.data.wind_speed:
             case 6:
-                return WindSeedEnum.STRONG if self.data.turbo == 1 else WindSeedEnum.HEIGH
+                return (
+                    WindSeedEnum.STRONG if self.data.turbo == 1 else WindSeedEnum.HEIGH
+                )
             case 5:
                 return WindSeedEnum.MID_HEIGH
             case 4:
@@ -134,12 +147,16 @@ class TCL_SplitAC_DeviceData_Helper
             case 3:
                 return WindSeedEnum.MID_LOW
             case 2:
-                return WindSeedEnum.MUTE if self.data.silence_switch == 1 else WindSeedEnum.LOW
+                return (
+                    WindSeedEnum.MUTE
+                    if self.data.silence_switch == 1
+                    else WindSeedEnum.LOW
+                )
             case 0:
                 return WindSeedEnum.AUTO
             case _:
                 return WindSeedEnum.AUTO
-    
+
     def getUpAndDownAirSupplyVector(self) -> UpAndDownAirSupplyVectorEnum:
         match self.data.vertical_direction:
             case 1:
@@ -158,7 +175,7 @@ class TCL_SplitAC_DeviceData_Helper
                 return UpAndDownAirSupplyVectorEnum.LOWER_FIX
             case 13:
                 return UpAndDownAirSupplyVectorEnum.BOTTOM_FIX
-    
+
     def getLeftAndRightAirSupplyVector(self) -> LeftAndRightAirSupplyVectorEnum:
         match self.data.horizontal_direction:
             case 1:
@@ -179,7 +196,7 @@ class TCL_SplitAC_DeviceData_Helper
                 return LeftAndRightAirSupplyVectorEnum.CENTER_RIGHT_FIX
             case 13:
                 return LeftAndRightAirSupplyVectorEnum.RIGHT_FIX
-    
+
     def getSleepMode(self) -> SleepModeEnum:
         match self.data.sleep:
             case 1:

@@ -94,7 +94,9 @@ class ModeSensor(TclEntityBase, SensorEntity):
 
 class WindSpeedSensor(TclEntityBase, SensorEntity):
     def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(self, coordinator, "WindSpeed-sensor", "Wind Speed", device)
+        TclEntityBase.__init__(
+            self, coordinator, "WindSpeed-sensor", "Wind Speed", device
+        )
 
     @property
     def device_class(self) -> str:
@@ -118,9 +120,16 @@ class WindSpeedSensor(TclEntityBase, SensorEntity):
     def state_class(self) -> str | None:
         return SensorStateClass.MEASUREMENT
 
+
 class UpAndDownAirSupplyVectorSensor(TclEntityBase, SensorEntity):
     def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(self, coordinator, "UpAndDownAirSupplyVector-sensor", "Up and down air supply", device)
+        TclEntityBase.__init__(
+            self,
+            coordinator,
+            "UpAndDownAirSupplyVector-sensor",
+            "Up and down air supply",
+            device,
+        )
 
     @property
     def device_class(self) -> str:
@@ -128,7 +137,7 @@ class UpAndDownAirSupplyVectorSensor(TclEntityBase, SensorEntity):
 
     @property
     def icon(self):
-        return "mdi:weather-windy"
+        return "mdi:swap-vertical"
 
     @property
     def native_value(self) -> int | float:
@@ -147,7 +156,13 @@ class UpAndDownAirSupplyVectorSensor(TclEntityBase, SensorEntity):
 
 class LeftAndRightAirSupplyVectorSensor(TclEntityBase, SensorEntity):
     def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(self, coordinator, "LeftAndRightAirSupplyVector-sensor", "Left and right air supply", device)
+        TclEntityBase.__init__(
+            self,
+            coordinator,
+            "LeftAndRightAirSupplyVector-sensor",
+            "Left and right air supply",
+            device,
+        )
 
     @property
     def device_class(self) -> str:
@@ -155,7 +170,7 @@ class LeftAndRightAirSupplyVectorSensor(TclEntityBase, SensorEntity):
 
     @property
     def icon(self):
-        return "mdi:weather-windy"
+        return "mdi:swap-horizontal"
 
     @property
     def native_value(self) -> int | float:
@@ -174,7 +189,9 @@ class LeftAndRightAirSupplyVectorSensor(TclEntityBase, SensorEntity):
 
 class SleepModeSensor(TclEntityBase, SensorEntity):
     def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(self, coordinator, "Sleep-Mode-sensor", "Sleep Mode", device)
+        TclEntityBase.__init__(
+            self, coordinator, "Sleep-Mode-sensor", "Sleep Mode", device
+        )
 
     @property
     def device_class(self) -> str:
@@ -182,7 +199,7 @@ class SleepModeSensor(TclEntityBase, SensorEntity):
 
     @property
     def icon(self):
-        return "mdi:weather-windy"
+        return "mdi:sleep"
 
     @property
     def native_value(self) -> int | float:
@@ -196,4 +213,4 @@ class SleepModeSensor(TclEntityBase, SensorEntity):
 
     @property
     def state_class(self) -> str | None:
-        return SensorStateClass.MEASUREMENT                
+        return SensorStateClass.MEASUREMENT
