@@ -3,16 +3,26 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, Dict
 
 import voluptuous as vol
 
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import (
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlow,
+    FlowResult,
+)
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers.schema_config_entry_flow import (
+    SchemaConfigFlowHandler,
+    SchemaFlowFormStep,
+)
 
-from .config_entry import ConfigData
+from homeassistant.config_entries import ConfigEntry
+from .config_entry import ConfigData, convertToConfigData
 from .const import (
     DEFAULT_APP_ID,
     DEFAULT_AWS_REGION,
@@ -22,18 +32,18 @@ from .const import (
     DOMAIN,
 )
 from .session_manager import SessionManager
+from .config_entry import New_NameConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
-        vol.Required(
-            "app_client_id", "App ClientId", DEFAULT_CLIENT_ID, "desc:App ClientId"
-        ): int,
-        vol.Required("app_id", "App Id", DEFAULT_APP_ID): str,
-        vol.Required("aws_region", "Aws region", DEFAULT_AWS_REGION): str,
-        vol.Required(CONF_USERNAME, "TCL Home app - Emial", DEFAULT_USER): str,
-        vol.Required(CONF_PASSWORD, "TCL Home app - Password", DEFAULT_PW): str,
+        vol.Required("app_client_id", default=DEFAULT_CLIENT_ID): int,
+        vol.Required("app_id", default=DEFAULT_APP_ID): str,
+        vol.Required("aws_region", default=DEFAULT_AWS_REGION): str,
+        vol.Required(CONF_USERNAME, default=DEFAULT_USER): str,
+        vol.Required(CONF_PASSWORD, default=DEFAULT_PW): str,
+        vol.Required("verbose_logging", default=False): bool,
     }
 )
 
@@ -49,6 +59,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
             aws_region=data["aws_region"],
             username=data[CONF_USERNAME],
             password=data[CONF_PASSWORD],
+            verbose_logging=data["verbose_logging"],
         ),
     )
 
@@ -62,15 +73,21 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     raise InvalidAuth
 
 
-class ConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for MyTestIntegration."""
+class TclHomeUnofficialConfigFlow(ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for TclHomeUnofficialConfigFlow."""
 
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
+        return TclHomeUnofficialOptionsFlowHandler()
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Handle the initial step."""
+        _LOGGER.info("Starting config flow for TCL Home Unofficial integration")
         errors: dict[str, str] = {}
         if user_input is not None:
             try:
@@ -89,6 +106,44 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+        )
+
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        _LOGGER.info("Reconfiguring TCL Home Unofficial integration %s", user_input)
+
+
+class TclHomeUnofficialOptionsFlowHandler(OptionsFlow):
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Manage the options."""
+        if user_input is not None:
+            options = self.config_entry.options | user_input
+            return self.async_create_entry(data=options)
+
+        data = convertToConfigData(self.config_entry)
+        errors: Dict[str, str] = {}
+
+        data_schema = vol.Schema(
+            {
+                vol.Required(
+                    "app_client_id",
+                    default=data.app_client_id,
+                ): int,
+                vol.Required("app_id", default=data.app_id): str,
+                vol.Required("aws_region", default=data.aws_region): str,
+                vol.Required(CONF_USERNAME, default=data.username): str,
+                vol.Required(CONF_PASSWORD, default=data.password): str,
+                vol.Required("verbose_logging", default=data.verbose_logging): bool,
+            }
+        )
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=data_schema,
+            errors=errors,
         )
 
 

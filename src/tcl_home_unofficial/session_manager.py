@@ -48,6 +48,12 @@ class SessionManager:
             authData=None, refreshTokensData=None, awsCredentialsData=None
         )
 
+    def is_verbose_logging(self) -> bool:
+        return self.configData.verbose_logging
+
+    def get_aws_region(self) -> str:
+        return self.configData.aws_region
+
     async def async_load(self) -> StorageData:
         """Load the stored data."""
         storageData = StorageData(

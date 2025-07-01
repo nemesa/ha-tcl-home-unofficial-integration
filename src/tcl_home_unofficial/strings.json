@@ -3,9 +3,11 @@
     "step": {
       "user": {
         "data": {
-          "clientId": "[%key:common::config_flow::data::clientId%]",
-          "username": "[%key:common::config_flow::data::username%]",
-          "password": "[%key:common::config_flow::data::password%]"
+          "app_client_id": "App Client ID",
+          "app_id": "App Id",
+          "aws_region": "Aws region",
+          "username": "TCL Home app - Emial",
+          "password": "TCL Home app - Password"
         }
       }
     },
@@ -16,6 +18,21 @@
     },
     "abort": {
       "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Example2 Options",
+        "description": "Example2 Select which options to amend.",
+        "data": {
+          "app_client_id": "App Client ID",
+          "app_id": "App Id",
+          "aws_region": "Aws region",
+          "username": "TCL Home app - Emial",
+          "password": "TCL Home app - Password"
+        }
+      }
     }
   }
 }

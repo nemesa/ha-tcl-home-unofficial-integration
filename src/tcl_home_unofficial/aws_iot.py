@@ -1,7 +1,6 @@
 """."""
 
 import datetime
-from http.client import HTTPException
 import json
 import logging
 
@@ -39,8 +38,6 @@ class AwsIot:
     ) -> None:
         """Initialize the AWS IoT client."""
         self.hass = hass
-        self.config_entry = config_entry
-        self.region_name = config_entry.data["aws_region"]
         self.session_manager = SessionManager(hass=hass, config_entry=config_entry)
         self.client = None
 
@@ -48,18 +45,11 @@ class AwsIot:
         awsCred = await self.session_manager.async_aws_credentials()
 
         boto3Session = boto3.session.Session(
-            region_name=self.region_name,
+            region_name=self.session_manager.get_aws_region(),
             aws_access_key_id=awsCred.Credentials.access_key_id,
             aws_secret_access_key=awsCred.Credentials.secret_key,
             aws_session_token=awsCred.Credentials.session_token,
         )
-
-        # credentials = boto3Session.get_credentials().get_frozen_credentials()
-        # _LOGGER.info("Aws:iot - credentials:%s", credentials)
-        # SSOTokenLoader.load(
-
-        # token = boto3Session.get_auth_token()
-        # _LOGGER.info("Aws:iot - token:%s", token)
 
         self.client = boto3Session.client(service_name="iot-data")
 
@@ -81,36 +71,29 @@ class AwsIot:
     ) -> dict:
         try:
             return await self.hass.async_add_executor_job(self.get_thing, device_id)
-        except HTTPException as he:
-            _LOGGER.info(
-                "Aws_iot - ForbiddenException getting thing %s: %s", device_id, he
-            )
-            if not fromException:
-                self.client.close()
-                await self.async_setup_client()
-                return await self.async_get_thing(device_id, True)
-            raise he
         except Exception as e:
-            _LOGGER.error("Aws_iot - Error getting thing %s: %s", device_id, e)
-            _LOGGER.info("Aws_iot - Error getting thing %s: %s", device_id, e)
+            # re-try if the error is due to expired credentials
             if not fromException:
                 self.client.close()
                 await self.async_setup_client()
                 return await self.async_get_thing(device_id, True)
+            _LOGGER.error("Aws_iot - Error getting thing %s: %s", device_id, e)
             raise e
 
     def get_thing(self, device_id: str) -> dict:
         """List all things in AWS IoT."""
         response = self.client.get_thing_shadow(thingName=device_id)
         payload = response["payload"].read().decode("utf-8")
-        _LOGGER.debug("AwsIot.getThing: %s", payload)
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.get_thing (%s): %s", device_id, payload)
         return json.loads(payload)
 
     async def async_turn_on(self, device_id: str) -> None:
         await self.hass.async_add_executor_job(self.turn_on, device_id)
 
     def turn_on(self, device_id: str) -> None:
-        """Turn on the device."""
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.turn_on: %s", device_id)
         payload = json.dumps(
             {
                 "state": {"desired": {"powerSwitch": 1}},
@@ -128,7 +111,8 @@ class AwsIot:
         await self.hass.async_add_executor_job(self.turn_off, device_id)
 
     def turn_off(self, device_id: str) -> None:
-        """Turn off the device."""
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.turn_off: %s", device_id)
 
         payload = json.dumps(
             {
@@ -147,7 +131,8 @@ class AwsIot:
         await self.hass.async_add_executor_job(self.beep_mode_on, device_id)
 
     def beep_mode_on(self, device_id: str) -> None:
-        """Turn on the device."""
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.beep_mode_on: %s", device_id)
         payload = json.dumps(
             {
                 "state": {"desired": {"beepSwitch": 1}},
@@ -165,7 +150,8 @@ class AwsIot:
         await self.hass.async_add_executor_job(self.beep_mode_off, device_id)
 
     def beep_mode_off(self, device_id: str) -> None:
-        """Turn on the device."""
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.beep_mode_off: %s", device_id)
         payload = json.dumps(
             {
                 "state": {"desired": {"beepSwitch": 0}},
@@ -185,7 +171,8 @@ class AwsIot:
         )
 
     def set_target_temperature(self, device_id: str, value: int) -> None:
-        """target_temperature"""
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.set_target_temperature: %s -> %s", device_id, value)
 
         if value < 16 or value > 36:
             _LOGGER.error("Invalid target temperature: %s (Min:16 Max:36)", value)
@@ -208,7 +195,8 @@ class AwsIot:
         await self.hass.async_add_executor_job(self.set_mode, device_id, value)
 
     def set_mode(self, device_id: str, value: ModeEnum) -> None:
-        """target_temperature"""
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.set_mode: %s -> %s", device_id, value)
 
         desired = {}
         match value:
@@ -307,7 +295,8 @@ class AwsIot:
         await self.hass.async_add_executor_job(self.set_wind_speed, device_id, value)
 
     def set_wind_speed(self, device_id: str, value: WindSeedEnum) -> None:
-        """target_temperature"""
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.set_wind_speed: %s -> %s", device_id, value)
 
         desired = {}
         match value:
@@ -385,6 +374,8 @@ class AwsIot:
         await self.hass.async_add_executor_job(self.eco_turn_on, device_id)
 
     def eco_turn_on(self, device_id: str) -> None:
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.eco_turn_on: %s", device_id)
         payload = json.dumps(
             {
                 "state": {
@@ -406,6 +397,8 @@ class AwsIot:
         await self.hass.async_add_executor_job(self.eco_turn_off, device_id)
 
     def eco_turn_off(self, device_id: str) -> None:
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.eco_turn_off: %s", device_id)
         payload = json.dumps(
             {
                 "state": {"desired": {"ECO": 0}},
@@ -419,6 +412,8 @@ class AwsIot:
         await self.hass.async_add_executor_job(self.healthy_turn_on, device_id)
 
     def healthy_turn_on(self, device_id: str) -> None:
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.healthy_turn_on: %s", device_id)
         payload = json.dumps(
             {
                 "state": {"desired": {"healthy": 1}},
@@ -432,6 +427,8 @@ class AwsIot:
         await self.hass.async_add_executor_job(self.healthy_turn_off, device_id)
 
     def healthy_turn_off(self, device_id: str) -> None:
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.healthy_turn_off: %s", device_id)
         payload = json.dumps(
             {
                 "state": {"desired": {"healthy": 0}},
@@ -445,6 +442,8 @@ class AwsIot:
         await self.hass.async_add_executor_job(self.drying_turn_on, device_id)
 
     def drying_turn_on(self, device_id: str) -> None:
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.drying_turn_on: %s", device_id)
         payload = json.dumps(
             {
                 "state": {"desired": {"antiMoldew": 1}},
@@ -458,6 +457,8 @@ class AwsIot:
         await self.hass.async_add_executor_job(self.drying_turn_off, device_id)
 
     def drying_turn_off(self, device_id: str) -> None:
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.drying_turn_off: %s", device_id)
         payload = json.dumps(
             {
                 "state": {"desired": {"antiMoldew": 0}},
@@ -477,6 +478,12 @@ class AwsIot:
     def set_up_and_down_air_supply_vector(
         self, device_id: str, value: UpAndDownAirSupplyVectorEnum
     ) -> None:
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info(
+                "AwsIot.set_up_and_down_air_supply_vector: %s -> %s",
+                device_id,
+                value,
+            )
         desired = {}
         match value:
             case UpAndDownAirSupplyVectorEnum.UP_AND_DOWN_SWING:
@@ -517,6 +524,12 @@ class AwsIot:
     def set_left_and_right_air_supply_vector(
         self, device_id: str, value: LeftAndRightAirSupplyVectorEnum
     ) -> None:
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info(
+                "AwsIot.set_left_and_right_air_supply_vector: %s -> %s",
+                device_id,
+                value,
+            )
         desired = {}
         match value:
             case LeftAndRightAirSupplyVectorEnum.LEFT_AND_RIGHT_SWING:
@@ -553,6 +566,8 @@ class AwsIot:
         await self.hass.async_add_executor_job(self.set_sleep_mode, device_id, value)
 
     def set_sleep_mode(self, device_id: str, value: SleepModeEnum) -> None:
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.set_sleep_mode: %s -> %s", device_id, value)
         desired = {}
         match value:
             case SleepModeEnum.STANDARD:
@@ -577,6 +592,8 @@ class AwsIot:
         await self.hass.async_add_executor_job(self.self_clean_start, device_id)
 
     def self_clean_start(self, device_id: str) -> None:
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.self_clean_start: %s", device_id)
         payload = json.dumps(
             {
                 "state": {"desired": {"powerSwitch": 0, "selfClean": 1}},
@@ -590,6 +607,8 @@ class AwsIot:
         await self.hass.async_add_executor_job(self.self_clean_stop, device_id)
 
     def self_clean_stop(self, device_id: str) -> None:
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.self_clean_stop: %s", device_id)
         payload = json.dumps(
             {
                 "state": {"desired": {"selfClean": 0}},
@@ -603,6 +622,8 @@ class AwsIot:
         await self.hass.async_add_executor_job(self.light_turn_on, device_id)
 
     def light_turn_on(self, device_id: str) -> None:
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.light_turn_on: %s", device_id)
         payload = json.dumps(
             {
                 "state": {"desired": {"screen": 1}},
@@ -616,6 +637,8 @@ class AwsIot:
         await self.hass.async_add_executor_job(self.light_turn_off, device_id)
 
     def light_turn_off(self, device_id: str) -> None:
+        if self.session_manager.is_verbose_logging():
+            _LOGGER.info("AwsIot.light_turn_off: %s", device_id)
         payload = json.dumps(
             {
                 "state": {"desired": {"screen": 0}},

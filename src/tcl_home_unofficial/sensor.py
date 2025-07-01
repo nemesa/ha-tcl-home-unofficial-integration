@@ -87,9 +87,9 @@ class ModeSensor(TclEntityBase, SensorEntity):
     def native_unit_of_measurement(self) -> str | None:
         return None
 
-    @property
-    def state_class(self) -> str | None:
-        return SensorStateClass.MEASUREMENT
+    # @property
+    # def state_class(self) -> str | None:
+    #     return SensorStateClass.MEASUREMENT
 
 
 class WindSpeedSensor(TclEntityBase, SensorEntity):
@@ -116,9 +116,9 @@ class WindSpeedSensor(TclEntityBase, SensorEntity):
     def native_unit_of_measurement(self) -> str | None:
         return None
 
-    @property
-    def state_class(self) -> str | None:
-        return SensorStateClass.MEASUREMENT
+    # @property
+    # def state_class(self) -> str | None:
+    #     return SensorStateClass.MEASUREMENT
 
 
 class UpAndDownAirSupplyVectorSensor(TclEntityBase, SensorEntity):
@@ -149,9 +149,9 @@ class UpAndDownAirSupplyVectorSensor(TclEntityBase, SensorEntity):
     def native_unit_of_measurement(self) -> str | None:
         return None
 
-    @property
-    def state_class(self) -> str | None:
-        return SensorStateClass.MEASUREMENT
+    # @property
+    # def state_class(self) -> str | None:
+    #     return SensorStateClass.MEASUREMENT
 
 
 class LeftAndRightAirSupplyVectorSensor(TclEntityBase, SensorEntity):
@@ -182,9 +182,9 @@ class LeftAndRightAirSupplyVectorSensor(TclEntityBase, SensorEntity):
     def native_unit_of_measurement(self) -> str | None:
         return None
 
-    @property
-    def state_class(self) -> str | None:
-        return SensorStateClass.MEASUREMENT
+    # @property
+    # def state_class(self) -> str | None:
+    #     return SensorStateClass.MEASUREMENT
 
 
 class SleepModeSensor(TclEntityBase, SensorEntity):
@@ -211,6 +211,6 @@ class SleepModeSensor(TclEntityBase, SensorEntity):
     def native_unit_of_measurement(self) -> str | None:
         return None
 
-    @property
-    def state_class(self) -> str | None:
-        return SensorStateClass.MEASUREMENT
+    # @property
+    # def state_class(self) -> str | None:
+    #     return SensorStateClass.MEASUREMENT

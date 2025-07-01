@@ -17,6 +17,7 @@ class TclEntityBase(CoordinatorEntity):
         self.device = device
         self.type = type
         self._name = name
+        self._attr_has_entity_name = True
         self._attr_unique_id = f"{DOMAIN}-{type}-{device.device_id}"
 
     @callback
@@ -35,3 +36,7 @@ class TclEntityBase(CoordinatorEntity):
     @property
     def name(self) -> str:
         return self._name
+
+    @property
+    def state_class(self) -> str | None:
+        return None

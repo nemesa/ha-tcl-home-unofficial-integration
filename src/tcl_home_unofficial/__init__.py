@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
@@ -28,7 +29,6 @@ async def async_setup_entry(
     hass: HomeAssistant, config_entry: New_NameConfigEntry
 ) -> bool:
     """Set up TCL Home - Unofficial from a config entry."""
-
     config_entry.devices = []
 
     aws_iot = AwsIot(
@@ -52,9 +52,14 @@ async def async_setup_entry(
             )
         )
 
+    # Initialise a listener for config flow options changes.
+    cancel_update_listener = config_entry.async_on_unload(
+        config_entry.add_update_listener(_async_update_listener)
+    )
+
     coordinator = IotDeviceCoordinator(hass, config_entry, aws_iot)
     await coordinator.async_config_entry_first_refresh()
-    config_entry.runtime_data = RuntimeData(coordinator)
+    config_entry.runtime_data = RuntimeData(coordinator, cancel_update_listener)
 
     await hass.config_entries.async_forward_entry_setups(config_entry, _PLATFORMS)
 
@@ -64,3 +69,12 @@ async def async_setup_entry(
 async def async_unload_entry(hass: HomeAssistant, entry: New_NameConfigEntry) -> bool:
     """Unload a config entry."""
     return await hass.config_entries.async_unload_platforms(entry, _PLATFORMS)
+
+
+async def _async_update_listener(hass: HomeAssistant, config_entry: ConfigEntry):
+    """Handle config options update.
+
+    Reload the integration when the options change.
+    Called from our listener created above.
+    """
+    await hass.config_entries.async_reload(config_entry.entry_id)
