@@ -34,6 +34,9 @@ async def async_setup_entry(
     for device in config_entry.devices:
         switches.append(PowerSwitch(coordinator, device, aws_iot))
         switches.append(BeepSwitch(coordinator, device, aws_iot))
+        switches.append(EcoSwitch(coordinator, device, aws_iot))
+        switches.append(HealthySwitch(coordinator, device, aws_iot))
+        switches.append(DryingSwitch(coordinator, device, aws_iot))
 
     async_add_entities(switches)
 
@@ -63,14 +66,14 @@ class PowerSwitch(TclEntityBase, SwitchEntity):
         return device.data.power_switch
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_turnOn(self.device.device_id)
+        await self.aws_iot.async_turn_on(self.device.device_id)
 
         self.device.data.power_switch = 1
         self.coordinator.set_device(self.device)
         await self.coordinator.async_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_turnOff(self.device.device_id)
+        await self.aws_iot.async_turn_off(self.device.device_id)
 
         self.device.data.power_switch = 0
         self.coordinator.set_device(self.device)
@@ -102,15 +105,134 @@ class BeepSwitch(TclEntityBase, SwitchEntity):
         return device.data.beep_switch
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_beepModeOn(self.device.device_id)
+        await self.aws_iot.async_beep_mode_on(self.device.device_id)
 
         self.device.data.beep_switch = 1
         self.coordinator.set_device(self.device)
         await self.coordinator.async_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_beepModeOff(self.device.device_id)
+        await self.aws_iot.async_beep_mode_off(self.device.device_id)
 
         self.device.data.beep_switch = 0
         self.coordinator.set_device(self.device)
         await self.coordinator.async_refresh()
+
+
+
+class EcoSwitch(TclEntityBase, SwitchEntity):
+    def __init__(
+        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, "ECO-Switch", "ECO", device)
+
+        self.aws_iot = aws_iot
+
+    @property
+    def device_class(self) -> str:
+        return SwitchDeviceClass.SWITCH
+
+    @property
+    def icon(self):
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        if self.device.data.eco == 1:
+            return "mdi:volume-high"
+        return "mdi:volume-off"
+
+    @property
+    def is_on(self) -> bool | None:
+        device = self.coordinator.get_device_by_id(self.device.device_id)
+        return device.data.eco
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        await self.aws_iot.async_eco_turn_on(self.device.device_id)
+
+        self.device.data.eco = 1
+        self.coordinator.set_device(self.device)
+        await self.coordinator.async_refresh()
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        await self.aws_iot.async_eco_turn_off(self.device.device_id)
+
+        self.device.data.eco = 0
+        self.coordinator.set_device(self.device)
+        await self.coordinator.async_refresh()
+
+
+
+class HealthySwitch(TclEntityBase, SwitchEntity):
+    def __init__(
+        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, "Helathy-Switch", "Healthy", device)
+
+        self.aws_iot = aws_iot
+
+    @property
+    def device_class(self) -> str:
+        return SwitchDeviceClass.SWITCH
+
+    @property
+    def icon(self):
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        if self.device.data.healthy == 1:
+            return "mdi:volume-high"
+        return "mdi:volume-off"
+
+    @property
+    def is_on(self) -> bool | None:
+        device = self.coordinator.get_device_by_id(self.device.device_id)
+        return device.data.healthy
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        await self.aws_iot.async_healthy_turn_on(self.device.device_id)
+
+        self.device.data.healthy = 1
+        self.coordinator.set_device(self.device)
+        await self.coordinator.async_refresh()
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        await self.aws_iot.async_healthy_turn_off(self.device.device_id)
+
+        self.device.data.healthy = 0
+        self.coordinator.set_device(self.device)
+        await self.coordinator.async_refresh()
+
+
+class DryingSwitch(TclEntityBase, SwitchEntity):
+    def __init__(
+        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, "Drying-Switch", "Drying", device)
+
+        self.aws_iot = aws_iot
+
+    @property
+    def device_class(self) -> str:
+        return SwitchDeviceClass.SWITCH
+
+    @property
+    def icon(self):
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        if self.device.data.anti_moldew == 1:
+            return "mdi:volume-high"
+        return "mdi:volume-off"
+
+    @property
+    def is_on(self) -> bool | None:
+        device = self.coordinator.get_device_by_id(self.device.device_id)
+        return device.data.anti_moldew
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        await self.aws_iot.async_drying__turn_on(self.device.device_id)
+
+        self.device.data.anti_moldew = 1
+        self.coordinator.set_device(self.device)
+        await self.coordinator.async_refresh()
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        await self.aws_iot.async_drying__turn_off(self.device.device_id)
+
+        self.device.data.anti_moldew = 0
+        self.coordinator.set_device(self.device)
+        await self.coordinator.async_refresh()        

@@ -51,7 +51,7 @@ class IotDeviceCoordinator(DataUpdateCoordinator):
         devices = []
         try:
             for device in self.config_entry.devices:
-                aws_thing = await self.aws_iot.async_getThing(device.device_id)
+                aws_thing = await self.aws_iot.async_get_thing(device.device_id)
                 d = Device(
                     device_id=device.device_id,
                     device_type=device.device_type,

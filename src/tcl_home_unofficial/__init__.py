@@ -39,7 +39,7 @@ async def async_setup_entry(
     things = await aws_iot.get_all_things()
 
     for thing in things.data:
-        aws_thing = await aws_iot.async_getThing(thing.device_id)
+        aws_thing = await aws_iot.async_get_thing(thing.device_id)
 
         config_entry.devices.append(
             Device(

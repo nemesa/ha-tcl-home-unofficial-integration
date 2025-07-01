@@ -59,20 +59,20 @@ class AwsIot:
 
         return things
 
-    async def async_getThing(self, device_id: str) -> dict:
-        return await self.hass.async_add_executor_job(self.getThing, device_id)
+    async def async_get_thing(self, device_id: str) -> dict:
+        return await self.hass.async_add_executor_job(self.get_thing, device_id)
 
-    def getThing(self, device_id: str) -> dict:
+    def get_thing(self, device_id: str) -> dict:
         """List all things in AWS IoT."""
         response = self.client.get_thing_shadow(thingName=device_id)
         payload = response["payload"].read().decode("utf-8")
         _LOGGER.debug("AwsIot.getThing: %s", payload)
         return json.loads(payload)
 
-    async def async_turnOn(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.turnOn, device_id)
+    async def async_turn_on(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.turn_on, device_id)
 
-    def turnOn(self, device_id: str) -> None:
+    def turn_on(self, device_id: str) -> None:
         """Turn on the device."""
         payload = json.dumps(
             {
@@ -87,10 +87,10 @@ class AwsIot:
             payload=payload,
         )
 
-    async def async_turnOff(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.turnOff, device_id)
+    async def async_turn_off(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.turn_off, device_id)
 
-    def turnOff(self, device_id: str) -> None:
+    def turn_off(self, device_id: str) -> None:
         """Turn off the device."""
 
         payload = json.dumps(
@@ -106,10 +106,10 @@ class AwsIot:
             payload=payload,
         )
 
-    async def async_beepModeOn(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.beepModeOn, device_id)
+    async def async_beep_mode_on(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.beep_mode_on, device_id)
 
-    def beepModeOn(self, device_id: str) -> None:
+    def beep_mode_on(self, device_id: str) -> None:
         """Turn on the device."""
         payload = json.dumps(
             {
@@ -124,10 +124,10 @@ class AwsIot:
             payload=payload,
         )
 
-    async def async_beepModeOff(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.beepModeOff, device_id)
+    async def async_beep_mode_off(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.beep_mode_off, device_id)
 
-    def beepModeOff(self, device_id: str) -> None:
+    def beep_mode_off(self, device_id: str) -> None:
         """Turn on the device."""
         payload = json.dumps(
             {
@@ -344,51 +344,170 @@ class AwsIot:
             payload=payload,
         )
 
+    async def async_eco_turn_on(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.eco_turn_on, device_id)
 
-"""
+    def eco_turn_on(self, device_id: str) -> None:
+        payload = json.dumps(
+            {
+                "state": {"desired": {"ECO":1,"highTemperatureWind":0,"turbo":0,"silenceSwitch":0,"windSpeed":0}},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
 
+        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
 
-ECO
-    off:    {"state":{"desired":{"ECO":0}},"clientToken":"mobile_1751204342594"}
-    on:     {"state":{"desired":{"ECO":1,"highTemperatureWind":0,"turbo":0,"silenceSwitch":0,"windSpeed":0}},"clientToken":"mobile_1751204352037"}
+    async def async_eco_turn_off(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.eco_turn_off, device_id)
 
+    def eco_turn_off(self, device_id: str) -> None:
+        payload = json.dumps(
+            {
+                "state": {"desired": {"ECO":0}},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
 
-Vector air suply
-    Up and down air supply:
-       Up and down swing:   {"state":{"desired":{"verticalSwitch":1,"verticalDirection":1}},"clientToken":"mobile_1751204861067"}
-       Upwards swing:       {"state":{"desired":{"verticalSwitch":1,"verticalDirection":2}},"clientToken":"mobile_1751205332778"}
-       Downwards swing:     {"state":{"desired":{"verticalSwitch":1,"verticalDirection":3}},"clientToken":"mobile_1751205314705"}
-       Top fix:             {"state":{"desired":{"verticalSwitch":0,"verticalDirection":9}},"clientToken":"mobile_1751205304708"}
-       Upper fix:           {"state":{"desired":{"verticalSwitch":0,"verticalDirection":10}},"clientToken":"mobile_1751205290466"}
-       Middle fix:          {"state":{"desired":{"verticalSwitch":0,"verticalDirection":11}},"clientToken":"mobile_1751205282178"}
-       Lower fix:           {"state":{"desired":{"verticalSwitch":0,"verticalDirection":12}},"clientToken":"mobile_1751205271681"}
-       Bottom fix:          {"state":{"desired":{"verticalSwitch":0,"verticalDirection":13}},"clientToken":"mobile_1751205257810"}
+        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
 
-    Left and right air supply:
-       Left and right swing:    {"state":{"desired":{"horizontalDirection":1,"horizontalSwitch":1}},"clientToken":"mobile_1751205419975"}
-       Left swing:              {"state":{"desired":{"horizontalDirection":2,"horizontalSwitch":1}},"clientToken":"mobile_1751205412750"}
-       Middle swing:            {"state":{"desired":{"horizontalDirection":3,"horizontalSwitch":1}},"clientToken":"mobile_1751205425043"}
-       Right swing:             {"state":{"desired":{"horizontalDirection":4,"horizontalSwitch":1}},"clientToken":"mobile_1751205430446"}
-       Left fix:                {"state":{"desired":{"horizontalDirection":9,"horizontalSwitch":0}},"clientToken":"mobile_1751205438845"}
-       Center-left fix:         {"state":{"desired":{"horizontalDirection":10,"horizontalSwitch":0}},"clientToken":"mobile_1751205447260"}
-       Middle fix:              {"state":{"desired":{"horizontalDirection":11,"horizontalSwitch":0}},"clientToken":"mobile_1751205453333"}
-       Center-right fix:        {"state":{"desired":{"horizontalDirection":12,"horizontalSwitch":0}},"clientToken":"mobile_1751205459761"}
-       Right fix:               {"state":{"desired":{"horizontalDirection":13,"horizontalSwitch":0}},"clientToken":"mobile_1751205466193"}
+    async def async_healthy_turn_on(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.healthy_turn_on, device_id)
 
+    def healthy_turn_on(self, device_id: str) -> None:
+        payload = json.dumps(
+            {
+                "state": {"desired": {"healthy":1}},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
 
-Sleep mode:
-    Standard:   {"state":{"desired":{"sleep":1}},"clientToken":"mobile_1751205551124"}
-    Elderly:    {"state":{"desired":{"sleep":2}},"clientToken":"mobile_1751205561522"}
-    Child:      {"state":{"desired":{"sleep":3}},"clientToken":"mobile_1751205567750"}
-    OFF:        {"state":{"desired":{"sleep":0}},"clientToken":"mobile_1751205583040"}
+        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
 
+    async def async_healthy_turn_off(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.healthy_turn_off, device_id)
 
-Helath mode:
-    OFF:        {"state":{"desired":{"healthy":0}},"clientToken":"mobile_1751205631269"}
-    ON:         {"state":{"desired":{"healthy":1}},"clientToken":"mobile_1751205600761"}
+    def healthy_turn_off(self, device_id: str) -> None:
+        payload = json.dumps(
+            {
+                "state": {"desired": {"healthy":0}},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
 
-drying:
-    ON: {"state":{"desired":{"antiMoldew":1}},"clientToken":"mobile_1751205646706"}
-    OFF {"state":{"desired":{"antiMoldew":1}},"clientToken":"mobile_1751205646706"}
+        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
 
-"""
+    async def async_drying__turn_on(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.drying__turn_on, device_id)
+
+    def drying_turn_on(self, device_id: str) -> None:
+        payload = json.dumps(
+            {
+                "state": {"desired": {"antiMoldew":1}},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+
+        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
+
+    async def async_drying_turn_off(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.drying_turn_off, device_id)
+
+    def drying_turn_off(self, device_id: str) -> None:
+        payload = json.dumps(
+            {
+                "state": {"desired": {"antiMoldew":0}},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+
+        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
+
+    async def async_set_up_and_down_air_supply_vector(self, device_id: str, value: UpAndDownAirSupplyVectorEnum) -> None:
+        await self.hass.async_add_executor_job(self.set_up_and_down_air_supply_vector, device_id, value)
+
+    def set_up_and_down_air_supply_vector(self, device_id: str, value: UpAndDownAirSupplyVectorEnum) -> None:
+        desired = {}
+        match value:
+            case UpAndDownAirSupplyVectorEnum.UP_AND_DOWN_SWING:
+                desired = {"verticalSwitch":1,"verticalDirection":1}
+            case UpAndDownAirSupplyVectorEnum.UPWARDS_SWING:
+                desired = {"verticalSwitch":1,"verticalDirection":2}
+            case UpAndDownAirSupplyVectorEnum.DOWNWARDS_SWING:
+                desired = {"verticalSwitch":1,"verticalDirection":3}
+            case UpAndDownAirSupplyVectorEnum.TOP_FIX:
+                desired = {"verticalSwitch":0,"verticalDirection":9}
+            case UpAndDownAirSupplyVectorEnum.UPPER_FIX:
+                desired = {"verticalSwitch":0,"verticalDirection":10}
+            case UpAndDownAirSupplyVectorEnum.MIDDLE_FIX:
+                desired = {"verticalSwitch":0,"verticalDirection":11}
+            case UpAndDownAirSupplyVectorEnum.LOWER_FIX:
+                desired = {"verticalSwitch":0,"verticalDirection":12}
+            case UpAndDownAirSupplyVectorEnum.BOTTOM_FIX:
+                desired = {"verticalSwitch":0,"verticalDirection":13}
+
+        payload = json.dumps(
+            {
+                "state": {"desired": desired},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+
+        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
+
+    async def async_set_left_and_right_air_supply_vector(self, device_id: str, value: LeftAndRightAirSupplyVectorEnum) -> None:
+        await self.hass.async_add_executor_job(self.set_left_and_right_air_supply_vector, device_id, value)
+
+    def set_left_and_right_air_supply_vector(self, device_id: str, value: LeftAndRightAirSupplyVectorEnum) -> None:
+        desired = {}
+        match value:
+            case LeftAndRightAirSupplyVectorEnum.LEFT_AND_RIGHT_SWING:
+                desired = {"horizontalDirection":1,"horizontalSwitch":1}
+            case LeftAndRightAirSupplyVectorEnum.LEFT_SWING:
+                desired = {"horizontalDirection":2,"horizontalSwitch":1}
+            case LeftAndRightAirSupplyVectorEnum.MIDDLE_SWING:
+                desired = {"horizontalDirection":3,"horizontalSwitch":1}
+            case LeftAndRightAirSupplyVectorEnum.RIGHT_SWING:
+                desired = {"horizontalDirection":4,"horizontalSwitch":1}
+            case LeftAndRightAirSupplyVectorEnum.LEFT_FIX:
+                desired = {"horizontalDirection":9,"horizontalSwitch":0}
+            case LeftAndRightAirSupplyVectorEnum.CENTER_LEFT_FIX:
+                desired = {"horizontalDirection":10,"horizontalSwitch":0}
+            case LeftAndRightAirSupplyVectorEnum.MIDDLE_FIX:
+                desired = {"horizontalDirection":11,"horizontalSwitch":0}
+            case LeftAndRightAirSupplyVectorEnum.CENTER_RIGHT_FIX:
+                desired = {"horizontalDirection":12,"horizontalSwitch":0}
+            case LeftAndRightAirSupplyVectorEnum.RIGHT_FIX:
+                desired = {"horizontalDirection":13,"horizontalSwitch":0}
+
+        payload = json.dumps(
+            {
+                "state": {"desired": desired},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+
+        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
+
+    async def async_set_sleep_mode(self, device_id: str, value: SleepModeEnum) -> None:
+        await self.hass.async_add_executor_job(self.set_sleep_mode, device_id, value)
+
+    def set_sleep_mode(self, device_id: str, value: SleepModeEnum) -> None:
+        desired = {}
+        match value:
+            case SleepModeEnum.STANDARD:
+                desired = {"sleep":1}
+            case SleepModeEnum.ELDERLY:
+                desired = {"sleep":2}
+            case SleepModeEnum.CHILD:
+                desired = {"sleep":3}
+            case SleepModeEnum.OFF:
+                desired = {"sleep":0}
+
+        payload = json.dumps(
+            {
+                "state": {"desired": desired},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+
+        self.client.publish(topic=getTopic(device_id),qos=1,payload=payload)
