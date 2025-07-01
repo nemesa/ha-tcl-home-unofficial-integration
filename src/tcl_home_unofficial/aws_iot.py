@@ -1,12 +1,12 @@
 """."""
 
 import datetime
+from http.client import HTTPException
 import json
 import logging
 
 import boto3
 import boto3.session
-from botocore.utils import SSOTokenLoader
 
 from homeassistant.core import HomeAssistant
 
@@ -81,8 +81,18 @@ class AwsIot:
     ) -> dict:
         try:
             return await self.hass.async_add_executor_job(self.get_thing, device_id)
+        except HTTPException as he:
+            _LOGGER.info(
+                "Aws_iot - ForbiddenException getting thing %s: %s", device_id, he
+            )
+            if not fromException:
+                self.client.close()
+                await self.async_setup_client()
+                return await self.async_get_thing(device_id, True)
+            raise he
         except Exception as e:
             _LOGGER.error("Aws_iot - Error getting thing %s: %s", device_id, e)
+            _LOGGER.info("Aws_iot - Error getting thing %s: %s", device_id, e)
             if not fromException:
                 self.client.close()
                 await self.async_setup_client()

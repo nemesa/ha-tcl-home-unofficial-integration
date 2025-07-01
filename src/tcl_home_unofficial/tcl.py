@@ -212,7 +212,6 @@ async def get_aws_credentials(cognitoToken: str) -> GetAwsCredentialsResponse:
     async with httpx.AsyncClient() as client:
         response = await client.post(url, json=payload, headers=headers)
         response_obj = response.json()
-        _LOGGER.info("get_aws_credentials response: %s", response_obj)
         return GetAwsCredentialsResponse(response_obj)
 
 
