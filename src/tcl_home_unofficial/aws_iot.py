@@ -6,6 +6,7 @@ import logging
 
 import boto3
 import boto3.session
+from botocore.utils import SSOTokenLoader
 
 from homeassistant.core import HomeAssistant
 
@@ -43,9 +44,7 @@ class AwsIot:
         self.session_manager = SessionManager(hass=hass, config_entry=config_entry)
         self.client = None
 
-    async def async_init(self) -> None:
-        await self.session_manager.async_load()
-
+    async def async_setup_client(self) -> None:
         awsCred = await self.session_manager.async_aws_credentials()
 
         boto3Session = boto3.session.Session(
@@ -54,7 +53,19 @@ class AwsIot:
             aws_secret_access_key=awsCred.Credentials.secret_key,
             aws_session_token=awsCred.Credentials.session_token,
         )
+
+        # credentials = boto3Session.get_credentials().get_frozen_credentials()
+        # _LOGGER.info("Aws:iot - credentials:%s", credentials)
+        # SSOTokenLoader.load(
+
+        # token = boto3Session.get_auth_token()
+        # _LOGGER.info("Aws:iot - token:%s", token)
+
         self.client = boto3Session.client(service_name="iot-data")
+
+    async def async_init(self) -> None:
+        await self.session_manager.async_load()
+        await self.async_setup_client()
 
     async def get_all_things(self) -> GetThingsResponse:
         authResult = await self.session_manager.async_get_auth_data()
@@ -65,8 +76,18 @@ class AwsIot:
 
         return things
 
-    async def async_get_thing(self, device_id: str) -> dict:
-        return await self.hass.async_add_executor_job(self.get_thing, device_id)
+    async def async_get_thing(
+        self, device_id: str, fromException: bool = False
+    ) -> dict:
+        try:
+            return await self.hass.async_add_executor_job(self.get_thing, device_id)
+        except Exception as e:
+            _LOGGER.error("Aws_iot - Error getting thing %s: %s", device_id, e)
+            if not fromException:
+                self.client.close()
+                await self.async_setup_client()
+                return await self.async_get_thing(device_id, True)
+            raise e
 
     def get_thing(self, device_id: str) -> dict:
         """List all things in AWS IoT."""
@@ -410,8 +431,8 @@ class AwsIot:
 
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
-    async def async_drying__turn_on(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.drying__turn_on, device_id)
+    async def async_drying_turn_on(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.drying_turn_on, device_id)
 
     def drying_turn_on(self, device_id: str) -> None:
         payload = json.dumps(
@@ -464,6 +485,8 @@ class AwsIot:
                 desired = {"verticalSwitch": 0, "verticalDirection": 12}
             case UpAndDownAirSupplyVectorEnum.BOTTOM_FIX:
                 desired = {"verticalSwitch": 0, "verticalDirection": 13}
+            case UpAndDownAirSupplyVectorEnum.NOT_SET:
+                desired = {"verticalSwitch": 0, "verticalDirection": 8}
 
         payload = json.dumps(
             {
@@ -504,6 +527,8 @@ class AwsIot:
                 desired = {"horizontalDirection": 12, "horizontalSwitch": 0}
             case LeftAndRightAirSupplyVectorEnum.RIGHT_FIX:
                 desired = {"horizontalDirection": 13, "horizontalSwitch": 0}
+            case LeftAndRightAirSupplyVectorEnum.NOT_SET:
+                desired = {"horizontalDirection": 8, "horizontalSwitch": 0}
 
         payload = json.dumps(
             {
@@ -532,6 +557,58 @@ class AwsIot:
         payload = json.dumps(
             {
                 "state": {"desired": desired},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
+
+    async def async_self_clean_start(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.self_clean_start, device_id)
+
+    def self_clean_start(self, device_id: str) -> None:
+        payload = json.dumps(
+            {
+                "state": {"desired": {"powerSwitch": 0, "selfClean": 1}},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
+
+    async def async_self_clean_stop(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.self_clean_stop, device_id)
+
+    def self_clean_stop(self, device_id: str) -> None:
+        payload = json.dumps(
+            {
+                "state": {"desired": {"selfClean": 0}},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
+
+    async def async_light_turn_on(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.light_turn_on, device_id)
+
+    def light_turn_on(self, device_id: str) -> None:
+        payload = json.dumps(
+            {
+                "state": {"desired": {"screen": 1}},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
+
+    async def async_light_turn_off(self, device_id: str) -> None:
+        await self.hass.async_add_executor_job(self.light_turn_off, device_id)
+
+    def light_turn_off(self, device_id: str) -> None:
+        payload = json.dumps(
+            {
+                "state": {"desired": {"screen": 0}},
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
         )

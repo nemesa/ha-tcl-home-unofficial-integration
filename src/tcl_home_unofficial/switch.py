@@ -37,6 +37,7 @@ async def async_setup_entry(
         switches.append(EcoSwitch(coordinator, device, aws_iot))
         switches.append(HealthySwitch(coordinator, device, aws_iot))
         switches.append(DryingSwitch(coordinator, device, aws_iot))
+        switches.append(LightSwitch(coordinator, device, aws_iot))
 
     async_add_entities(switches)
 
@@ -222,15 +223,56 @@ class DryingSwitch(TclEntityBase, SwitchEntity):
         return device.data.anti_moldew
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_drying__turn_on(self.device.device_id)
+        await self.aws_iot.async_drying_turn_on(self.device.device_id)
 
         self.device.data.anti_moldew = 1
         self.coordinator.set_device(self.device)
         await self.coordinator.async_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_drying__turn_off(self.device.device_id)
+        await self.aws_iot.async_drying_turn_off(self.device.device_id)
 
         self.device.data.anti_moldew = 0
+        self.coordinator.set_device(self.device)
+        await self.coordinator.async_refresh()
+
+
+class LightSwitch(TclEntityBase, SwitchEntity):
+    def __init__(
+        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
+    ) -> None:
+        TclEntityBase.__init__(
+            self, coordinator, "Light-Switch", "Screen Light", device
+        )
+
+        self.aws_iot = aws_iot
+
+    @property
+    def device_class(self) -> str:
+        return SwitchDeviceClass.SWITCH
+
+    @property
+    def icon(self):
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        if self.device.data.screen == 1:
+            return "mdi:lightbulb-outline"
+        return "mdi:lightbulb-off-outline"
+
+    @property
+    def is_on(self) -> bool | None:
+        device = self.coordinator.get_device_by_id(self.device.device_id)
+        return device.data.screen
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        await self.aws_iot.async_light_turn_on(self.device.device_id)
+
+        self.device.data.screen = 1
+        self.coordinator.set_device(self.device)
+        await self.coordinator.async_refresh()
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        await self.aws_iot.async_light_turn_off(self.device.device_id)
+
+        self.device.data.screen = 0
         self.coordinator.set_device(self.device)
         await self.coordinator.async_refresh()

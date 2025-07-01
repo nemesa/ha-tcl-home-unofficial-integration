@@ -36,6 +36,7 @@ class UpAndDownAirSupplyVectorEnum(StrEnum):
     MIDDLE_FIX = "Middle fix"
     LOWER_FIX = "Lower fix"
     BOTTOM_FIX = "Bottom fix"
+    NOT_SET = "Not set"
 
 
 class LeftAndRightAirSupplyVectorEnum(StrEnum):
@@ -48,6 +49,7 @@ class LeftAndRightAirSupplyVectorEnum(StrEnum):
     MIDDLE_FIX = "Middle fix"
     CENTER_RIGHT_FIX = "Center-right fix"
     RIGHT_FIX = "Right fix"
+    NOT_SET = "Not set"
 
 
 class SleepModeEnum(StrEnum):
@@ -95,6 +97,8 @@ class TCL_SplitAC_DeviceData:
         self.eco = int(delta.get("ECO", aws_thing_state["ECO"]))
         self.healthy = int(delta.get("healthy", aws_thing_state["healthy"]))
         self.anti_moldew = int(delta.get("antiMoldew", aws_thing_state["antiMoldew"]))
+        self.self_clean = int(delta.get("selfClean", aws_thing_state["selfClean"]))
+        self.screen = int(delta.get("screen", aws_thing_state["screen"]))
         self.device_id = device_id
 
     device_id: str
@@ -113,6 +117,8 @@ class TCL_SplitAC_DeviceData:
     healthy: int
     eco: int
     anti_moldew: int
+    self_clean: int
+    screen: int
 
 
 class TCL_SplitAC_DeviceData_Helper:
@@ -165,6 +171,8 @@ class TCL_SplitAC_DeviceData_Helper:
                 return UpAndDownAirSupplyVectorEnum.UPWARDS_SWING
             case 3:
                 return UpAndDownAirSupplyVectorEnum.DOWNWARDS_SWING
+            case 8:
+                return UpAndDownAirSupplyVectorEnum.NOT_SET
             case 9:
                 return UpAndDownAirSupplyVectorEnum.TOP_FIX
             case 10:
@@ -186,6 +194,8 @@ class TCL_SplitAC_DeviceData_Helper:
                 return LeftAndRightAirSupplyVectorEnum.MIDDLE_SWING
             case 4:
                 return LeftAndRightAirSupplyVectorEnum.RIGHT_SWING
+            case 8:
+                return LeftAndRightAirSupplyVectorEnum.NOT_SET
             case 9:
                 return LeftAndRightAirSupplyVectorEnum.LEFT_FIX
             case 10:

@@ -33,6 +33,7 @@ async def async_setup_entry(
         sensors.append(EcoSwitchBinarySensor(coordinator, device))
         sensors.append(HealthySwitchBinarySensor(coordinator, device))
         sensors.append(DryingSwitchBinarySensor(coordinator, device))
+        sensors.append(LightSwitchBinarySensor(coordinator, device))
 
     async_add_entities(sensors)
 
@@ -143,3 +144,26 @@ class DryingSwitchBinarySensor(TclEntityBase, BinarySensorEntity):
     def is_on(self) -> bool | None:
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
         return self.device.data.anti_moldew
+
+
+class LightSwitchBinarySensor(TclEntityBase, BinarySensorEntity):
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
+        TclEntityBase.__init__(
+            self, coordinator, "Light-Switch-sensor", "Light Switch State", device
+        )
+
+    @property
+    def icon(self):
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        if self.device.data.screen == 1:
+            return "mdi:lightbulb-outline"
+        return "mdi:lightbulb-off-outline"
+
+    @property
+    def device_class(self) -> str:
+        return BinarySensorDeviceClass.POWER
+
+    @property
+    def is_on(self) -> bool | None:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        return self.device.data.screen
