@@ -4,9 +4,9 @@
     "step": {
       "user": {
         "title": "Account",
-        "description": "TCL Home app - Unofficial",
+        "description": "This integartion will disguise itself as the TCL-Home Android application. Use the same credentials as you use in the app. (It's recommended to use a separate account for this integration and share the devices for the new account in case TCL would ban the acount.)",
         "data": {
-          "username": "TCL Home app - Emial",
+          "username": "TCL Home app - Email",
           "password": "TCL Home app - Password"
         }
       },
@@ -14,8 +14,18 @@
         "title": "Android app settings",
         "description": "Ususally you should leave this values as they are. They are here in case TCL changes this values in the future. In that case you could correct theme here without need to update the integration.",
         "data": {
-          "app_client_id": "TCL Home app - app_client_id",
-          "app_id": "TCL Home app - app_id"
+          "app_login_url": "App Login Url",
+          "cloud_urls": "App Cloud URLs",
+          "app_id": "App Id"
+        }
+      },
+      "settings_of_logs": {
+        "title": "Log settings settings",
+        "description": "You can turn on logging later in the options of the integration. Logs will be in the Settings -> System -> Logs -> ([...] menu) -> Show raw logs",
+        "data": {
+          "verbose_device_logging": "Device related logs, raw jsons of device states changes, ect.",
+          "verbose_session_logging": "Session management logs, access tokens, etc.",
+          "verbose_setup_logging": "Setup related logs, configuration flow inital found devices, etc."
         }
       }
     },
@@ -31,13 +41,33 @@
   "options": {
     "step": {
       "init": {
-        "title": "Example2 Options",
-        "description": "Example2 Select which options to amend.",
+        "title": "Options",
+        "description": "Any configuration change will do a re-login to the TCL Home app."
+      },
+      "option_page_account": {
+        "title": "Account",
+        "description": "This integartion will disguise itself as the TCL-Home Android application. Use the same credentials as you use in the app. (It's recommended to use a separate account for this integration and share the devices for the new account in case TCL would ban the acount.)",
         "data": {
-          "app_client_id": "App Client ID",
-          "app_id": "App Id",
-          "username": "TCL Home app - Emial",
+          "username": "TCL Home app - Email",
           "password": "TCL Home app - Password"
+        }
+      },
+      "option_page_tcl_app": {
+        "title": "Android app settings",
+        "description": "Ususally you should leave this values as they are. They are here in case TCL changes this values in the future. In that case you could correct theme here without need to update the integration.",
+        "data": {
+          "app_login_url": "App Login Url",
+          "cloud_urls": "App Cloud URLs",
+          "app_id": "App Id"
+        }
+      },
+      "option_page_logs": {
+        "title": "Log settings settings",
+        "description": "You can turn on logging later in the options of the integration. Logs will be in the Settings -> System -> Logs -> ([...] menu) -> Show raw logs",
+        "data": {
+          "verbose_device_logging": "Device related logs, raw jsons of device states changes, ect.",
+          "verbose_session_logging": "Session management logs, access tokens, etc.",
+          "verbose_setup_logging": "Setup related logs, configuration flow inital found devices, etc."
         }
       }
     }

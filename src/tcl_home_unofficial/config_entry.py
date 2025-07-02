@@ -20,7 +20,8 @@ class ConfigData:
 
     username: str
     password: str
-    app_client_id: str
+    app_login_url: str
+    cloud_urls:str
     app_id: str
     verbose_device_logging: bool
     verbose_session_logging: bool
@@ -40,7 +41,8 @@ def buildConfigData(data: dict, fallback: dict = {}):
     config = ConfigData(
         username=data.get(CONF_USERNAME, fallback[CONF_USERNAME]),
         password=data.get(CONF_PASSWORD, fallback[CONF_PASSWORD]),
-        app_client_id=data.get("app_client_id", fallback["app_client_id"]),
+        app_login_url=data.get("app_login_url", fallback["app_login_url"]),
+        cloud_urls=data.get("cloud_urls", fallback["cloud_urls"]),
         app_id=data.get("app_id", fallback["app_id"]),
         verbose_device_logging=data.get(
             "verbose_device_logging", fallback["verbose_device_logging"]
@@ -59,7 +61,8 @@ def sanitizeConfigData(config: ConfigData) -> None:
     return ConfigData(
         username=config.username,
         password="*****",
-        app_client_id=config.app_client_id,
+        app_login_url=config.app_login_url,
+        cloud_urls=config.cloud_urls,
         app_id=config.app_id,
         verbose_device_logging=config.verbose_device_logging,
         verbose_session_logging=config.verbose_session_logging,

@@ -105,21 +105,6 @@ class CloudUrlsResponseData:
     new_struct: int
 
 
-"""
-    sso_region: 'FR',
-    cloud_region: 'eu-central-1',
-    sso_url: 'https://pa.account.tcl.com',
-    cloud_url: 'https://prod-eu.aws.tcljd.com',
-    icon_resource_url: 'https://eu-default-prod.aws.tcljd.com',
-    identity_pool_id: 'eu-central-1:83840aed-13f2-4c1d-8eaf-9df7f2daaee3',
-    upload_web_url: 'https://prod-eu-web.aws.tcljd.com',
-    newStruct: 0,
-    device_url: 'https://prod-eu.aws.tcljd.com',
-    cloud_url_emq: 'https://prod-eu.aws.tcljd.com'
-
-"""
-
-
 @dataclass
 class CloudUrlsResponse:
     def __init__(self, data: dict) -> None:
@@ -190,13 +175,11 @@ class GetAwsCredentialsResponse:
 
 
 async def do_account_auth(
-    username: str, password: str, clientId: str, verbose_logging: bool = False
+    username: str, password: str, login_url: str, verbose_logging: bool = False
 ) -> DoAccountAuthResponse:
     if verbose_logging:
-        _LOGGER.info("TCL-Service.do_account_auth")
+        _LOGGER.info("TCL-Service.do_account_auth: %s", login_url)
     pw = hashlib.md5(password.encode("utf-8")).hexdigest()
-
-    url = f"https://pa.account.tcl.com/account/login?clientId={clientId}"
 
     payload = {
         "equipment": 2,
@@ -219,7 +202,7 @@ async def do_account_auth(
     }
 
     async with httpx.AsyncClient() as client:
-        response = await client.post(url, json=payload, headers=headers)
+        response = await client.post(login_url, json=payload, headers=headers)
 
         response_obj = response.json()
         if verbose_logging:
@@ -232,11 +215,10 @@ async def do_account_auth(
 
 
 async def get_cloud_urls(
-    username: str, token: str, verbose_logging: bool = False
+    cloud_urls: str, username: str, token: str, verbose_logging: bool = False
 ) -> CloudUrlsResponse:
     if verbose_logging:
-        _LOGGER.info("TCL-Service.get_cloud_urls")
-    url = f"https://prod-center.aws.tcljd.com/v3/global/cloud_url_get"
+        _LOGGER.info("TCL-Service.get_cloud_urls: %s", cloud_urls)
 
     payload = {"ssoId": username, "ssoToken": token}
 
@@ -246,7 +228,7 @@ async def get_cloud_urls(
     }
 
     async with httpx.AsyncClient() as client:
-        response = await client.post(url, json=payload, headers=headers)
+        response = await client.post(cloud_urls, json=payload, headers=headers)
         response_obj = response.json()
         if verbose_logging:
             _LOGGER.info("TCL-Service.get_cloud_urls response: %s", response_obj)
@@ -256,11 +238,15 @@ async def get_cloud_urls(
 
 
 async def refreshTokens(
-    username: str, accessToken: str, appId: str, verbose_logging: bool = False
+    refresh_tokens_url: str,
+    username: str,
+    accessToken: str,
+    appId: str,
+    verbose_logging: bool = False,
 ) -> RefreshTokensResponse:
+    url = f"{refresh_tokens_url}/v3/auth/refresh_tokens"
     if verbose_logging:
-        _LOGGER.info("TCL-Service.refreshTokens")
-    url = f"https://prod-eu.aws.tcljd.com/v3/auth/refresh_tokens"
+        _LOGGER.info("TCL-Service.refreshTokens: %s", url)
 
     payload = {
         "userId": username,
@@ -285,13 +271,13 @@ async def refreshTokens(
 
 
 async def get_aws_credentials(
-    cognitoToken: str, verbose_logging: bool = False
+    aws_region: str, cognitoToken: str, verbose_logging: bool = False
 ) -> GetAwsCredentialsResponse:
-    if verbose_logging:
-        _LOGGER.info("TCL-Service.get_aws_credentials")
-    identity_pool_id = get_sub_from_jwt_token(cognitoToken)
+    url = f"https://cognito-identity.{aws_region}.amazonaws.com/"
 
-    url = f"https://cognito-identity.eu-central-1.amazonaws.com/"
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.get_aws_credentials: %s", url)
+    identity_pool_id = get_sub_from_jwt_token(cognitoToken)
 
     payload = {
         "IdentityId": identity_pool_id,
@@ -315,10 +301,11 @@ async def get_aws_credentials(
 
 
 async def get_things(
-    saas_token: str, country_abbr: str, verbose_logging: bool = False
+    device_url: str, saas_token: str, country_abbr: str, verbose_logging: bool = False
 ) -> GetThingsResponse:
+    url = f"{device_url}/v3/user/get_things"
     if verbose_logging:
-        _LOGGER.info("TCL-Service.get_things")
+        _LOGGER.info("TCL-Service.get_things: %s", url)
     timestamp = str(int(time.time() * 1000))
     nonce = "".join(
         random.choices(string.ascii_lowercase + string.digits, k=16)
@@ -341,9 +328,7 @@ async def get_things(
     }
 
     async with httpx.AsyncClient() as client:
-        response = await client.post(
-            "https://prod-eu.aws.tcljd.com/v3/user/get_things", json={}, headers=headers
-        )
+        response = await client.post(url, json={}, headers=headers)
         if response.status_code != 200:
             raise Exception("Error at get_things: " + response.text)
         response_obj = response.json()

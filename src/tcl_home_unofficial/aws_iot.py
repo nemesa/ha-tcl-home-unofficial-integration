@@ -68,10 +68,13 @@ class AwsIot:
         refreshTokensResult = await self.session_manager.async_refresh_tokens()
         saas_token = refreshTokensResult.data.saas_token
 
+        clud_urls = await self.session_manager.async_aws_cloud_urls()
+
         things = await get_things(
-            saas_token,
-            authResult.user.country_abbr,
-            self.session_manager.is_verbose_device_logging(),
+            device_url=clud_urls.data.device_url,
+            saas_token=saas_token,
+            country_abbr=authResult.user.country_abbr,
+            verbose_logging=self.session_manager.is_verbose_device_logging(),
         )
 
         return things

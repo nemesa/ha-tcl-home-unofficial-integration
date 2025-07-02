@@ -64,8 +64,8 @@ class SessionManager:
         return self.configData.verbose_setup_logging
 
     async def get_aws_region(self) -> str:
-        cloud_url = await self.async_aws_cloud_urls()
-        return cloud_url.data.cloud_region
+        cloud_urls = await self.async_aws_cloud_urls()
+        return cloud_urls.data.cloud_region
 
     async def async_load(self) -> StorageData:
         """Load the stored data."""
@@ -135,7 +135,7 @@ class SessionManager:
         authData = await do_account_auth(
             username=self.configData.username,
             password=self.configData.password,
-            clientId=self.configData.app_client_id,
+            login_url=self.configData.app_login_url,
             verbose_logging=self.is_verbose_session_logging(),
         )
 
@@ -176,8 +176,10 @@ class SessionManager:
         if self.is_verbose_session_logging():
             _LOGGER.info("SessionManager.async_force_refresh_tokens")
         authData = await self.async_get_auth_data()
+        cloud_urls = await self.async_aws_cloud_urls()
 
         refreshTokensData = await refreshTokens(
+            refresh_tokens_url=cloud_urls.data.cloud_url,
             username=authData.user.username,
             accessToken=authData.token,
             appId=self.configData.app_id,
@@ -229,8 +231,10 @@ class SessionManager:
         if self.is_verbose_session_logging():
             _LOGGER.info("SessionManager.async_force_aws_credentials")
         refreshTokensData = await self.async_refresh_tokens()
+        aws_region = await self.get_aws_region()
 
         awsCredentials = await get_aws_credentials(
+            aws_region=aws_region,
             cognitoToken=refreshTokensData.data.cognito_token,
             verbose_logging=self.is_verbose_session_logging(),
         )
@@ -269,6 +273,7 @@ class SessionManager:
         authData = await self.async_get_auth_data()
 
         cloudUrls = await get_cloud_urls(
+            cloud_urls=self.configData.cloud_urls,
             username=authData.user.username,
             token=authData.token,
             verbose_logging=self.is_verbose_session_logging(),

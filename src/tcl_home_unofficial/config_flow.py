@@ -25,7 +25,8 @@ from homeassistant.config_entries import ConfigEntry
 from .config_entry import ConfigData, convertToConfigData
 from .const import (
     DEFAULT_APP_ID,
-    DEFAULT_CLIENT_ID,
+    DEFAULT_APP_LOGI_URL,
+    DEFAULT_APP_CLOUD_URL,
     DEFAULT_PW,
     DEFAULT_USER,
     DOMAIN,
@@ -47,7 +48,8 @@ async def isUserCanLogIn(hass: HomeAssistant, data: dict[str, Any]) -> dict:
     sessionManager = SessionManager(
         hass=hass,
         configData=ConfigData(
-            app_client_id=data["app_client_id"],
+            app_login_url=data["app_login_url"],
+            cloud_urls=data["cloud_urls"],
             app_id=data["app_id"],
             username=data[CONF_USERNAME],
             password=data[CONF_PASSWORD],
@@ -142,17 +144,21 @@ class TclHomeUnofficialConfigFlow(ConfigFlow, domain=DOMAIN):
             else:
                 return await self.async_step_settings_of_logs()
 
-        app_client_id = DEFAULT_CLIENT_ID
+        app_login_url = DEFAULT_APP_LOGI_URL
+        cloud_urls = DEFAULT_APP_CLOUD_URL
         app_id = DEFAULT_APP_ID
         if self._input_data is not None:
-            if "app_client_id" in self._input_data:
-                app_client_id = self._input_data["app_client_id"]
+            if "app_login_url" in self._input_data:
+                app_login_url = self._input_data["app_login_url"]
             if "app_id" in self._input_data:
                 app_id = self._input_data["app_id"]
+            if "cloud_urls" in self._input_data:
+                cloud_urls = self._input_data["cloud_urls"]
 
         data_schema = vol.Schema(
             {
-                vol.Required("app_client_id", default=app_client_id): int,
+                vol.Required("app_login_url", default=app_login_url): str,
+                vol.Required("cloud_urls", default=cloud_urls): str,
                 vol.Required("app_id", default=app_id): str,
             }
         )
@@ -246,10 +252,8 @@ class TclHomeUnofficialOptionsFlowHandler(OptionsFlow):
         data = convertToConfigData(self.config_entry)
         data_schema = vol.Schema(
             {
-                vol.Required(
-                    "app_client_id",
-                    default=data.app_client_id,
-                ): int,
+                vol.Required("app_login_url",default=data.app_login_url): str,
+                vol.Required("cloud_urls",default=data.cloud_urls): str,
                 vol.Required("app_id", default=data.app_id): str,
             }
         )
