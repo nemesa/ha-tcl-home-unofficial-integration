@@ -16,7 +16,7 @@ from .config_entry import (
     sanitizeConfigData,
 )
 from .coordinator import IotDeviceCoordinator
-from .device import Device
+from .device import Device, is_implemented_by_integration
 
 _PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
@@ -25,6 +25,7 @@ _PLATFORMS: list[Platform] = [
     Platform.SELECT,
     Platform.NUMBER,
     Platform.BUTTON,
+    Platform.REMOTE,
 ]
 
 _LOGGER = logging.getLogger(__name__)
@@ -43,6 +44,7 @@ async def async_setup_entry(
         )
 
     config_entry.devices = []
+    config_entry.non_implemented_devices = []
 
     aws_iot = AwsIot(
         hass=hass,
@@ -57,7 +59,16 @@ async def async_setup_entry(
     things = await aws_iot.get_all_things()
 
     for thing in things.data:
-        aws_thing = await aws_iot.async_get_thing(thing.device_id)
+        is_implemented = is_implemented_by_integration(thing.device_name)
+
+        if is_implemented:
+            aws_thing = await aws_iot.async_get_thing(thing.device_id)
+        else:
+            aws_thing = None
+            _LOGGER.warning(
+                "Setup.async_setup_entry device is not implemented by this integration: %s",
+                thing,
+            )
 
         device = Device(
             device_id=thing.device_id,
@@ -67,16 +78,12 @@ async def async_setup_entry(
             aws_thing=aws_thing,
         )
 
-        if configData.verbose_setup_logging:
-            _LOGGER.info("Setup.async_setup_entry found device:%s", device)
-
-        if device.is_implemented_by_integration:
+        if is_implemented:
+            if configData.verbose_setup_logging:
+                _LOGGER.info("Setup.async_setup_entry found device:%s", device)
             config_entry.devices.append(device)
         else:
-            _LOGGER.warning(
-                "Setup.async_setup_entry device is not implemented by this integration: %s",
-                device,
-            )
+            config_entry.non_implemented_devices.append(device)
 
     # Initialise a listener for config flow options changes.
     cancel_update_listener = config_entry.async_on_unload(

@@ -34,6 +34,7 @@ class RuntimeData:
 
     coordinator: DataUpdateCoordinator
     devices: list[Device] | None = None
+    non_implemented_devices: list[Device] | None = None
 
 
 def buildConfigData(data: dict):

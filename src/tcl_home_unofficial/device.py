@@ -219,6 +219,14 @@ class TCL_SplitAC_DeviceData_Helper:
                 return SleepModeEnum.OFF
 
 
+def is_implemented_by_integration(device_type: str) -> bool:
+    match device_type:
+        case "Split AC":
+            return True
+        case _:
+            return False
+
+
 @dataclass
 class Device:
     """Device."""
@@ -229,23 +237,26 @@ class Device:
         device_type: str,
         name: str,
         firmware_version: str,
-        aws_thing: dict,
+        aws_thing: dict | None,
     ) -> None:
         self.device_id = device_id
         self.device_type = device_type
         self.name = name
         self.firmware_version = firmware_version
-        self.is_implemented_by_integration = False
+        self.is_implemented_by_integration = is_implemented_by_integration(
+            device_type=device_type
+        )
         match device_type:
             case "Split AC":
-                self.is_implemented_by_integration = True
-                self.data = TCL_SplitAC_DeviceData(
-                    device_id,
-                    aws_thing["state"]["reported"],
-                    aws_thing["state"].get("delta", {}),
-                )
+                if aws_thing is not None:
+                    self.data = TCL_SplitAC_DeviceData(
+                        device_id,
+                        aws_thing["state"]["reported"],
+                        aws_thing["state"].get("delta", {}),
+                    )
+                else:
+                    self.data = None
             case _:
-                self.is_implemented_by_integration = False
                 self.data = None
 
     device_id: int
@@ -259,7 +270,7 @@ class Device:
 def toDeviceInfo(device: Device) -> DeviceInfo:
     """Convert Device to DeviceInfo."""
     return DeviceInfo(
-        name=f"{device.name} ({device.device_id})",
+        name=f"{device.name} ({device.device_id}){'' if device.is_implemented_by_integration else ' (Not implemented)'}",
         manufacturer="TCL",
         model=device.device_type,
         sw_version=device.firmware_version,
