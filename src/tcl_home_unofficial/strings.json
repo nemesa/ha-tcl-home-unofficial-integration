@@ -1,13 +1,21 @@
 {
   "config": {
+    "flow_title": "TCL Home app - Unofficial (flow_title)",
     "step": {
       "user": {
+        "title": "Account",
+        "description": "TCL Home app - Unofficial",
         "data": {
-          "app_client_id": "App Client ID",
-          "app_id": "App Id",
-          "aws_region": "Aws region",
           "username": "TCL Home app - Emial",
           "password": "TCL Home app - Password"
+        }
+      },
+      "settings_of_app": {
+        "title": "Android app settings",
+        "description": "Ususally you should leave this values as they are. They are here in case TCL changes this values in the future. In that case you could correct theme here without need to update the integration.",
+        "data": {
+          "app_client_id": "TCL Home app - app_client_id",
+          "app_id": "TCL Home app - app_id"
         }
       }
     },
@@ -28,7 +36,6 @@
         "data": {
           "app_client_id": "App Client ID",
           "app_id": "App Id",
-          "aws_region": "Aws region",
           "username": "TCL Home app - Emial",
           "password": "TCL Home app - Password"
         }

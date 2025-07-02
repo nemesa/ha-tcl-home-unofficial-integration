@@ -22,7 +22,6 @@ class ConfigData:
     password: str
     app_client_id: str
     app_id: str
-    aws_region: str
     verbose_device_logging: bool
     verbose_session_logging: bool
     verbose_setup_logging: bool
@@ -37,16 +36,21 @@ class RuntimeData:
     non_implemented_devices: list[Device] | None = None
 
 
-def buildConfigData(data: dict):
+def buildConfigData(data: dict, fallback: dict = {}):
     config = ConfigData(
-        username=data[CONF_USERNAME],
-        password=data[CONF_PASSWORD],
-        app_client_id=data["app_client_id"],
-        app_id=data["app_id"],
-        aws_region=data["aws_region"],
-        verbose_device_logging=data["verbose_device_logging"],
-        verbose_session_logging=data["verbose_session_logging"],
-        verbose_setup_logging=data["verbose_setup_logging"],
+        username=data.get(CONF_USERNAME, fallback[CONF_USERNAME]),
+        password=data.get(CONF_PASSWORD, fallback[CONF_PASSWORD]),
+        app_client_id=data.get("app_client_id", fallback["app_client_id"]),
+        app_id=data.get("app_id", fallback["app_id"]),
+        verbose_device_logging=data.get(
+            "verbose_device_logging", fallback["verbose_device_logging"]
+        ),
+        verbose_session_logging=data.get(
+            "verbose_session_logging", fallback["verbose_session_logging"]
+        ),
+        verbose_setup_logging=data.get(
+            "verbose_setup_logging", fallback["verbose_setup_logging"]
+        ),
     )
     return config
 
@@ -57,7 +61,6 @@ def sanitizeConfigData(config: ConfigData) -> None:
         password="*****",
         app_client_id=config.app_client_id,
         app_id=config.app_id,
-        aws_region=config.aws_region,
         verbose_device_logging=config.verbose_device_logging,
         verbose_session_logging=config.verbose_session_logging,
         verbose_setup_logging=config.verbose_setup_logging,
@@ -70,5 +73,5 @@ def convertToConfigData(
     """Convert a ConfigEntry to ConfigData."""
 
     if config_entry.options:
-        return buildConfigData(config_entry.options)
+        return buildConfigData(config_entry.options, config_entry.data)
     return buildConfigData(config_entry.data)

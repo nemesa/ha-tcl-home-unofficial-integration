@@ -42,10 +42,11 @@ class AwsIot:
         self.client = None
 
     async def async_setup_client(self) -> None:
+        aws_region = await self.session_manager.get_aws_region()
         awsCred = await self.session_manager.async_aws_credentials()
 
         boto3Session = boto3.session.Session(
-            region_name=self.session_manager.get_aws_region(),
+            region_name=aws_region,
             aws_access_key_id=awsCred.Credentials.access_key_id,
             aws_secret_access_key=awsCred.Credentials.secret_key,
             aws_session_token=awsCred.Credentials.session_token,

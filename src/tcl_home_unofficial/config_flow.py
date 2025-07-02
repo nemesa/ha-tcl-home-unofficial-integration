@@ -25,7 +25,6 @@ from homeassistant.config_entries import ConfigEntry
 from .config_entry import ConfigData, convertToConfigData
 from .const import (
     DEFAULT_APP_ID,
-    DEFAULT_AWS_REGION,
     DEFAULT_CLIENT_ID,
     DEFAULT_PW,
     DEFAULT_USER,
@@ -35,13 +34,8 @@ from .session_manager import SessionManager
 
 _LOGGER = logging.getLogger(__name__)
 
-STEP_USER_DATA_SCHEMA = vol.Schema(
+STEP_LOG_DATA_SCHEMA = vol.Schema(
     {
-        vol.Required("app_client_id", default=DEFAULT_CLIENT_ID): int,
-        vol.Required("app_id", default=DEFAULT_APP_ID): str,
-        vol.Required("aws_region", default=DEFAULT_AWS_REGION): str,
-        vol.Required(CONF_USERNAME, default=DEFAULT_USER): str,
-        vol.Required(CONF_PASSWORD, default=DEFAULT_PW): str,
         vol.Required("verbose_device_logging", default=False): bool,
         vol.Required("verbose_session_logging", default=False): bool,
         vol.Required("verbose_setup_logging", default=False): bool,
@@ -49,28 +43,33 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 )
 
 
-async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
-    """Validate the user input allows us to connect."""
-
+async def isUserCanLogIn(hass: HomeAssistant, data: dict[str, Any]) -> dict:
     sessionManager = SessionManager(
         hass=hass,
         configData=ConfigData(
             app_client_id=data["app_client_id"],
             app_id=data["app_id"],
-            aws_region=data["aws_region"],
             username=data[CONF_USERNAME],
             password=data[CONF_PASSWORD],
-            verbose_device_logging=data["verbose_device_logging"],
-            verbose_session_logging=data["verbose_session_logging"],
-            verbose_setup_logging=data["verbose_setup_logging"],
+            verbose_device_logging=False,
+            verbose_session_logging=False,
+            verbose_setup_logging=False,
         ),
     )
 
+    await sessionManager.clear_storage()
     await sessionManager.async_load()
 
-    authResult = await sessionManager.async_get_auth_data()
+    authResult = await sessionManager.async_get_auth_data(allowInvalid=True)
+    if authResult is not None and authResult.token:
+        return {"success": True}
+    return {"success": False}
 
-    if authResult.token:
+
+async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
+    authResult = await isUserCanLogIn(hass, data)
+
+    if authResult["success"]:
         return {"title": f"TCL Home integration - {data[CONF_USERNAME]}"}
 
     raise InvalidAuth
@@ -80,6 +79,10 @@ class TclHomeUnofficialConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for TclHomeUnofficialConfigFlow."""
 
     VERSION = 1
+    _input_data: dict[str, Any] = {}
+    _title: str
+
+    _has_invalid_auth: bool = False
 
     @staticmethod
     @callback
@@ -92,23 +95,103 @@ class TclHomeUnofficialConfigFlow(ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         _LOGGER.info("Starting config flow for TCL Home Unofficial integration")
         errors: dict[str, str] = {}
+        if self._has_invalid_auth:
+            errors["base"] = "invalid_auth"
+        user_name = DEFAULT_USER
+        user_password = DEFAULT_PW
+
+        if self._input_data is not None:
+            if CONF_USERNAME in self._input_data:
+                user_name = self._input_data[CONF_USERNAME]
+            if CONF_PASSWORD in self._input_data:
+                user_password = self._input_data[CONF_PASSWORD]
+
+        data_schema = vol.Schema(
+            {
+                vol.Required(CONF_USERNAME, default=user_name): str,
+                vol.Required(CONF_PASSWORD, default=user_password): str,
+            }
+        )
+
         if user_input is not None:
-            try:
-                info = await validate_input(self.hass, user_input)
-            except CannotConnect:
-                errors["base"] = "cannot_connect"
-            except InvalidAuth:
-                errors["base"] = "invalid_auth"
-            except Exception:
-                _LOGGER.exception("Unexpected exception")
-                errors["base"] = "unknown"
-            else:
-                await self.async_set_unique_id(info.get("title"))
-                self._abort_if_unique_id_configured()
-                return self.async_create_entry(title=info["title"], data=user_input)
+            self._input_data = user_input
+
+            # Call the next step
+            self._has_invalid_auth = False
+            return await self.async_step_settings_of_app()
 
         return self.async_show_form(
-            step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+            step_id="user",
+            data_schema=data_schema,
+            errors=errors,
+            last_step=False,
+        )
+
+    async def async_step_settings_of_app(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            self._input_data.update(user_input)
+
+            canUserLoginResult = await isUserCanLogIn(self.hass, self._input_data)
+            if canUserLoginResult["success"] is False:
+                self._has_invalid_auth = True
+                return await self.async_step_user()
+            else:
+                return await self.async_step_settings_of_logs()
+
+        app_client_id = DEFAULT_CLIENT_ID
+        app_id = DEFAULT_APP_ID
+        if self._input_data is not None:
+            if "app_client_id" in self._input_data:
+                app_client_id = self._input_data["app_client_id"]
+            if "app_id" in self._input_data:
+                app_id = self._input_data["app_id"]
+
+        data_schema = vol.Schema(
+            {
+                vol.Required("app_client_id", default=app_client_id): int,
+                vol.Required("app_id", default=app_id): str,
+            }
+        )
+
+        return self.async_show_form(
+            step_id="settings_of_app",
+            data_schema=data_schema,
+            errors=errors,
+            last_step=False,
+        )
+
+    async def async_step_settings_of_logs(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            self._input_data.update(user_input)
+            info = {
+                "title": f"TCL Home integration - {self._input_data[CONF_USERNAME]}"
+            }
+            await self.async_set_unique_id(info.get("title"))
+            self._abort_if_unique_id_configured()
+            # return self.async_create_entry(title=info["title"], data=user_input)
+            self._title = info["title"]
+
+            return self.async_create_entry(
+                title=self._title, data=self._input_data, options=self._input_data
+            )
+
+        # ----------------------------------------------------------------------------
+        # Show settings form.  The step id always needs to match the bit after async_step_ in your method.
+        # Set last_step to True here if it is last step.
+        # ----------------------------------------------------------------------------
+        return self.async_show_form(
+            step_id="settings_of_logs",
+            data_schema=STEP_LOG_DATA_SCHEMA,
+            errors=errors,
+            last_step=True,
         )
 
     async def async_step_reconfigure(
@@ -126,9 +209,41 @@ class TclHomeUnofficialOptionsFlowHandler(OptionsFlow):
             options = self.config_entry.options | user_input
             return self.async_create_entry(data=options)
 
-        data = convertToConfigData(self.config_entry)
-        errors: Dict[str, str] = {}
+        self.data = convertToConfigData(self.config_entry)
 
+        return self.async_show_menu(
+            step_id="init",
+            # menu_options=["option_page_1", "option_page_2"],
+            menu_options={
+                "option_page_account": "Account",
+                "option_page_tcl_app": "TCL App Settings",
+                "option_page_logs": "Logs",
+            },
+        )
+
+    async def async_step_option_page_account(self, user_input=None):
+        if user_input is not None:
+            options = self.config_entry.options | user_input
+            return self.async_create_entry(data=options)
+
+        data = convertToConfigData(self.config_entry)
+        data_schema = vol.Schema(
+            {
+                vol.Required(CONF_USERNAME, default=data.username): str,
+                vol.Required(CONF_PASSWORD, default=data.password): str,
+            }
+        )
+
+        return self.async_show_form(
+            step_id="option_page_account", data_schema=data_schema
+        )
+
+    async def async_step_option_page_tcl_app(self, user_input=None):
+        if user_input is not None:
+            options = self.config_entry.options | user_input
+            return self.async_create_entry(data=options)
+
+        data = convertToConfigData(self.config_entry)
         data_schema = vol.Schema(
             {
                 vol.Required(
@@ -136,9 +251,21 @@ class TclHomeUnofficialOptionsFlowHandler(OptionsFlow):
                     default=data.app_client_id,
                 ): int,
                 vol.Required("app_id", default=data.app_id): str,
-                vol.Required("aws_region", default=data.aws_region): str,
-                vol.Required(CONF_USERNAME, default=data.username): str,
-                vol.Required(CONF_PASSWORD, default=data.password): str,
+            }
+        )
+
+        return self.async_show_form(
+            step_id="option_page_tcl_app", data_schema=data_schema
+        )
+
+    async def async_step_option_page_logs(self, user_input=None):
+        if user_input is not None:
+            options = self.config_entry.options | user_input
+            return self.async_create_entry(data=options)
+
+        data = convertToConfigData(self.config_entry)
+        data_schema = vol.Schema(
+            {
                 vol.Required(
                     "verbose_device_logging", default=data.verbose_device_logging
                 ): bool,
@@ -151,11 +278,7 @@ class TclHomeUnofficialOptionsFlowHandler(OptionsFlow):
             }
         )
 
-        return self.async_show_form(
-            step_id="init",
-            data_schema=data_schema,
-            errors=errors,
-        )
+        return self.async_show_form(step_id="option_page_logs", data_schema=data_schema)
 
 
 class CannotConnect(HomeAssistantError):

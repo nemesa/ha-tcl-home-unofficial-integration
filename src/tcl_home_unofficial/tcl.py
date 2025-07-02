@@ -41,11 +41,14 @@ class DoAccountAuthResponseUser:
 @dataclass
 class DoAccountAuthResponse:
     def __init__(self, data: dict) -> None:
-        self.token = getValue(data, ["token"])
-        self.refresh_token = getValue(data, ["refresh_token", "refreshtoken"])
-        self.user = DoAccountAuthResponseUser(data["user"])
+        self.status = getValue(data, ["status"])
+        if self.status == 1:
+            self.token = getValue(data, ["token"])
+            self.refresh_token = getValue(data, ["refresh_token", "refreshtoken"])
+            self.user = DoAccountAuthResponseUser(data["user"])
 
     token: str
+    status: int
     refresh_token: str
     user: DoAccountAuthResponseUser
 
@@ -74,6 +77,59 @@ class RefreshTokensResponse:
     code: int
     message: str
     data: RefreshTokensResponseData
+
+
+@dataclass
+class CloudUrlsResponseData:
+    def __init__(self, data: dict) -> None:
+        self.sso_region = getValue(data, ["sso_region"])
+        self.cloud_region = getValue(data, ["cloud_region"])
+        self.sso_url = getValue(data, ["sso_url"])
+        self.cloud_url = getValue(data, ["cloud_url"])
+        self.icon_resource_url = getValue(data, ["icon_resource_url"])
+        self.identity_pool_id = getValue(data, ["identity_pool_id"])
+        self.upload_web_url = getValue(data, ["upload_web_url"])
+        self.device_url = getValue(data, ["device_url"])
+        self.cloud_url_emq = getValue(data, ["cloud_url_emq"])
+        self.new_struct = getValue(data, ["new_struct", "newStruct"])
+
+    sso_region: str
+    cloud_region: str
+    sso_url: str
+    cloud_url: str
+    icon_resource_url: str
+    identity_pool_id: str
+    upload_web_url: str
+    device_url: str
+    cloud_url_emq: str
+    new_struct: int
+
+
+"""
+    sso_region: 'FR',
+    cloud_region: 'eu-central-1',
+    sso_url: 'https://pa.account.tcl.com',
+    cloud_url: 'https://prod-eu.aws.tcljd.com',
+    icon_resource_url: 'https://eu-default-prod.aws.tcljd.com',
+    identity_pool_id: 'eu-central-1:83840aed-13f2-4c1d-8eaf-9df7f2daaee3',
+    upload_web_url: 'https://prod-eu-web.aws.tcljd.com',
+    newStruct: 0,
+    device_url: 'https://prod-eu.aws.tcljd.com',
+    cloud_url_emq: 'https://prod-eu.aws.tcljd.com'
+
+"""
+
+
+@dataclass
+class CloudUrlsResponse:
+    def __init__(self, data: dict) -> None:
+        self.data = CloudUrlsResponseData(data["data"])
+        self.code = getValue(data, ["code"])
+        self.message = getValue(data, ["message"])
+
+    code: int
+    message: str
+    data: CloudUrlsResponseData
 
 
 @dataclass
@@ -168,7 +224,35 @@ async def do_account_auth(
         response_obj = response.json()
         if verbose_logging:
             _LOGGER.info("TCL-Service.do_account_auth response: %s", response_obj)
-        return DoAccountAuthResponse(response_obj)
+        if response.status_code == 200:
+            authResponse = DoAccountAuthResponse(response_obj)
+            if authResponse.status == 1:
+                return authResponse
+        return None
+
+
+async def get_cloud_urls(
+    username: str, token: str, verbose_logging: bool = False
+) -> CloudUrlsResponse:
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.get_cloud_urls")
+    url = f"https://prod-center.aws.tcljd.com/v3/global/cloud_url_get"
+
+    payload = {"ssoId": username, "ssoToken": token}
+
+    headers = {
+        "user-agent": "Android",
+        "content-type": "application/json; charset=UTF-8",
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload, headers=headers)
+        response_obj = response.json()
+        if verbose_logging:
+            _LOGGER.info("TCL-Service.get_cloud_urls response: %s", response_obj)
+        if response.status_code == 200:
+            return CloudUrlsResponse(response_obj)
+        return None
 
 
 async def refreshTokens(
@@ -195,7 +279,9 @@ async def refreshTokens(
         response_obj = response.json()
         if verbose_logging:
             _LOGGER.info("TCL-Service.refreshTokens response: %s", response_obj)
-        return RefreshTokensResponse(response_obj)
+        if response.status_code == 200:
+            return RefreshTokensResponse(response_obj)
+        return None
 
 
 async def get_aws_credentials(
@@ -223,7 +309,9 @@ async def get_aws_credentials(
         response_obj = response.json()
         if verbose_logging:
             _LOGGER.info("TCL-Service.get_aws_credentials response: %s", response_obj)
-        return GetAwsCredentialsResponse(response_obj)
+        if response.status_code == 200:
+            return GetAwsCredentialsResponse(response_obj)
+        return None
 
 
 async def get_things(

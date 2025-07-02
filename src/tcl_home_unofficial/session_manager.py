@@ -9,6 +9,7 @@ from homeassistant.helpers import storage
 from .config_entry import ConfigData, New_NameConfigEntry, convertToConfigData
 from .const import DOMAIN
 from .tcl import (
+    CloudUrlsResponse,
     DoAccountAuthResponse,
     GetAwsCredentialsResponse,
     RefreshTokensResponse,
@@ -16,6 +17,7 @@ from .tcl import (
     check_if_jwt_expired,
     do_account_auth,
     get_aws_credentials,
+    get_cloud_urls,
     refreshTokens,
 )
 
@@ -25,6 +27,7 @@ _LOGGER = logging.getLogger(__name__)
 @dataclass
 class StorageData:
     authData: DoAccountAuthResponse | None = None
+    cloudUrlsData: CloudUrlsResponse | None = None
     refreshTokensData: RefreshTokensResponse | None = None
     awsCredentialsData: GetAwsCredentialsResponse | None = None
 
@@ -45,7 +48,10 @@ class SessionManager:
             hass=hass, version=1, key=DOMAIN
         )
         self.storageData = StorageData(
-            authData=None, refreshTokensData=None, awsCredentialsData=None
+            authData=None,
+            refreshTokensData=None,
+            awsCredentialsData=None,
+            cloudUrlsData=None,
         )
 
     def is_verbose_device_logging(self) -> bool:
@@ -57,13 +63,17 @@ class SessionManager:
     def is_verbose_setup_logging(self) -> bool:
         return self.configData.verbose_setup_logging
 
-    def get_aws_region(self) -> str:
-        return self.configData.aws_region
+    async def get_aws_region(self) -> str:
+        cloud_url = await self.async_aws_cloud_urls()
+        return cloud_url.data.cloud_region
 
     async def async_load(self) -> StorageData:
         """Load the stored data."""
         storageData = StorageData(
-            authData=None, refreshTokensData=None, awsCredentialsData=None
+            authData=None,
+            refreshTokensData=None,
+            awsCredentialsData=None,
+            cloudUrlsData=None,
         )
         data = await self._store.async_load()
         if data is None:
@@ -96,6 +106,12 @@ class SessionManager:
                 if self.is_verbose_session_logging():
                     _LOGGER.info("SessionManager.async_load awsCredentialsData is None")
 
+            if data.get("cloudUrlsData") is not None:
+                storageData.cloudUrlsData = CloudUrlsResponse(data["cloudUrlsData"])
+            else:
+                if self.is_verbose_session_logging():
+                    _LOGGER.info("SessionManager.async_load cloudUrlsData is None")
+
         if self.is_verbose_session_logging():
             _LOGGER.info("SessionManager.async_load done")
         self.storageData = storageData
@@ -107,10 +123,13 @@ class SessionManager:
         self.storageData.refreshTokensData = None
         self.storageData.authData = None
         self.storageData.awsCredentialsData = None
+        self.storageData.cloudUrlsData = None
         await self._store.async_save(data=self.storageData)
         await self.async_load()
 
-    async def async_force_get_auth_data(self) -> DoAccountAuthResponse:
+    async def async_force_get_auth_data(
+        self, allowInvalid: bool = False
+    ) -> DoAccountAuthResponse:
         if self.is_verbose_session_logging():
             _LOGGER.info("SessionManager.async_force_get_auth_data")
         authData = await do_account_auth(
@@ -122,9 +141,15 @@ class SessionManager:
 
         self.storageData.authData = authData
         await self._store.async_save(data=self.storageData)
+        if authData is None and not allowInvalid:
+            raise ValueError(
+                "SessionManager.async_force_get_auth_data: authData is None"
+            )
         return authData
 
-    async def async_get_auth_data(self) -> DoAccountAuthResponse:
+    async def async_get_auth_data(
+        self, allowInvalid: bool = False
+    ) -> DoAccountAuthResponse:
         if self.storageData.authData is not None:
             if self.is_verbose_session_logging():
                 _LOGGER.debug("SessionManager.async_get_auth_data.resolve from storage")
@@ -133,7 +158,7 @@ class SessionManager:
             ):
                 if self.is_verbose_session_logging():
                     _LOGGER.debug("SessionManager.async_get_auth_data token expired")
-                return await self.async_force_get_auth_data()
+                return await self.async_force_get_auth_data(allowInvalid)
 
             if check_if_jwt_expired(
                 "authData.refresh_token", self.storageData.authData.refresh_token, "exp"
@@ -142,10 +167,10 @@ class SessionManager:
                     _LOGGER.debug(
                         "SessionManager.async_get_auth_data refresh_token expired"
                     )
-                return await self.async_force_get_auth_data()
+                return await self.async_force_get_auth_data(allowInvalid)
             return self.storageData.authData
 
-        return await self.async_force_get_auth_data()
+        return await self.async_force_get_auth_data(allowInvalid)
 
     async def async_force_refresh_tokens(self) -> RefreshTokensResponse:
         if self.is_verbose_session_logging():
@@ -161,6 +186,10 @@ class SessionManager:
 
         self.storageData.refreshTokensData = refreshTokensData
         await self._store.async_save(data=self.storageData)
+        if refreshTokensData is None:
+            raise ValueError(
+                "SessionManager.async_force_refresh_tokens: refreshTokensData is None"
+            )
         return refreshTokensData
 
     async def async_refresh_tokens(self) -> RefreshTokensResponse:
@@ -208,6 +237,10 @@ class SessionManager:
 
         self.storageData.awsCredentialsData = awsCredentials
         await self._store.async_save(data=self.storageData)
+        if awsCredentials is None:
+            raise ValueError(
+                "SessionManager.async_force_aws_credentials: awsCredentials is None"
+            )
         return awsCredentials
 
     async def async_aws_credentials(self) -> GetAwsCredentialsResponse:
@@ -229,3 +262,32 @@ class SessionManager:
             return self.storageData.awsCredentialsData
 
         return await self.async_force_aws_credentials()
+
+    async def async_force_cloud_urls(self) -> CloudUrlsResponse:
+        if self.is_verbose_session_logging():
+            _LOGGER.info("SessionManager.async_force_cloud_urls")
+        authData = await self.async_get_auth_data()
+
+        cloudUrls = await get_cloud_urls(
+            username=authData.user.username,
+            token=authData.token,
+            verbose_logging=self.is_verbose_session_logging(),
+        )
+
+        self.storageData.cloudUrlsData = cloudUrls
+        await self._store.async_save(data=self.storageData)
+        if cloudUrls is None:
+            raise ValueError(
+                "SessionManager.async_force_cloud_urls: awsCredentials is None"
+            )
+        return cloudUrls
+
+    async def async_aws_cloud_urls(self) -> CloudUrlsResponse:
+        if self.storageData.cloudUrlsData is not None:
+            if self.is_verbose_session_logging():
+                _LOGGER.debug(
+                    "SessionManager.async_aws_cloud_urls.resolve from storage"
+                )
+            return self.storageData.cloudUrlsData
+
+        return await self.async_force_cloud_urls()

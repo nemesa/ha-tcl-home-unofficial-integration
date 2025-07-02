@@ -50,11 +50,11 @@ async def async_setup_entry(
         hass=hass,
         config_entry=config_entry,
     )
+    await aws_iot.get_session_manager().clear_storage()
     await aws_iot.async_init()
 
     if configData.verbose_setup_logging:
         _LOGGER.info("Setup.async_setup_entry clear session storage")
-    await aws_iot.get_session_manager().clear_storage()
 
     things = await aws_iot.get_all_things()
 
