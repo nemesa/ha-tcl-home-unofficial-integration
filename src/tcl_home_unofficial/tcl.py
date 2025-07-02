@@ -134,9 +134,10 @@ class GetAwsCredentialsResponse:
 
 
 async def do_account_auth(
-    username: str, password: str, clientId: str
+    username: str, password: str, clientId: str, verbose_logging: bool = False
 ) -> DoAccountAuthResponse:
-    _LOGGER.info("tcl.do_account_auth")
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.do_account_auth")
     pw = hashlib.md5(password.encode("utf-8")).hexdigest()
 
     url = f"https://pa.account.tcl.com/account/login?clientId={clientId}"
@@ -165,13 +166,16 @@ async def do_account_auth(
         response = await client.post(url, json=payload, headers=headers)
 
         response_obj = response.json()
+        if verbose_logging:
+            _LOGGER.info("TCL-Service.do_account_auth response: %s", response_obj)
         return DoAccountAuthResponse(response_obj)
 
 
 async def refreshTokens(
-    username: str, accessToken: str, appId: str
+    username: str, accessToken: str, appId: str, verbose_logging: bool = False
 ) -> RefreshTokensResponse:
-    _LOGGER.info("tcl.refreskTokens")
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.refreshTokens")
     url = f"https://prod-eu.aws.tcljd.com/v3/auth/refresh_tokens"
 
     payload = {
@@ -189,11 +193,16 @@ async def refreshTokens(
     async with httpx.AsyncClient() as client:
         response = await client.post(url, json=payload, headers=headers)
         response_obj = response.json()
+        if verbose_logging:
+            _LOGGER.info("TCL-Service.refreshTokens response: %s", response_obj)
         return RefreshTokensResponse(response_obj)
 
 
-async def get_aws_credentials(cognitoToken: str) -> GetAwsCredentialsResponse:
-    _LOGGER.info("tcl.get_aws_credentials")
+async def get_aws_credentials(
+    cognitoToken: str, verbose_logging: bool = False
+) -> GetAwsCredentialsResponse:
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.get_aws_credentials")
     identity_pool_id = get_sub_from_jwt_token(cognitoToken)
 
     url = f"https://cognito-identity.eu-central-1.amazonaws.com/"
@@ -212,11 +221,16 @@ async def get_aws_credentials(cognitoToken: str) -> GetAwsCredentialsResponse:
     async with httpx.AsyncClient() as client:
         response = await client.post(url, json=payload, headers=headers)
         response_obj = response.json()
+        if verbose_logging:
+            _LOGGER.info("TCL-Service.get_aws_credentials response: %s", response_obj)
         return GetAwsCredentialsResponse(response_obj)
 
 
-async def get_things(saas_token: str, country_abbr: str) -> GetThingsResponse:
-    _LOGGER.info("tcl.get_things")
+async def get_things(
+    saas_token: str, country_abbr: str, verbose_logging: bool = False
+) -> GetThingsResponse:
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.get_things")
     timestamp = str(int(time.time() * 1000))
     nonce = "".join(
         random.choices(string.ascii_lowercase + string.digits, k=16)
@@ -245,6 +259,8 @@ async def get_things(saas_token: str, country_abbr: str) -> GetThingsResponse:
         if response.status_code != 200:
             raise Exception("Error at get_things: " + response.text)
         response_obj = response.json()
+        if verbose_logging:
+            _LOGGER.info("TCL-Service.get_things response: %s", response_obj)
         return GetThingsResponse(response_obj)
 
 

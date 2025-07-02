@@ -23,7 +23,9 @@ class ConfigData:
     app_client_id: str
     app_id: str
     aws_region: str
-    verbose_logging: bool
+    verbose_device_logging: bool
+    verbose_session_logging: bool
+    verbose_setup_logging: bool
 
 
 @dataclass
@@ -41,21 +43,24 @@ def buildConfigData(data: dict):
         app_client_id=data["app_client_id"],
         app_id=data["app_id"],
         aws_region=data["aws_region"],
-        verbose_logging=data["verbose_logging"],
+        verbose_device_logging=data["verbose_device_logging"],
+        verbose_session_logging=data["verbose_session_logging"],
+        verbose_setup_logging=data["verbose_setup_logging"],
     )
     return config
 
 
-def logConfigData(config: ConfigData) -> None:
-    log = f"config-data: username: {config.username}"
-    log += f", app_client_id: {config.app_client_id}"
-    log += ", password: *****"
-    log += f", app_id: {config.app_id}"
-    log += f", aws_region: {config.aws_region}"
-    log += f", verbose_logging: {config.verbose_logging}"
-
-    if config.verbose_logging:
-        _LOGGER.info(log)
+def sanitizeConfigData(config: ConfigData) -> None:
+    return ConfigData(
+        username=config.username,
+        password="*****",
+        app_client_id=config.app_client_id,
+        app_id=config.app_id,
+        aws_region=config.aws_region,
+        verbose_device_logging=config.verbose_device_logging,
+        verbose_session_logging=config.verbose_session_logging,
+        verbose_setup_logging=config.verbose_setup_logging,
+    )
 
 
 def convertToConfigData(
@@ -64,10 +69,5 @@ def convertToConfigData(
     """Convert a ConfigEntry to ConfigData."""
 
     if config_entry.options:
-        config = buildConfigData(config_entry.options)
-        logConfigData(config)
-        return config
-    else:
-        config = buildConfigData(config_entry.data)
-        logConfigData(config)
-        return config
+        return buildConfigData(config_entry.options)
+    return buildConfigData(config_entry.data)

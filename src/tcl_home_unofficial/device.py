@@ -235,16 +235,24 @@ class Device:
         self.device_type = device_type
         self.name = name
         self.firmware_version = firmware_version
-        self.data = TCL_SplitAC_DeviceData(
-            device_id,
-            aws_thing["state"]["reported"],
-            aws_thing["state"].get("delta", {}),
-        )
+        self.is_implemented_by_integration = False
+        match device_type:
+            case "Split AC":
+                self.is_implemented_by_integration = True
+                self.data = TCL_SplitAC_DeviceData(
+                    device_id,
+                    aws_thing["state"]["reported"],
+                    aws_thing["state"].get("delta", {}),
+                )
+            case _:
+                self.is_implemented_by_integration = False
+                self.data = None
 
     device_id: int
     device_type: str
     name: str
     firmware_version: str
+    is_implemented_by_integration: bool
     data: TCL_SplitAC_DeviceData | None = None
 
 

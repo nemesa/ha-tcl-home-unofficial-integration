@@ -9,7 +9,12 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
 from .aws_iot import AwsIot
-from .config_entry import New_NameConfigEntry, RuntimeData
+from .config_entry import (
+    New_NameConfigEntry,
+    RuntimeData,
+    convertToConfigData,
+    sanitizeConfigData,
+)
 from .coordinator import IotDeviceCoordinator
 from .device import Device
 
@@ -29,6 +34,14 @@ async def async_setup_entry(
     hass: HomeAssistant, config_entry: New_NameConfigEntry
 ) -> bool:
     """Set up TCL Home - Unofficial from a config entry."""
+    configData = convertToConfigData(config_entry)
+
+    if configData.verbose_setup_logging:
+        _LOGGER.info(
+            "Setup.async_setup_entry %s",
+            sanitizeConfigData(configData),
+        )
+
     config_entry.devices = []
 
     aws_iot = AwsIot(
@@ -37,20 +50,33 @@ async def async_setup_entry(
     )
     await aws_iot.async_init()
 
+    if configData.verbose_setup_logging:
+        _LOGGER.info("Setup.async_setup_entry clear session storage")
+    await aws_iot.get_session_manager().clear_storage()
+
     things = await aws_iot.get_all_things()
 
     for thing in things.data:
         aws_thing = await aws_iot.async_get_thing(thing.device_id)
 
-        config_entry.devices.append(
-            Device(
-                device_id=thing.device_id,
-                device_type=thing.device_name,
-                name=thing.nick_name,
-                firmware_version=thing.firmware_version,
-                aws_thing=aws_thing,
-            )
+        device = Device(
+            device_id=thing.device_id,
+            device_type=thing.device_name,
+            name=thing.nick_name,
+            firmware_version=thing.firmware_version,
+            aws_thing=aws_thing,
         )
+
+        if configData.verbose_setup_logging:
+            _LOGGER.info("Setup.async_setup_entry found device:%s", device)
+
+        if device.is_implemented_by_integration:
+            config_entry.devices.append(device)
+        else:
+            _LOGGER.warning(
+                "Setup.async_setup_entry device is not implemented by this integration: %s",
+                device,
+            )
 
     # Initialise a listener for config flow options changes.
     cancel_update_listener = config_entry.async_on_unload(
@@ -77,4 +103,11 @@ async def _async_update_listener(hass: HomeAssistant, config_entry: ConfigEntry)
     Reload the integration when the options change.
     Called from our listener created above.
     """
+    configData = convertToConfigData(config_entry)
+
+    if configData.verbose_setup_logging:
+        _LOGGER.info(
+            "Setup._async_update_listener %s",
+            sanitizeConfigData(configData),
+        )
     await hass.config_entries.async_reload(config_entry.entry_id)

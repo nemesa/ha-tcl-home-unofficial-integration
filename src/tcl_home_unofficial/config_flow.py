@@ -32,7 +32,6 @@ from .const import (
     DOMAIN,
 )
 from .session_manager import SessionManager
-from .config_entry import New_NameConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,7 +42,9 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
         vol.Required("aws_region", default=DEFAULT_AWS_REGION): str,
         vol.Required(CONF_USERNAME, default=DEFAULT_USER): str,
         vol.Required(CONF_PASSWORD, default=DEFAULT_PW): str,
-        vol.Required("verbose_logging", default=False): bool,
+        vol.Required("verbose_device_logging", default=False): bool,
+        vol.Required("verbose_session_logging", default=False): bool,
+        vol.Required("verbose_setup_logging", default=False): bool,
     }
 )
 
@@ -59,7 +60,9 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
             aws_region=data["aws_region"],
             username=data[CONF_USERNAME],
             password=data[CONF_PASSWORD],
-            verbose_logging=data["verbose_logging"],
+            verbose_device_logging=data["verbose_device_logging"],
+            verbose_session_logging=data["verbose_session_logging"],
+            verbose_setup_logging=data["verbose_setup_logging"],
         ),
     )
 
@@ -136,7 +139,15 @@ class TclHomeUnofficialOptionsFlowHandler(OptionsFlow):
                 vol.Required("aws_region", default=data.aws_region): str,
                 vol.Required(CONF_USERNAME, default=data.username): str,
                 vol.Required(CONF_PASSWORD, default=data.password): str,
-                vol.Required("verbose_logging", default=data.verbose_logging): bool,
+                vol.Required(
+                    "verbose_device_logging", default=data.verbose_device_logging
+                ): bool,
+                vol.Required(
+                    "verbose_session_logging", default=data.verbose_session_logging
+                ): bool,
+                vol.Required(
+                    "verbose_setup_logging", default=data.verbose_setup_logging
+                ): bool,
             }
         )
 
