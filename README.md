@@ -21,6 +21,11 @@ For setup we only need the user/pass which is used for the app.
 (as this is not offical integration from TCL I would recomend to create a new user for this integration and share your devices to that use, in case of TCL decide to ban the user)
 
 ## How to install
+
+At some point this may be awaliable in the [communit integrations](https://www.home-assistant.io/integrations), but for now it's manual only.
+
+Steps:
+
 Download zip from GitHub
 
 extract the ha-tcl-home-unofficial-integration-main.zip 
@@ -38,9 +43,11 @@ restart home assistant
 
 Settings -> Devices & Services -> + Add Integration (button) -> search for "TCL Home"
 
-Follow conf steps
+Follow on screen conf steps
 
-OPTIONAL:
+--------
+Optionally you can add a file editor addin to upload the files and to edit the configuration.yaml
+
 Settings -> Add-ons
 search for
 File editor
