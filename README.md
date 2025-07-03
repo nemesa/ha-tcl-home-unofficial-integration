@@ -17,7 +17,7 @@ The Home Assistant integration [samples](https://github.com/msp1974/HAIntegratio
 This integration is the result of reverse-engineering the “TCL Home” Android app. For setup, we only need the username/password used for the app. Since this is not an official integration from TCL, I recommend creating a new user for this integration and sharing your devices with that user—just in case TCL decides to ban the account.
 
 ## How to install  
-This may eventually become available in the [Community Integrations](https://www.home-assistant.io/integrations), but for now installation is manual only.
+This may eventually become available in the [HACS](https://www.home-assistant.io/integrations), but for now installation is manual only.
 
 ### Steps:
 1. Download the ZIP from GitHub and extract `ha-tcl-home-unofficial-integration-main.zip`.  

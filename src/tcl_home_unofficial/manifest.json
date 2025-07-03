@@ -6,6 +6,7 @@
   ],
   "config_flow": true,
   "documentation": "https://github.com/nemesa/ha-tcl-home-unofficial-integration/blob/main/README.md",
+  "issue_tracker": "https://github.com/nemesa/ha-tcl-home-unofficial-integration/issues",
   "iot_class": "cloud_polling",
   "version": "1.0.1",
   "loggers": ["custom_components.tcl_home_unofficial"]
