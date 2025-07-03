@@ -3,8 +3,7 @@
 
 ## Known issues
 - No branding icons or logos  
-- Error: The `tcl_home_unofficial` integration does not support YAML configuration  
-- Connection lost after a few hours  
+- Connection lost after a few hours (maybe fixed, still testing) 
 
 ## Supported device types
 - Split AC  
@@ -24,12 +23,8 @@ This may eventually become available in the [HACS](https://www.home-assistant.io
 2. Create a folder named `custom_components` next to your `configuration.yaml` (if you don't already have one).  
 3. Inside `custom_components`, create a folder named `tcl_home_unofficial`.  
 4. Copy all files from the ZIP’s `/ha-tcl-home-unofficial-integration-main/src/tcl_home_unofficial/` folder into your new `custom_components/tcl_home_unofficial` folder.  
-5. Edit your `configuration.yaml` and add:  
-   ```yaml
-    tcl_home_unofficial:
-   ```  
-6. Restart Home Assistant.  
-7. In the UI go to **Settings → Devices & Services → + Add Integration**, then search for “TCL Home” and follow the setup steps.
+5. Restart Home Assistant.  
+6. In the UI go to **Settings → Devices & Services → + Add Integration**, then search for “TCL Home” and follow the setup steps.
 
 ---
 
