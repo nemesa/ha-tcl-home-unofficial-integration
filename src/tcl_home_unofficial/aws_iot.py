@@ -79,19 +79,53 @@ class AwsIot:
 
         return things
 
-    async def async_get_thing(
-        self, device_id: str, fromException: bool = False
-    ) -> dict:
+    async def execute_and_re_try_call_with_device_id(
+        self, function, device_id: str, fromException: bool = False
+    ):
         try:
-            return await self.hass.async_add_executor_job(self.get_thing, device_id)
+            return await self.hass.async_add_executor_job(function, device_id)
         except Exception as e:
             # re-try if the error is due to expired credentials
             if not fromException:
                 self.client.close()
                 await self.async_setup_client()
-                return await self.async_get_thing(device_id, True)
-            _LOGGER.error("Aws_iot - Error getting thing %s: %s", device_id, e)
+                return await self.execute_and_re_try_call_with_device_id(
+                    function, device_id, True
+                )
+            _LOGGER.error(
+                "Aws_iot - Error execute_and_re_try_call_with_device_id %s: %s",
+                device_id,
+                e,
+            )
             raise e
+
+    async def execute_and_re_try_call_with_device_id_and_value(
+        self, function, device_id: str, value: int, fromException: bool = False
+    ):
+        try:
+            return await self.hass.async_add_executor_job(function, device_id, value)
+        except Exception as e:
+            # re-try if the error is due to expired credentials
+            if not fromException:
+                self.client.close()
+                await self.async_setup_client()
+                return await self.execute_and_re_try_call_with_device_id(
+                    function, device_id, value, True
+                )
+            _LOGGER.error(
+                "Aws_iot - Error execute_and_re_try_call_with_device_id_and_value %s - %s | %s",
+                device_id,
+                value,
+                e,
+            )
+            raise e
+
+    async def async_get_thing(
+        self, device_id: str, fromException: bool = False
+    ) -> dict:
+        return await self.execute_and_re_try_call_with_device_id(
+            self.get_thing, device_id, fromException
+        )
 
     def get_thing(self, device_id: str) -> dict:
         """List all things in AWS IoT."""
@@ -101,86 +135,47 @@ class AwsIot:
             _LOGGER.info("AwsIot.get_thing (%s): %s", device_id, payload)
         return json.loads(payload)
 
-    async def async_turn_on(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.turn_on, device_id)
+    async def async_set_power(
+        self, device_id: str, value: SleepModeEnum, fromException: bool = False
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_power, device_id, value, fromException
+        )
 
-    def turn_on(self, device_id: str) -> None:
+    def set_power(self, device_id: str, value: int) -> None:
         if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.turn_on: %s", device_id)
+            _LOGGER.info("AwsIot.power: %s - %s", device_id, value)
         payload = json.dumps(
             {
-                "state": {"desired": {"powerSwitch": 1}},
+                "state": {"desired": {"powerSwitch": value}},
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
         )
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
-        self.client.publish(
-            topic=getTopic(device_id),
-            qos=1,
-            payload=payload,
+    async def async_set_beep_mode(
+        self, device_id: str, value: SleepModeEnum, fromException: bool = False
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_beep_mode, device_id, value, fromException
         )
 
-    async def async_turn_off(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.turn_off, device_id)
-
-    def turn_off(self, device_id: str) -> None:
+    def set_beep_mode(self, device_id: str, value: int) -> None:
         if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.turn_off: %s", device_id)
-
+            _LOGGER.info("AwsIot.beep_mode: %s - %s", device_id, value)
         payload = json.dumps(
             {
-                "state": {"desired": {"beepSwitch": 0, "powerSwitch": 0}},
+                "state": {"desired": {"beepSwitch": value}},
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
         )
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
-        self.client.publish(
-            topic=getTopic(device_id),
-            qos=1,
-            payload=payload,
-        )
-
-    async def async_beep_mode_on(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.beep_mode_on, device_id)
-
-    def beep_mode_on(self, device_id: str) -> None:
-        if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.beep_mode_on: %s", device_id)
-        payload = json.dumps(
-            {
-                "state": {"desired": {"beepSwitch": 1}},
-                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
-            }
-        )
-
-        self.client.publish(
-            topic=getTopic(device_id),
-            qos=1,
-            payload=payload,
-        )
-
-    async def async_beep_mode_off(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.beep_mode_off, device_id)
-
-    def beep_mode_off(self, device_id: str) -> None:
-        if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.beep_mode_off: %s", device_id)
-        payload = json.dumps(
-            {
-                "state": {"desired": {"beepSwitch": 0}},
-                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
-            }
-        )
-
-        self.client.publish(
-            topic=getTopic(device_id),
-            qos=1,
-            payload=payload,
-        )
-
-    async def async_set_target_temperature(self, device_id: str, value: int) -> None:
-        await self.hass.async_add_executor_job(
-            self.set_target_temperature, device_id, value
+    async def async_set_target_temperature(
+        self, device_id: str, value: int, fromException: bool = False
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_target_temperature, device_id, value, fromException
         )
 
     def set_target_temperature(self, device_id: str, value: int) -> None:
@@ -204,8 +199,12 @@ class AwsIot:
             payload=payload,
         )
 
-    async def async_set_mode(self, device_id: str, value: ModeEnum) -> None:
-        await self.hass.async_add_executor_job(self.set_mode, device_id, value)
+    async def async_set_mode(
+        self, device_id: str, value: ModeEnum, fromException: bool = False
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_mode, device_id, value, fromException
+        )
 
     def set_mode(self, device_id: str, value: ModeEnum) -> None:
         if self.session_manager.is_verbose_device_logging():
@@ -304,8 +303,12 @@ class AwsIot:
             payload=payload,
         )
 
-    async def async_set_wind_speed(self, device_id: str, value: WindSeedEnum) -> None:
-        await self.hass.async_add_executor_job(self.set_wind_speed, device_id, value)
+    async def async_set_wind_speed(
+        self, device_id: str, value: WindSeedEnum, fromException: bool = False
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_wind_speed, device_id, value, fromException
+        )
 
     def set_wind_speed(self, device_id: str, value: WindSeedEnum) -> None:
         if self.session_manager.is_verbose_device_logging():
@@ -383,109 +386,14 @@ class AwsIot:
             payload=payload,
         )
 
-    async def async_eco_turn_on(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.eco_turn_on, device_id)
-
-    def eco_turn_on(self, device_id: str) -> None:
-        if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.eco_turn_on: %s", device_id)
-        payload = json.dumps(
-            {
-                "state": {
-                    "desired": {
-                        "ECO": 1,
-                        "highTemperatureWind": 0,
-                        "turbo": 0,
-                        "silenceSwitch": 0,
-                        "windSpeed": 0,
-                    }
-                },
-                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
-            }
-        )
-
-        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
-
-    async def async_eco_turn_off(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.eco_turn_off, device_id)
-
-    def eco_turn_off(self, device_id: str) -> None:
-        if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.eco_turn_off: %s", device_id)
-        payload = json.dumps(
-            {
-                "state": {"desired": {"ECO": 0}},
-                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
-            }
-        )
-
-        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
-
-    async def async_healthy_turn_on(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.healthy_turn_on, device_id)
-
-    def healthy_turn_on(self, device_id: str) -> None:
-        if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.healthy_turn_on: %s", device_id)
-        payload = json.dumps(
-            {
-                "state": {"desired": {"healthy": 1}},
-                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
-            }
-        )
-
-        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
-
-    async def async_healthy_turn_off(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.healthy_turn_off, device_id)
-
-    def healthy_turn_off(self, device_id: str) -> None:
-        if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.healthy_turn_off: %s", device_id)
-        payload = json.dumps(
-            {
-                "state": {"desired": {"healthy": 0}},
-                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
-            }
-        )
-
-        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
-
-    async def async_drying_turn_on(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.drying_turn_on, device_id)
-
-    def drying_turn_on(self, device_id: str) -> None:
-        if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.drying_turn_on: %s", device_id)
-        payload = json.dumps(
-            {
-                "state": {"desired": {"antiMoldew": 1}},
-                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
-            }
-        )
-
-        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
-
-    async def async_drying_turn_off(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.drying_turn_off, device_id)
-
-    def drying_turn_off(self, device_id: str) -> None:
-        if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.drying_turn_off: %s", device_id)
-        payload = json.dumps(
-            {
-                "state": {"desired": {"antiMoldew": 0}},
-                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
-            }
-        )
-
-        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
-
     async def async_set_up_and_down_air_supply_vector(
-        self, device_id: str, value: UpAndDownAirSupplyVectorEnum
+        self,
+        device_id: str,
+        value: UpAndDownAirSupplyVectorEnum,
+        fromException: bool = False,
     ) -> None:
-        await self.hass.async_add_executor_job(
-            self.set_up_and_down_air_supply_vector, device_id, value
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_up_and_down_air_supply_vector, device_id, value, fromException
         )
 
     def set_up_and_down_air_supply_vector(
@@ -528,10 +436,13 @@ class AwsIot:
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
     async def async_set_left_and_right_air_supply_vector(
-        self, device_id: str, value: LeftAndRightAirSupplyVectorEnum
+        self,
+        device_id: str,
+        value: LeftAndRightAirSupplyVectorEnum,
+        fromException: bool = False,
     ) -> None:
-        await self.hass.async_add_executor_job(
-            self.set_left_and_right_air_supply_vector, device_id, value
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_left_and_right_air_supply_vector, device_id, value, fromException
         )
 
     def set_left_and_right_air_supply_vector(
@@ -575,8 +486,12 @@ class AwsIot:
 
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
-    async def async_set_sleep_mode(self, device_id: str, value: SleepModeEnum) -> None:
-        await self.hass.async_add_executor_job(self.set_sleep_mode, device_id, value)
+    async def async_set_sleep_mode(
+        self, device_id: str, value: SleepModeEnum, fromException: bool = False
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_sleep_mode, device_id, value, fromException
+        )
 
     def set_sleep_mode(self, device_id: str, value: SleepModeEnum) -> None:
         if self.session_manager.is_verbose_device_logging():
@@ -601,62 +516,116 @@ class AwsIot:
 
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
-    async def async_self_clean_start(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.self_clean_start, device_id)
-
-    def self_clean_start(self, device_id: str) -> None:
-        if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.self_clean_start: %s", device_id)
-        payload = json.dumps(
-            {
-                "state": {"desired": {"powerSwitch": 0, "selfClean": 1}},
-                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
-            }
+    async def async_set_eco(
+        self, device_id: str, value: SleepModeEnum, fromException: bool = False
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_eco, device_id, value, fromException
         )
 
+    def set_eco(self, device_id: str, value: int) -> None:
+        if self.session_manager.is_verbose_device_logging():
+            _LOGGER.info("AwsIot.set_eco: %s - %s", device_id, value)
+        if value == 1:
+            payload = json.dumps(
+                {
+                    "state": {
+                        "desired": {
+                            "ECO": 1,
+                            "highTemperatureWind": 0,
+                            "turbo": 0,
+                            "silenceSwitch": 0,
+                            "windSpeed": 0,
+                        }
+                    },
+                    "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+                }
+            )
+        else:
+            payload = json.dumps(
+                {
+                    "state": {"desired": {"ECO": 0}},
+                    "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+                }
+            )
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
-    async def async_self_clean_stop(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.self_clean_stop, device_id)
+    async def async_set_healthy(
+        self, device_id: str, value: SleepModeEnum, fromException: bool = False
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_healthy, device_id, value, fromException
+        )
 
-    def self_clean_stop(self, device_id: str) -> None:
+    def set_healthy(self, device_id: str, value: int) -> None:
         if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.self_clean_stop: %s", device_id)
+            _LOGGER.info("AwsIot.set_healthy: %s - %s", device_id, value)
         payload = json.dumps(
             {
-                "state": {"desired": {"selfClean": 0}},
+                "state": {"desired": {"healthy": value}},
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
         )
-
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
-    async def async_light_turn_on(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.light_turn_on, device_id)
+    async def async_set_drying(
+        self, device_id: str, value: SleepModeEnum, fromException: bool = False
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_drying, device_id, value, fromException
+        )
 
-    def light_turn_on(self, device_id: str) -> None:
+    def set_drying(self, device_id: str, value: int) -> None:
         if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.light_turn_on: %s", device_id)
+            _LOGGER.info("AwsIot.set_drying: %s - %s", device_id, value)
         payload = json.dumps(
             {
-                "state": {"desired": {"screen": 1}},
+                "state": {"desired": {"antiMoldew": value}},
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
         )
-
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
-    async def async_light_turn_off(self, device_id: str) -> None:
-        await self.hass.async_add_executor_job(self.light_turn_off, device_id)
+    async def async_set_self_clean(
+        self, device_id: str, value: SleepModeEnum, fromException: bool = False
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_self_clean, device_id, value, fromException
+        )
 
-    def light_turn_off(self, device_id: str) -> None:
+    def set_self_clean(self, device_id: str, value: int) -> None:
         if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.light_turn_off: %s", device_id)
+            _LOGGER.info("AwsIot.set_self_clean: %s - %s", device_id, value)
+        if value == 1:
+            payload = json.dumps(
+                {
+                    "state": {"desired": {"powerSwitch": 0, "selfClean": 1}},
+                    "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+                }
+            )
+        else:
+            payload = json.dumps(
+                {
+                    "state": {"desired": {"selfClean": 0}},
+                    "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+                }
+            )
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
+
+    async def async_set_light(
+        self, device_id: str, value: SleepModeEnum, fromException: bool = False
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_light, device_id, value, fromException
+        )
+
+    def set_light(self, device_id: str, value: int) -> None:
+        if self.session_manager.is_verbose_device_logging():
+            _LOGGER.info("AwsIot.set_light: %s - %s", device_id, value)
         payload = json.dumps(
             {
-                "state": {"desired": {"screen": 0}},
+                "state": {"desired": {"screen": value}},
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
         )
-
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)

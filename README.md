@@ -1,6 +1,13 @@
 # ha-tcl-home-unofficial-integration
 TCL Home home assistant integration (unofficial)
 
+## Known issues:
+ - no branding icons/logos
+ - Error: The tcl_home_unofficial integration does not support YAML configuration
+ - connection lost after a a few hours
+
+## Supported device types
+ - Split AC
 
 ## Credit:
 The idea how to do basic login is from [DavidIlie's proejct ](https://github.com/DavidIlie/tcl-home-ac)

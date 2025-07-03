@@ -67,14 +67,14 @@ class PowerSwitch(TclEntityBase, SwitchEntity):
         return device.data.power_switch
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_turn_on(self.device.device_id)
+        await self.aws_iot.async_set_power(self.device.device_id, 1)
 
         self.device.data.power_switch = 1
         self.coordinator.set_device(self.device)
         await self.coordinator.async_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_turn_off(self.device.device_id)
+        await self.aws_iot.async_set_power(self.device.device_id, 0)
 
         self.device.data.power_switch = 0
         self.coordinator.set_device(self.device)
@@ -106,14 +106,14 @@ class BeepSwitch(TclEntityBase, SwitchEntity):
         return device.data.beep_switch
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_beep_mode_on(self.device.device_id)
+        await self.aws_iot.async_set_beep_mode(self.device.device_id, 1)
 
         self.device.data.beep_switch = 1
         self.coordinator.set_device(self.device)
         await self.coordinator.async_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_beep_mode_off(self.device.device_id)
+        await self.aws_iot.async_set_beep_mode(self.device.device_id, 0)
 
         self.device.data.beep_switch = 0
         self.coordinator.set_device(self.device)
@@ -145,14 +145,14 @@ class EcoSwitch(TclEntityBase, SwitchEntity):
         return device.data.eco
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_eco_turn_on(self.device.device_id)
+        await self.aws_iot.async_set_eco(self.device.device_id, 1)
 
         self.device.data.eco = 1
         self.coordinator.set_device(self.device)
         await self.coordinator.async_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_eco_turn_off(self.device.device_id)
+        await self.aws_iot.async_set_eco(self.device.device_id, 0)
 
         self.device.data.eco = 0
         self.coordinator.set_device(self.device)
@@ -184,14 +184,14 @@ class HealthySwitch(TclEntityBase, SwitchEntity):
         return device.data.healthy
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_healthy_turn_on(self.device.device_id)
+        await self.aws_iot.async_set_healthy(self.device.device_id, 1)
 
         self.device.data.healthy = 1
         self.coordinator.set_device(self.device)
         await self.coordinator.async_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_healthy_turn_off(self.device.device_id)
+        await self.aws_iot.async_set_healthy(self.device.device_id, 0)
 
         self.device.data.healthy = 0
         self.coordinator.set_device(self.device)
@@ -223,14 +223,14 @@ class DryingSwitch(TclEntityBase, SwitchEntity):
         return device.data.anti_moldew
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_drying_turn_on(self.device.device_id)
+        await self.aws_iot.async_set_drying(self.device.device_id, 1)
 
         self.device.data.anti_moldew = 1
         self.coordinator.set_device(self.device)
         await self.coordinator.async_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_drying_turn_off(self.device.device_id)
+        await self.aws_iot.async_set_drying(self.device.device_id, 0)
 
         self.device.data.anti_moldew = 0
         self.coordinator.set_device(self.device)
@@ -264,14 +264,14 @@ class LightSwitch(TclEntityBase, SwitchEntity):
         return device.data.screen
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_light_turn_on(self.device.device_id)
+        await self.aws_iot.async_set_light(self.device.device_id, 1)
 
         self.device.data.screen = 1
         self.coordinator.set_device(self.device)
         await self.coordinator.async_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_light_turn_off(self.device.device_id)
+        await self.aws_iot.async_set_light(self.device.device_id, 0)
 
         self.device.data.screen = 0
         self.coordinator.set_device(self.device)
