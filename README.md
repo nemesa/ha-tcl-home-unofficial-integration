@@ -1,63 +1,53 @@
-# ha-tcl-home-unofficial-integration
-TCL Home home assistant integration (unofficial)
+# ha-tcl-home-unofficial-integration  
+**TCL Home Home Assistant integration (unofficial)**
 
-## Known issues:
- - no branding icons/logos
- - Error: The tcl_home_unofficial integration does not support YAML configuration
- - connection lost after a a few hours
+## Known issues
+- No branding icons or logos  
+- Error: The `tcl_home_unofficial` integration does not support YAML configuration  
+- Connection lost after a few hours  
 
 ## Supported device types
- - Split AC
+- Split AC  
 
-## Credit:
-The idea how to do basic login is from [DavidIlie's proejct ](https://github.com/DavidIlie/tcl-home-ac)
+## Credit  
+The idea for basic login is from [DavidIlie’s project](https://github.com/DavidIlie/tcl-home-ac).  
+The Home Assistant integration [samples](https://github.com/msp1974/HAIntegrationExamples) helped a lot.
 
-This Home Assistant integration [samples](https://github.com/msp1974/HAIntegrationExamples) helped a lot.
+## How it works  
+This integration is the result of reverse-engineering the “TCL Home” Android app. For setup, we only need the username/password used for the app. Since this is not an official integration from TCL, I recommend creating a new user for this integration and sharing your devices with that user—just in case TCL decides to ban the account.
 
-## How it's work
+## How to install  
+This may eventually become available in the [Community Integrations](https://www.home-assistant.io/integrations), but for now installation is manual only.
 
-This integration is the result of a reverse enginering of the "TCL Home" andoid app.
-For setup we only need the user/pass which is used for the app.
-(as this is not offical integration from TCL I would recomend to create a new user for this integration and share your devices to that use, in case of TCL decide to ban the user)
+### Steps:
+1. Download the ZIP from GitHub and extract `ha-tcl-home-unofficial-integration-main.zip`.  
+2. Create a folder named `custom_components` next to your `configuration.yaml` (if you don't already have one).  
+3. Inside `custom_components`, create a folder named `tcl_home_unofficial`.  
+4. Copy all files from the ZIP’s `/ha-tcl-home-unofficial-integration-main/src/tcl_home_unofficial/` folder into your new `custom_components/tcl_home_unofficial` folder.  
+5. Edit your `configuration.yaml` and add:  
+   ```yaml
+    tcl_home_unofficial:
+   ```  
+6. Restart Home Assistant.  
+7. In the UI go to **Settings → Devices & Services → + Add Integration**, then search for “TCL Home” and follow the setup steps.
 
-## How to install
+---
 
-At some point this may be awaliable in the [communit integrations](https://www.home-assistant.io/integrations), but for now it's manual only.
+Optionally, you can install the File Editor add-on to upload files and edit `configuration.yaml` via:  
+**Settings → Add-ons**, then search for “File editor.”
 
-Steps:
+## Logs
+For info logs extend the `configuration.yaml` with
+   ```yaml
+    logger:
+      logs:
+        custom_components.tcl_home_unofficial: info
+   ```  
 
-Download zip from GitHub
+## How the integration looks
 
-extract the ha-tcl-home-unofficial-integration-main.zip 
+Dashboard example:  
+![Dashboard example](./dashboard_example.jpg "Dashboard example")
 
-create a folder "custom_components" next to your configuration.yaml (if you don't have it allready)
-then create a "tcl_home_unofficial" folder in the "custom_components"
-copy every file from the zip's "/ha-tcl-home-unofficial-integration-main/src/tcl_home_unofficial/" folder 
-into new the /homeassistant/custom_components/tcl_home_unofficial what we just created
-
-edit your configuration.yaml and add
-"tcl_home_unofficial:"
-
-restart home assistant
-
-
-Settings -> Devices & Services -> + Add Integration (button) -> search for "TCL Home"
-
-Follow on screen conf steps
-
---------
-Optionally you can add a file editor addin to upload the files and to edit the configuration.yaml
-
-Settings -> Add-ons
-search for
-File editor
-
-
-## How the integration looks like
-
-Dashborad example
-![alt Dashborad example](./dashboard_example.jpg "Dashborad example")
-
-Integration mapping to the app:
-![alt Integration mapping to the app](./integration_map_to_app.jpg "Integration mapping to the app")
-
+Integration mapping to the app:  
+![Integration mapping to the app](./integration_map_to_app.jpg "Integration mapping to the app")
