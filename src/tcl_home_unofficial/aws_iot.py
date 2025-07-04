@@ -90,7 +90,9 @@ class AwsIot:
                 self.client.close()
                 await self.async_setup_client()
                 return await self.execute_and_re_try_call_with_device_id(
-                    function, device_id, True
+                    function=function,
+                    device_id=device_id,
+                    fromException=True,
                 )
             _LOGGER.error(
                 "Aws_iot - Error execute_and_re_try_call_with_device_id %s: %s",
@@ -109,8 +111,11 @@ class AwsIot:
             if not fromException:
                 self.client.close()
                 await self.async_setup_client()
-                return await self.execute_and_re_try_call_with_device_id(
-                    function, device_id, value, True
+                return await self.execute_and_re_try_call_with_device_id_and_value(
+                    function=function,
+                    device_id=device_id,
+                    value=value,
+                    fromException=True,
                 )
             _LOGGER.error(
                 "Aws_iot - Error execute_and_re_try_call_with_device_id_and_value %s - %s | %s",

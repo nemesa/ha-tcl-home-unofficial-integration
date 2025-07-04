@@ -50,7 +50,7 @@ class SetTargetTempEntity(TclEntityBase, NumberEntity):
         self._attr_assumed_state = False
         self._attr_device_class = NumberDeviceClass.TEMPERATURE
         self._attr_translation_key = None
-        self._attr_mode = NumberMode.SLIDER  # NumberMode.BOX
+        self._attr_mode = NumberMode.BOX
         self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
         self._attr_native_value = device.data.target_temperature
 
