@@ -24,28 +24,20 @@ async def async_setup_entry(
     """Set up the Binary Sensors."""
     coordinator = config_entry.runtime_data.coordinator
 
-    aws_iot = AwsIot(
-        hass=hass,
-        config_entry=config_entry,
-    )
-    await aws_iot.async_init()
-
     switches = []
     for device in config_entry.devices:
-        switches.append(SelfCleanButton(coordinator, device, aws_iot))
+        switches.append(SelfCleanButton(coordinator, device))
 
     async_add_entities(switches)
 
 
 class SelfCleanButton(TclEntityBase, ButtonEntity):
-    def __init__(
-        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
-    ) -> None:
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
         TclEntityBase.__init__(
             self, coordinator, "SelfCleanButton", "Evaporator Clean", device
         )
 
-        self.aws_iot = aws_iot
+        self.aws_iot = coordinator.get_aws_iot()
 
     @property
     def name(self) -> str:

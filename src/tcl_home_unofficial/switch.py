@@ -24,31 +24,23 @@ async def async_setup_entry(
     """Set up the Binary Sensors."""
     coordinator = config_entry.runtime_data.coordinator
 
-    aws_iot = AwsIot(
-        hass=hass,
-        config_entry=config_entry,
-    )
-    await aws_iot.async_init()
-
     switches = []
     for device in config_entry.devices:
-        switches.append(PowerSwitch(coordinator, device, aws_iot))
-        switches.append(BeepSwitch(coordinator, device, aws_iot))
-        switches.append(EcoSwitch(coordinator, device, aws_iot))
-        switches.append(HealthySwitch(coordinator, device, aws_iot))
-        switches.append(DryingSwitch(coordinator, device, aws_iot))
-        switches.append(LightSwitch(coordinator, device, aws_iot))
+        switches.append(PowerSwitch(coordinator, device))
+        switches.append(BeepSwitch(coordinator, device))
+        switches.append(EcoSwitch(coordinator, device))
+        switches.append(HealthySwitch(coordinator, device))
+        switches.append(DryingSwitch(coordinator, device))
+        switches.append(LightSwitch(coordinator, device))
 
     async_add_entities(switches)
 
 
 class PowerSwitch(TclEntityBase, SwitchEntity):
-    def __init__(
-        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
-    ) -> None:
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
         TclEntityBase.__init__(self, coordinator, "PowerSwitch", "Power Switch", device)
 
-        self.aws_iot = aws_iot
+        self.aws_iot = coordinator.get_aws_iot()
 
     @property
     def device_class(self) -> str:
@@ -82,12 +74,10 @@ class PowerSwitch(TclEntityBase, SwitchEntity):
 
 
 class BeepSwitch(TclEntityBase, SwitchEntity):
-    def __init__(
-        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
-    ) -> None:
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
         TclEntityBase.__init__(self, coordinator, "BeepSwitch", "Beep", device)
 
-        self.aws_iot = aws_iot
+        self.aws_iot = coordinator.get_aws_iot()
 
     @property
     def device_class(self) -> str:
@@ -121,12 +111,10 @@ class BeepSwitch(TclEntityBase, SwitchEntity):
 
 
 class EcoSwitch(TclEntityBase, SwitchEntity):
-    def __init__(
-        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
-    ) -> None:
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
         TclEntityBase.__init__(self, coordinator, "ECO-Switch", "ECO", device)
 
-        self.aws_iot = aws_iot
+        self.aws_iot = coordinator.get_aws_iot()
 
     @property
     def device_class(self) -> str:
@@ -160,12 +148,10 @@ class EcoSwitch(TclEntityBase, SwitchEntity):
 
 
 class HealthySwitch(TclEntityBase, SwitchEntity):
-    def __init__(
-        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
-    ) -> None:
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
         TclEntityBase.__init__(self, coordinator, "Helathy-Switch", "Healthy", device)
 
-        self.aws_iot = aws_iot
+        self.aws_iot = coordinator.get_aws_iot()
 
     @property
     def device_class(self) -> str:
@@ -199,12 +185,10 @@ class HealthySwitch(TclEntityBase, SwitchEntity):
 
 
 class DryingSwitch(TclEntityBase, SwitchEntity):
-    def __init__(
-        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
-    ) -> None:
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
         TclEntityBase.__init__(self, coordinator, "Drying-Switch", "Drying", device)
 
-        self.aws_iot = aws_iot
+        self.aws_iot = coordinator.get_aws_iot()
 
     @property
     def device_class(self) -> str:
@@ -238,14 +222,12 @@ class DryingSwitch(TclEntityBase, SwitchEntity):
 
 
 class LightSwitch(TclEntityBase, SwitchEntity):
-    def __init__(
-        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
-    ) -> None:
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
         TclEntityBase.__init__(
             self, coordinator, "Light-Switch", "Screen Light", device
         )
 
-        self.aws_iot = aws_iot
+        self.aws_iot = coordinator.get_aws_iot()
 
     @property
     def device_class(self) -> str:

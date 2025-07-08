@@ -45,6 +45,10 @@ class IotDeviceCoordinator(DataUpdateCoordinator):
             update_interval=timedelta(seconds=self.poll_interval),
         )
 
+    def get_aws_iot(self) -> AwsIot:
+        """Return the AwsIot instance."""
+        return self.aws_iot
+
     async def async_update_data(self):
         """Fetch data"""
 

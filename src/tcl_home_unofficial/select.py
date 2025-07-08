@@ -33,31 +33,23 @@ async def async_setup_entry(
     """Set up the Binary Sensors."""
     coordinator = config_entry.runtime_data.coordinator
 
-    aws_iot = AwsIot(
-        hass=hass,
-        config_entry=config_entry,
-    )
-    await aws_iot.async_init()
-
     switches = []
     for device in config_entry.devices:
-        switches.append(ModeSelect(coordinator, device, aws_iot))
-        switches.append(WindSpeedSelect(coordinator, device, aws_iot))
-        switches.append(UpAndDownAirSupplyVectorSelect(coordinator, device, aws_iot))
-        switches.append(LeftAndRightAirSupplyVectorSelect(coordinator, device, aws_iot))
-        switches.append(SleepModeSelect(coordinator, device, aws_iot))
+        switches.append(ModeSelect(coordinator, device))
+        switches.append(WindSpeedSelect(coordinator, device))
+        switches.append(UpAndDownAirSupplyVectorSelect(coordinator, device))
+        switches.append(LeftAndRightAirSupplyVectorSelect(coordinator, device))
+        switches.append(SleepModeSelect(coordinator, device))
 
     async_add_entities(switches)
 
 
 class ModeSelect(TclEntityBase, SelectEntity):
-    def __init__(
-        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
-    ) -> None:
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
         TclEntityBase.__init__(self, coordinator, "ModeSelect", "Set Mode", device)
 
         helper = TCL_SplitAC_DeviceData_Helper(device.data)
-        self.aws_iot = aws_iot
+        self.aws_iot = coordinator.get_aws_iot()
         self._attr_current_option = helper.getMode()
         self._attr_options = [e.value for e in ModeEnum]
 
@@ -73,14 +65,12 @@ class ModeSelect(TclEntityBase, SelectEntity):
 
 
 class WindSpeedSelect(TclEntityBase, SelectEntity):
-    def __init__(
-        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
-    ) -> None:
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
         TclEntityBase.__init__(
             self, coordinator, "WindSpeedSelect", "Wind Speed", device
         )
 
-        self.aws_iot = aws_iot
+        self.aws_iot = coordinator.get_aws_iot()
         helper = TCL_SplitAC_DeviceData_Helper(device.data)
         self._attr_current_option = helper.getWindSpeed()
         self._attr_options = [e.value for e in WindSeedEnum]
@@ -97,9 +87,7 @@ class WindSpeedSelect(TclEntityBase, SelectEntity):
 
 
 class UpAndDownAirSupplyVectorSelect(TclEntityBase, SelectEntity):
-    def __init__(
-        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
-    ) -> None:
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
         TclEntityBase.__init__(
             self,
             coordinator,
@@ -108,7 +96,7 @@ class UpAndDownAirSupplyVectorSelect(TclEntityBase, SelectEntity):
             device,
         )
 
-        self.aws_iot = aws_iot
+        self.aws_iot = coordinator.get_aws_iot()
         helper = TCL_SplitAC_DeviceData_Helper(device.data)
         self._attr_current_option = helper.getUpAndDownAirSupplyVector()
         self._attr_options = [e.value for e in UpAndDownAirSupplyVectorEnum]
@@ -127,9 +115,7 @@ class UpAndDownAirSupplyVectorSelect(TclEntityBase, SelectEntity):
 
 
 class LeftAndRightAirSupplyVectorSelect(TclEntityBase, SelectEntity):
-    def __init__(
-        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
-    ) -> None:
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
         TclEntityBase.__init__(
             self,
             coordinator,
@@ -138,7 +124,7 @@ class LeftAndRightAirSupplyVectorSelect(TclEntityBase, SelectEntity):
             device,
         )
 
-        self.aws_iot = aws_iot
+        self.aws_iot = coordinator.get_aws_iot()
         helper = TCL_SplitAC_DeviceData_Helper(device.data)
         self._attr_current_option = helper.getLeftAndRightAirSupplyVector()
         self._attr_options = [e.value for e in LeftAndRightAirSupplyVectorEnum]
@@ -157,14 +143,12 @@ class LeftAndRightAirSupplyVectorSelect(TclEntityBase, SelectEntity):
 
 
 class SleepModeSelect(TclEntityBase, SelectEntity):
-    def __init__(
-        self, coordinator: IotDeviceCoordinator, device: Device, aws_iot: AwsIot
-    ) -> None:
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
         TclEntityBase.__init__(
             self, coordinator, "SleepModeSelect", "Sleep Mode", device
         )
 
-        self.aws_iot = aws_iot
+        self.aws_iot = coordinator.get_aws_iot()
         helper = TCL_SplitAC_DeviceData_Helper(device.data)
         self._attr_current_option = helper.getSleepMode()
         self._attr_options = [e.value for e in SleepModeEnum]

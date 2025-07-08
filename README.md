@@ -2,8 +2,7 @@
 **TCL Home Home Assistant integration (unofficial)**
 
 ## Known issues
-- No branding icons or logos  
-- Connection lost after a few hours (maybe fixed, still testing) 
+- 
 
 ## Supported device types
 - Split AC  
