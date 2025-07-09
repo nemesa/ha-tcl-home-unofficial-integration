@@ -8,6 +8,10 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from .const import DOMAIN
 
 
+class DeviceTypeEnum(StrEnum):
+    SPLIT_AC = "Split AC"
+
+
 class ModeEnum(StrEnum):
     COOL = "Cool"
     HEAT = "Heat"
@@ -69,6 +73,9 @@ class TCL_SplitAC_DeviceData:
         self.target_temperature = int(
             delta.get("targetTemperature", aws_thing_state["targetTemperature"])
         )
+        self.current_temperature = int(
+            delta.get("currentTemperature", aws_thing_state["currentTemperature"])
+        )
         self.work_mode = int(delta.get("workMode", aws_thing_state["workMode"]))
         self.high_temperature_wind = int(
             delta.get("highTemperatureWind", aws_thing_state["highTemperatureWind"])
@@ -105,6 +112,7 @@ class TCL_SplitAC_DeviceData:
     power_switch: int | bool
     beep_switch: int | bool
     target_temperature: int
+    current_temperature: int
     high_temperature_wind: int
     turbo: int
     silence_switch: int
@@ -221,7 +229,7 @@ class TCL_SplitAC_DeviceData_Helper:
 
 def is_implemented_by_integration(device_type: str) -> bool:
     match device_type:
-        case "Split AC":
+        case DeviceTypeEnum.SPLIT_AC:
             return True
         case _:
             return False
@@ -247,7 +255,7 @@ class Device:
             device_type=device_type
         )
         match device_type:
-            case "Split AC":
+            case DeviceTypeEnum.SPLIT_AC:
                 if aws_thing is not None:
                     self.data = TCL_SplitAC_DeviceData(
                         device_id,

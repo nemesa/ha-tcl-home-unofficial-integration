@@ -7,10 +7,9 @@ from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .aws_iot import AwsIot
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device
+from .device import Device, DeviceTypeEnum
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,58 +25,136 @@ async def async_setup_entry(
 
     switches = []
     for device in config_entry.devices:
-        switches.append(PowerSwitch(coordinator, device))
-        switches.append(BeepSwitch(coordinator, device))
-        switches.append(EcoSwitch(coordinator, device))
-        switches.append(HealthySwitch(coordinator, device))
-        switches.append(DryingSwitch(coordinator, device))
-        switches.append(LightSwitch(coordinator, device))
+        if device.device_type == DeviceTypeEnum.SPLIT_AC:
+            switches.append(
+                Switch(
+                    coordinator=coordinator,
+                    device=device,
+                    type="Power",
+                    name="Power Switch",
+                    icon_fn=lambda device: "mdi:power-plug"
+                    if device.data.power_switch == 1
+                    else "mdi:power-plug-off",
+                    is_on_fn=lambda device: device.data.power_switch,
+                    turn_on_fn=lambda device: coordinator.get_aws_iot().async_set_power(
+                        device.device_id, 1
+                    ),
+                    turn_off_fn=lambda device: coordinator.get_aws_iot().async_set_power(
+                        device.device_id, 0
+                    ),
+                )
+            )
+            switches.append(
+                Switch(
+                    coordinator=coordinator,
+                    device=device,
+                    type="BeepMode",
+                    name="Beep Mode Switch",
+                    icon_fn=lambda device: "mdi:volume-high"
+                    if device.data.beep_switch == 1
+                    else "mdi:volume-off",
+                    is_on_fn=lambda device: device.data.beep_switch,
+                    turn_on_fn=lambda device: coordinator.get_aws_iot().async_set_beep_mode(
+                        device.device_id, 1
+                    ),
+                    turn_off_fn=lambda device: coordinator.get_aws_iot().async_set_beep_mode(
+                        device.device_id, 0
+                    ),
+                )
+            )
+            switches.append(
+                Switch(
+                    coordinator=coordinator,
+                    device=device,
+                    type="ECO",
+                    name="ECO Switch",
+                    icon_fn=lambda device: "mdi:leaf"
+                    if device.data.eco == 1
+                    else "mdi:leaf-off",
+                    is_on_fn=lambda device: device.data.eco,
+                    turn_on_fn=lambda device: coordinator.get_aws_iot().async_set_eco(
+                        device.device_id, 1
+                    ),
+                    turn_off_fn=lambda device: coordinator.get_aws_iot().async_set_eco(
+                        device.device_id, 0
+                    ),
+                )
+            )
+            switches.append(
+                Switch(
+                    coordinator=coordinator,
+                    device=device,
+                    type="Healthy",
+                    name="Healthy Switch",
+                    icon_fn=lambda device: "mdi:heart"
+                    if device.data.healthy == 1
+                    else "mdi:heart-off",
+                    is_on_fn=lambda device: device.data.healthy,
+                    turn_on_fn=lambda device: coordinator.get_aws_iot().async_set_healthy(
+                        device.device_id, 1
+                    ),
+                    turn_off_fn=lambda device: coordinator.get_aws_iot().async_set_healthy(
+                        device.device_id, 0
+                    ),
+                )
+            )
+            switches.append(
+                Switch(
+                    coordinator=coordinator,
+                    device=device,
+                    type="Drying",
+                    name="Drying Switch",
+                    icon_fn=lambda device: "mdi:opacity"
+                    if device.data.anti_moldew == 1
+                    else "mdi:water-off-outline",
+                    is_on_fn=lambda device: device.data.anti_moldew,
+                    turn_on_fn=lambda device: coordinator.get_aws_iot().async_set_drying(
+                        device.device_id, 1
+                    ),
+                    turn_off_fn=lambda device: coordinator.get_aws_iot().async_set_drying(
+                        device.device_id, 0
+                    ),
+                )
+            )
+            switches.append(
+                Switch(
+                    coordinator=coordinator,
+                    device=device,
+                    type="DiplayLight",
+                    name="Diplay Light Switch",
+                    icon_fn=lambda device: "mdi:lightbulb-outline"
+                    if device.data.screen == 1
+                    else "mdi:lightbulb-off-outline",
+                    is_on_fn=lambda device: device.data.screen,
+                    turn_on_fn=lambda device: coordinator.get_aws_iot().async_set_light(
+                        device.device_id, 1
+                    ),
+                    turn_off_fn=lambda device: coordinator.get_aws_iot().async_set_light(
+                        device.device_id, 0
+                    ),
+                )
+            )
 
     async_add_entities(switches)
 
 
-class PowerSwitch(TclEntityBase, SwitchEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(self, coordinator, "PowerSwitch", "Power Switch", device)
-
-        self.aws_iot = coordinator.get_aws_iot()
-
-    @property
-    def device_class(self) -> str:
-        return SwitchDeviceClass.SWITCH
-
-    @property
-    def icon(self):
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        if self.device.data.power_switch == 1:
-            return "mdi:power-plug"
-        return "mdi:power-plug-off"
-
-    @property
-    def is_on(self) -> bool | None:
-        device = self.coordinator.get_device_by_id(self.device.device_id)
-        return device.data.power_switch
-
-    async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_set_power(self.device.device_id, 1)
-
-        self.device.data.power_switch = 1
-        self.coordinator.set_device(self.device)
-        await self.coordinator.async_refresh()
-
-    async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_set_power(self.device.device_id, 0)
-
-        self.device.data.power_switch = 0
-        self.coordinator.set_device(self.device)
-        await self.coordinator.async_refresh()
-
-
-class BeepSwitch(TclEntityBase, SwitchEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(self, coordinator, "BeepSwitch", "Beep", device)
-
-        self.aws_iot = coordinator.get_aws_iot()
+class Switch(TclEntityBase, SwitchEntity):
+    def __init__(
+        self,
+        coordinator: IotDeviceCoordinator,
+        device: Device,
+        type: str,
+        name: str,
+        icon_fn: lambda device: str,
+        is_on_fn: lambda device: bool | None,
+        turn_on_fn: lambda device: None,
+        turn_off_fn: lambda device: None,
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, type, name, device)
+        self.icon_fn = icon_fn
+        self.turn_on_fn = turn_on_fn
+        self.turn_off_fn = turn_off_fn
+        self.is_on_fn = is_on_fn
 
     @property
     def device_class(self) -> str:
@@ -85,176 +162,17 @@ class BeepSwitch(TclEntityBase, SwitchEntity):
 
     @property
     def icon(self):
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        if self.device.data.beep_switch == 1:
-            return "mdi:volume-high"
-        return "mdi:volume-off"
+        return self.icon_fn(self.device)
 
     @property
     def is_on(self) -> bool | None:
         device = self.coordinator.get_device_by_id(self.device.device_id)
-        return device.data.beep_switch
+        return self.is_on_fn(device)
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_set_beep_mode(self.device.device_id, 1)
-
-        self.device.data.beep_switch = 1
-        self.coordinator.set_device(self.device)
+        await self.turn_on_fn(self.device)
         await self.coordinator.async_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_set_beep_mode(self.device.device_id, 0)
-
-        self.device.data.beep_switch = 0
-        self.coordinator.set_device(self.device)
-        await self.coordinator.async_refresh()
-
-
-class EcoSwitch(TclEntityBase, SwitchEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(self, coordinator, "ECO-Switch", "ECO", device)
-
-        self.aws_iot = coordinator.get_aws_iot()
-
-    @property
-    def device_class(self) -> str:
-        return SwitchDeviceClass.SWITCH
-
-    @property
-    def icon(self):
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        if self.device.data.eco == 1:
-            return "mdi:leaf"
-        return "mdi:leaf-off"
-
-    @property
-    def is_on(self) -> bool | None:
-        device = self.coordinator.get_device_by_id(self.device.device_id)
-        return device.data.eco
-
-    async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_set_eco(self.device.device_id, 1)
-
-        self.device.data.eco = 1
-        self.coordinator.set_device(self.device)
-        await self.coordinator.async_refresh()
-
-    async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_set_eco(self.device.device_id, 0)
-
-        self.device.data.eco = 0
-        self.coordinator.set_device(self.device)
-        await self.coordinator.async_refresh()
-
-
-class HealthySwitch(TclEntityBase, SwitchEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(self, coordinator, "Helathy-Switch", "Healthy", device)
-
-        self.aws_iot = coordinator.get_aws_iot()
-
-    @property
-    def device_class(self) -> str:
-        return SwitchDeviceClass.SWITCH
-
-    @property
-    def icon(self):
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        if self.device.data.healthy == 1:
-            return "mdi:heart"
-        return "mdi:heart-off"
-
-    @property
-    def is_on(self) -> bool | None:
-        device = self.coordinator.get_device_by_id(self.device.device_id)
-        return device.data.healthy
-
-    async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_set_healthy(self.device.device_id, 1)
-
-        self.device.data.healthy = 1
-        self.coordinator.set_device(self.device)
-        await self.coordinator.async_refresh()
-
-    async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_set_healthy(self.device.device_id, 0)
-
-        self.device.data.healthy = 0
-        self.coordinator.set_device(self.device)
-        await self.coordinator.async_refresh()
-
-
-class DryingSwitch(TclEntityBase, SwitchEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(self, coordinator, "Drying-Switch", "Drying", device)
-
-        self.aws_iot = coordinator.get_aws_iot()
-
-    @property
-    def device_class(self) -> str:
-        return SwitchDeviceClass.SWITCH
-
-    @property
-    def icon(self):
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        if self.device.data.anti_moldew == 1:
-            return "mdi:water-opacity"
-        return "mdi:water-off-outline"
-
-    @property
-    def is_on(self) -> bool | None:
-        device = self.coordinator.get_device_by_id(self.device.device_id)
-        return device.data.anti_moldew
-
-    async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_set_drying(self.device.device_id, 1)
-
-        self.device.data.anti_moldew = 1
-        self.coordinator.set_device(self.device)
-        await self.coordinator.async_refresh()
-
-    async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_set_drying(self.device.device_id, 0)
-
-        self.device.data.anti_moldew = 0
-        self.coordinator.set_device(self.device)
-        await self.coordinator.async_refresh()
-
-
-class LightSwitch(TclEntityBase, SwitchEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(
-            self, coordinator, "Light-Switch", "Screen Light", device
-        )
-
-        self.aws_iot = coordinator.get_aws_iot()
-
-    @property
-    def device_class(self) -> str:
-        return SwitchDeviceClass.SWITCH
-
-    @property
-    def icon(self):
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        if self.device.data.screen == 1:
-            return "mdi:lightbulb-outline"
-        return "mdi:lightbulb-off-outline"
-
-    @property
-    def is_on(self) -> bool | None:
-        device = self.coordinator.get_device_by_id(self.device.device_id)
-        return device.data.screen
-
-    async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_set_light(self.device.device_id, 1)
-
-        self.device.data.screen = 1
-        self.coordinator.set_device(self.device)
-        await self.coordinator.async_refresh()
-
-    async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.aws_iot.async_set_light(self.device.device_id, 0)
-
-        self.device.data.screen = 0
-        self.coordinator.set_device(self.device)
+        await self.turn_off_fn(self.device)
         await self.coordinator.async_refresh()

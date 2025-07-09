@@ -13,7 +13,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device, TCL_SplitAC_DeviceData_Helper
+from .device import Device, DeviceTypeEnum, TCL_SplitAC_DeviceData_Helper
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -30,22 +30,99 @@ async def async_setup_entry(
 
     sensors = []
     for device in config_entry.devices:
-        sensors.append(TargetTemperatureSensor(coordinator, device))
-        sensors.append(ModeSensor(coordinator, device))
-        sensors.append(WindSpeedSensor(coordinator, device))
-        sensors.append(UpAndDownAirSupplyVectorSensor(coordinator, device))
-        sensors.append(LeftAndRightAirSupplyVectorSensor(coordinator, device))
-        sensors.append(SleepModeSensor(coordinator, device))
-
-    # Create the binary sensors.
+        if device.device_type == DeviceTypeEnum.SPLIT_AC:
+            # sensors.append(
+            #     TemperatureSensor(
+            #         coordinator=coordinator,
+            #         device=device,
+            #         type="TargetTemperature",
+            #         name="Target Temperature",
+            #         value_fn=lambda device: device.data.target_temperature,
+            #     )
+            # )
+            sensors.append(
+                TemperatureSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="CurrentTemperature",
+                    name="Current Temperature",
+                    value_fn=lambda device: device.data.current_temperature,
+                )
+            )
+            # sensors.append(
+            #     EnumSensor(
+            #         coordinator=coordinator,
+            #         device=device,
+            #         type="Mode",
+            #         name="Mode",
+            #         icon="mdi:set-none",
+            #         value_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
+            #             device.data
+            #         ).getMode(),
+            #     )
+            # )
+            # sensors.append(
+            #     EnumSensor(
+            #         coordinator=coordinator,
+            #         device=device,
+            #         type="WindSpeed",
+            #         name="Wind Speed",
+            #         icon="mdi:weather-windy",
+            #         value_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
+            #             device.data
+            #         ).getWindSpeed(),
+            #     )
+            # )
+            # sensors.append(
+            #     EnumSensor(
+            #         coordinator=coordinator,
+            #         device=device,
+            #         type="UpAndDownAirSupplyVector",
+            #         name="Up and Down air supply",
+            #         icon="mdi:swap-vertical",
+            #         value_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
+            #             device.data
+            #         ).getUpAndDownAirSupplyVector(),
+            #     )
+            # )
+            # sensors.append(
+            #     EnumSensor(
+            #         coordinator=coordinator,
+            #         device=device,
+            #         type="LeftAndRightAirSupplyVector",
+            #         name="Left and Right air supply",
+            #         icon="mdi:swap-horizontal",
+            #         value_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
+            #             device.data
+            #         ).getLeftAndRightAirSupplyVector(),
+            #     )
+            # )
+            # sensors.append(
+            #     EnumSensor(
+            #         coordinator=coordinator,
+            #         device=device,
+            #         type="SleepMode",
+            #         name="Sleep Mode",
+            #         icon="mdi:sleep",
+            #         value_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
+            #             device.data
+            #         ).getSleepMode(),
+            #     )
+            # )
     async_add_entities(sensors)
 
 
-class TargetTemperatureSensor(TclEntityBase, SensorEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(
-            self, coordinator, "TargetTemperature-sensor", "Target Temperature", device
-        )
+class TemperatureSensor(TclEntityBase, SensorEntity):
+    def __init__(
+        self,
+        coordinator: IotDeviceCoordinator,
+        device: Device,
+        type: str,
+        name: str,
+        value_fn,
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, type, name, device)
+        self.value_fn = value_fn
 
     @property
     def device_class(self) -> str:
@@ -54,7 +131,7 @@ class TargetTemperatureSensor(TclEntityBase, SensorEntity):
     @property
     def native_value(self) -> int | float:
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        return float(self.device.data.target_temperature)
+        return float(self.value_fn(self.device))
 
     @property
     def native_unit_of_measurement(self) -> str | None:
@@ -65,9 +142,19 @@ class TargetTemperatureSensor(TclEntityBase, SensorEntity):
         return SensorStateClass.MEASUREMENT
 
 
-class ModeSensor(TclEntityBase, SensorEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(self, coordinator, "Mode-sensor", "Mode", device)
+class EnumSensor(TclEntityBase, SensorEntity):
+    def __init__(
+        self,
+        coordinator: IotDeviceCoordinator,
+        device: Device,
+        type: str,
+        name: str,
+        icon: str,
+        value_fn,
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, type, name, device)
+        self.icon_name = icon
+        self.value_fn = value_fn
 
     @property
     def device_class(self) -> str:
@@ -75,142 +162,13 @@ class ModeSensor(TclEntityBase, SensorEntity):
 
     @property
     def icon(self):
-        return "mdi:set-none"
+        return self.icon_name
 
     @property
     def native_value(self) -> int | float:
-        self.device: Device = self.coordinator.get_device_by_id(self.device.device_id)
-        helper = TCL_SplitAC_DeviceData_Helper(self.device.data)
-        return helper.getMode()
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        return self.value_fn(self.device)
 
     @property
     def native_unit_of_measurement(self) -> str | None:
         return None
-
-    # @property
-    # def state_class(self) -> str | None:
-    #     return SensorStateClass.MEASUREMENT
-
-
-class WindSpeedSensor(TclEntityBase, SensorEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(
-            self, coordinator, "WindSpeed-sensor", "Wind Speed", device
-        )
-
-    @property
-    def device_class(self) -> str:
-        return SensorDeviceClass.ENUM
-
-    @property
-    def icon(self):
-        return "mdi:weather-windy"
-
-    @property
-    def native_value(self) -> int | float:
-        self.device: Device = self.coordinator.get_device_by_id(self.device.device_id)
-        helper = TCL_SplitAC_DeviceData_Helper(self.device.data)
-        return helper.getWindSpeed()
-
-    @property
-    def native_unit_of_measurement(self) -> str | None:
-        return None
-
-    # @property
-    # def state_class(self) -> str | None:
-    #     return SensorStateClass.MEASUREMENT
-
-
-class UpAndDownAirSupplyVectorSensor(TclEntityBase, SensorEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(
-            self,
-            coordinator,
-            "UpAndDownAirSupplyVector-sensor",
-            "Up and down air supply",
-            device,
-        )
-
-    @property
-    def device_class(self) -> str:
-        return SensorDeviceClass.ENUM
-
-    @property
-    def icon(self):
-        return "mdi:swap-vertical"
-
-    @property
-    def native_value(self) -> int | float:
-        self.device: Device = self.coordinator.get_device_by_id(self.device.device_id)
-        helper = TCL_SplitAC_DeviceData_Helper(self.device.data)
-        return helper.getUpAndDownAirSupplyVector()
-
-    @property
-    def native_unit_of_measurement(self) -> str | None:
-        return None
-
-    # @property
-    # def state_class(self) -> str | None:
-    #     return SensorStateClass.MEASUREMENT
-
-
-class LeftAndRightAirSupplyVectorSensor(TclEntityBase, SensorEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(
-            self,
-            coordinator,
-            "LeftAndRightAirSupplyVector-sensor",
-            "Left and right air supply",
-            device,
-        )
-
-    @property
-    def device_class(self) -> str:
-        return SensorDeviceClass.ENUM
-
-    @property
-    def icon(self):
-        return "mdi:swap-horizontal"
-
-    @property
-    def native_value(self) -> int | float:
-        self.device: Device = self.coordinator.get_device_by_id(self.device.device_id)
-        helper = TCL_SplitAC_DeviceData_Helper(self.device.data)
-        return helper.getLeftAndRightAirSupplyVector()
-
-    @property
-    def native_unit_of_measurement(self) -> str | None:
-        return None
-
-    # @property
-    # def state_class(self) -> str | None:
-    #     return SensorStateClass.MEASUREMENT
-
-
-class SleepModeSensor(TclEntityBase, SensorEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(
-            self, coordinator, "Sleep-Mode-sensor", "Sleep Mode", device
-        )
-
-    @property
-    def device_class(self) -> str:
-        return SensorDeviceClass.ENUM
-
-    @property
-    def icon(self):
-        return "mdi:sleep"
-
-    @property
-    def native_value(self) -> int | float:
-        self.device: Device = self.coordinator.get_device_by_id(self.device.device_id)
-        helper = TCL_SplitAC_DeviceData_Helper(self.device.data)
-        return helper.getSleepMode()
-
-    @property
-    def native_unit_of_measurement(self) -> str | None:
-        return None
-
-    # @property
-    # def state_class(self) -> str | None:
-    #     return SensorStateClass.MEASUREMENT

@@ -11,7 +11,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device
+from .device import Device, DeviceTypeEnum
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -27,45 +27,41 @@ async def async_setup_entry(
     coordinator = config_entry.runtime_data.coordinator
 
     sensors = []
-    for device in config_entry.devices:
-        sensors.append(PowerStateBinarySensor(coordinator, device))
-        sensors.append(BeepSwitchBinarySensor(coordinator, device))
-        sensors.append(EcoSwitchBinarySensor(coordinator, device))
-        sensors.append(HealthySwitchBinarySensor(coordinator, device))
-        sensors.append(DryingSwitchBinarySensor(coordinator, device))
-        sensors.append(LightSwitchBinarySensor(coordinator, device))
+    # for device in config_entry.devices:
+    #     if device.device_type == DeviceTypeEnum.SPLIT_AC:
+    #         sensors.append(
+    #             BinarySensor(
+    #                 coordinator=coordinator,
+    #                 device=device,
+    #                 type="BeepMode",
+    #                 name="Beep Mode",
+    #                 icon_fn=lambda device: "mdi:volume-high"
+    #                 if device.data.beep_switch == 1
+    #                 else "mdi:volume-off",
+    #                 is_on_fn=lambda device: device.data.beep_switch,
+    #             )
+    #         )
 
     async_add_entities(sensors)
 
 
-class PowerStateBinarySensor(TclEntityBase, BinarySensorEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(
-            self, coordinator, "Power-State-sensor", "Power State", device
-        )
-
-    @property
-    def device_class(self) -> str:
-        return BinarySensorDeviceClass.POWER
-
-    @property
-    def is_on(self) -> bool | None:
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        return self.device.data.power_switch
-
-
-class BeepSwitchBinarySensor(TclEntityBase, BinarySensorEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(
-            self, coordinator, "Beep-Switch-sensor", "Beep Switch State", device
-        )
+class BinarySensor(TclEntityBase, BinarySensorEntity):
+    def __init__(
+        self,
+        coordinator: IotDeviceCoordinator,
+        device: Device,
+        type: str,
+        name: str,
+        icon_fn: lambda device: str,
+        is_on_fn: lambda device: bool,
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, type, name, device)
+        self.icon_fn = icon_fn
+        self.is_on_fn = is_on_fn
 
     @property
     def icon(self):
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        if self.device.data.beep_switch == 1:
-            return "mdi:volume-high"
-        return "mdi:volume-off"
+        return self.icon_fn(self.device)
 
     @property
     def device_class(self) -> str:
@@ -74,96 +70,4 @@ class BeepSwitchBinarySensor(TclEntityBase, BinarySensorEntity):
     @property
     def is_on(self) -> bool | None:
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        return self.device.data.beep_switch
-
-
-class EcoSwitchBinarySensor(TclEntityBase, BinarySensorEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(
-            self, coordinator, "ECO-Switch-sensor", "Eco Switch State", device
-        )
-
-    @property
-    def icon(self):
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        if self.device.data.eco == 1:
-            return "mdi:leaf"
-        return "mdi:leaf-off"
-
-    @property
-    def device_class(self) -> str:
-        return BinarySensorDeviceClass.POWER
-
-    @property
-    def is_on(self) -> bool | None:
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        return self.device.data.eco
-
-
-class HealthySwitchBinarySensor(TclEntityBase, BinarySensorEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(
-            self, coordinator, "Healthy-Switch-sensor", "Healthy Switch State", device
-        )
-
-    @property
-    def icon(self):
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        if self.device.data.healthy == 1:
-            return "mdi:heart"
-        return "mdi:heart-off"
-
-    @property
-    def device_class(self) -> str:
-        return BinarySensorDeviceClass.POWER
-
-    @property
-    def is_on(self) -> bool | None:
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        return self.device.data.healthy
-
-
-class DryingSwitchBinarySensor(TclEntityBase, BinarySensorEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(
-            self, coordinator, "Drying-Switch-sensor", "Drying Switch State", device
-        )
-
-    @property
-    def icon(self):
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        if self.device.data.anti_moldew == 1:
-            return "mdi:water-opacity"
-        return "mdi:water-off-outline"
-
-    @property
-    def device_class(self) -> str:
-        return BinarySensorDeviceClass.POWER
-
-    @property
-    def is_on(self) -> bool | None:
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        return self.device.data.anti_moldew
-
-
-class LightSwitchBinarySensor(TclEntityBase, BinarySensorEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(
-            self, coordinator, "Light-Switch-sensor", "Light Switch State", device
-        )
-
-    @property
-    def icon(self):
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        if self.device.data.screen == 1:
-            return "mdi:lightbulb-outline"
-        return "mdi:lightbulb-off-outline"
-
-    @property
-    def device_class(self) -> str:
-        return BinarySensorDeviceClass.POWER
-
-    @property
-    def is_on(self) -> bool | None:
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        return self.device.data.screen
+        return self.is_on_fn(self.device)
