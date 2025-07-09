@@ -14,6 +14,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .aws_iot import AwsIot
 from .const import DEFAULT_SCAN_INTERVAL, DOMAIN
 from .device import Device
+from .config_entry import ConfigData
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,6 +49,10 @@ class IotDeviceCoordinator(DataUpdateCoordinator):
     def get_aws_iot(self) -> AwsIot:
         """Return the AwsIot instance."""
         return self.aws_iot
+
+    def get_config_data(self) -> AwsIot:
+        """Return the AwsIot instance."""
+        return self.aws_iot.get_session_manager().get_config_data()
 
     async def async_update_data(self):
         """Fetch data"""

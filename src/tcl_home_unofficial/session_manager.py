@@ -63,6 +63,9 @@ class SessionManager:
     def is_verbose_setup_logging(self) -> bool:
         return self.configData.verbose_setup_logging
 
+    def get_config_data(self) -> ConfigData:
+        return self.configData
+
     async def get_aws_region(self) -> str:
         cloud_urls = await self.async_aws_cloud_urls()
         return cloud_urls.data.cloud_region

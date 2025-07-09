@@ -26,6 +26,7 @@ _PLATFORMS: list[Platform] = [
     Platform.NUMBER,
     Platform.BUTTON,
     Platform.REMOTE,
+    Platform.CLIMATE,
 ]
 
 _LOGGER = logging.getLogger(__name__)

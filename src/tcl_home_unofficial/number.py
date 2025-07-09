@@ -10,7 +10,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .aws_iot import AwsIot
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device
+from .device import Device, DeviceTypeEnum
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,7 +26,8 @@ async def async_setup_entry(
 
     customEntities = []
     for device in config_entry.devices:
-        customEntities.append(SetTargetTempEntity(coordinator, device))
+        if device.device_type == DeviceTypeEnum.SPLIT_AC:
+            customEntities.append(SetTargetTempEntity(coordinator, device))
 
     async_add_entities(customEntities)
 

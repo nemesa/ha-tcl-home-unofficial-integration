@@ -148,11 +148,23 @@ class AwsIot:
         )
 
     def set_power(self, device_id: str, value: int) -> None:
+        turnOffBeep = (
+            self.session_manager.get_config_data().behavior_mute_beep_on_power_on
+        )
+
         if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.power: %s - %s", device_id, value)
+            _LOGGER.info(
+                "AwsIot.power: %s - %s (turnOffBeep:%s)", device_id, value, turnOffBeep
+            )
+
+        desired = {"powerSwitch": value}
+
+        if turnOffBeep and value == 1:
+            desired["beepSwitch"] = 0
+
         payload = json.dumps(
             {
-                "state": {"desired": {"powerSwitch": value}},
+                "state": {"desired": desired},
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
         )

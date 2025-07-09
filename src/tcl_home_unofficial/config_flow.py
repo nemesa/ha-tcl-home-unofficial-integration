@@ -56,6 +56,8 @@ async def isUserCanLogIn(hass: HomeAssistant, data: dict[str, Any]) -> dict:
             verbose_device_logging=False,
             verbose_session_logging=False,
             verbose_setup_logging=False,
+            behavior_keep_target_temperature_at_cliet_mode_change=False,
+            behavior_mute_beep_on_power_on=False,
         ),
     )
 
@@ -142,7 +144,7 @@ class TclHomeUnofficialConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._has_invalid_auth = True
                 return await self.async_step_user()
             else:
-                return await self.async_step_settings_of_logs()
+                return await self.async_step_settings_of_behavior()
 
         app_login_url = DEFAULT_APP_LOGI_URL
         cloud_urls = DEFAULT_APP_CLOUD_URL
@@ -165,6 +167,53 @@ class TclHomeUnofficialConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="settings_of_app",
+            data_schema=data_schema,
+            errors=errors,
+            last_step=False,
+        )
+
+    async def async_step_settings_of_behavior(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            self._input_data.update(user_input)
+            return await self.async_step_settings_of_logs()
+
+        behavior_keep_target_temperature_at_cliet_mode_change = False
+        behavior_mute_beep_on_power_on = False
+        if self._input_data is not None:
+            if (
+                "behavior_keep_target_temperature_at_cliet_mode_change"
+                in self._input_data
+            ):
+                behavior_keep_target_temperature_at_cliet_mode_change = (
+                    self._input_data[
+                        "behavior_keep_target_temperature_at_cliet_mode_change"
+                    ]
+                )
+        if self._input_data is not None:
+            if "behavior_mute_beep_on_power_on" in self._input_data:
+                behavior_mute_beep_on_power_on = self._input_data[
+                    "behavior_mute_beep_on_power_on"
+                ]
+
+        data_schema = vol.Schema(
+            {
+                vol.Required(
+                    "behavior_keep_target_temperature_at_cliet_mode_change",
+                    default=behavior_keep_target_temperature_at_cliet_mode_change,
+                ): bool,
+                vol.Required(
+                    "behavior_mute_beep_on_power_on",
+                    default=behavior_mute_beep_on_power_on,
+                ): bool,
+            }
+        )
+
+        return self.async_show_form(
+            step_id="settings_of_behavior",
             data_schema=data_schema,
             errors=errors,
             last_step=False,
@@ -224,6 +273,7 @@ class TclHomeUnofficialOptionsFlowHandler(OptionsFlow):
                 "option_page_account": "Account",
                 "option_page_tcl_app": "TCL App Settings",
                 "option_page_logs": "Logs",
+                "option_page_behaviors": "Behaviors",
             },
         )
 
@@ -252,8 +302,8 @@ class TclHomeUnofficialOptionsFlowHandler(OptionsFlow):
         data = convertToConfigData(self.config_entry)
         data_schema = vol.Schema(
             {
-                vol.Required("app_login_url",default=data.app_login_url): str,
-                vol.Required("cloud_urls",default=data.cloud_urls): str,
+                vol.Required("app_login_url", default=data.app_login_url): str,
+                vol.Required("cloud_urls", default=data.cloud_urls): str,
                 vol.Required("app_id", default=data.app_id): str,
             }
         )
@@ -283,6 +333,29 @@ class TclHomeUnofficialOptionsFlowHandler(OptionsFlow):
         )
 
         return self.async_show_form(step_id="option_page_logs", data_schema=data_schema)
+
+    async def async_step_option_page_behaviors(self, user_input=None):
+        if user_input is not None:
+            options = self.config_entry.options | user_input
+            return self.async_create_entry(data=options)
+
+        data = convertToConfigData(self.config_entry)
+        data_schema = vol.Schema(
+            {
+                vol.Required(
+                    "behavior_keep_target_temperature_at_cliet_mode_change",
+                    default=data.behavior_keep_target_temperature_at_cliet_mode_change,
+                ): bool,
+                vol.Required(
+                    "behavior_mute_beep_on_power_on",
+                    default=data.behavior_mute_beep_on_power_on,
+                ): bool,
+            }
+        )
+
+        return self.async_show_form(
+            step_id="option_page_behaviors", data_schema=data_schema
+        )
 
 
 class CannotConnect(HomeAssistantError):
