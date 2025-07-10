@@ -19,16 +19,20 @@ This may eventually become available in the [HACS](https://www.home-assistant.io
 
 ### Steps:
 1. Download the ZIP from GitHub and extract `ha-tcl-home-unofficial-integration-main.zip`.  
-2. Create a folder named `custom_components` next to your `configuration.yaml` (if you don't already have one).  
+![git download](./git_download.jpg "git download")
+2. At HomeAssistant Host, create a folder named `custom_components` next to your `configuration.yaml` (if you don't already have one).  
 3. Inside `custom_components`, create a folder named `tcl_home_unofficial`.  
-4. Copy all files from the ZIP’s `/ha-tcl-home-unofficial-integration-main/src/tcl_home_unofficial/` folder into your new `custom_components/tcl_home_unofficial` folder.  
+4. Copy all files from the ZIP’s `/ha-tcl-home-unofficial-integration-main/src/tcl_home_unofficial/` folder into your new `custom_components/tcl_home_unofficial` folder. Should look like this: 
+![files in HA](./ha_files.jpg "files in HA")
+Note the translations folder with the en.json, you have to copy that foler and file too.
 5. Restart Home Assistant.  
-6. In the UI go to **Settings → Devices & Services → + Add Integration**, then search for “TCL Home” and follow the setup steps.
+6. In the Home Assitant go to **Settings → Devices & Services → + Add Integration**, then search for “TCL Home” and follow the setup steps.
 
 ---
 
-Optionally, you can install the File Editor add-on to upload files and edit `configuration.yaml` via:  
-**Settings → Add-ons**, then search for “File editor.”
+Optionally, you can install the File Editor add-on to create the folders and upload files or to edit `configuration.yaml`
+Install it at:  
+Home Assitant **Settings → Add-ons**, then search for “File editor.”
 
 ## Logs
 For info logs extend the `configuration.yaml` with
