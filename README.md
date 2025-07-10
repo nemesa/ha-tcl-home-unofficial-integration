@@ -40,8 +40,12 @@ For info logs extend the `configuration.yaml` with
 
 ## How the integration looks
 
+Climate contoll implementaion:
+
+![Climate controll](./climate_controll.jpg "Climate controll")
+
 Dashboard example:  
 ![Dashboard example](./dashboard_example.jpg "Dashboard example")
 
-Integration mapping to the app:  
+Integration mapping to the app (out dated picture, now less redundant sensors and +climate type controll):  
 ![Integration mapping to the app](./integration_map_to_app.jpg "Integration mapping to the app")

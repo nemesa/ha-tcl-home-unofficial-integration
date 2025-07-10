@@ -130,6 +130,9 @@ class SplitAcClimate(TclEntityBase, ClimateEntity):
         self._attr_temperature_unit = UnitOfTemperature.CELSIUS
 
         self._target_temperature = self.device.data.target_temperature
+        self._attr_target_temperature_step = 1
+        self._attr_min_temp = 16
+        self._attr_max_temp = 36
 
     @property
     def current_temperature(self) -> float:
@@ -140,14 +143,6 @@ class SplitAcClimate(TclEntityBase, ClimateEntity):
     def target_temperature(self) -> float | None:
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
         return float(self.device.data.target_temperature)
-
-    @property
-    def target_temperature_high(self) -> float | None:
-        return float(36)
-
-    @property
-    def target_temperature_low(self) -> float | None:
-        return float(16)
 
     @property
     def hvac_mode(self) -> HVACMode:

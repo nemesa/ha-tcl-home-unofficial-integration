@@ -270,10 +270,10 @@ class TclHomeUnofficialOptionsFlowHandler(OptionsFlow):
             step_id="init",
             # menu_options=["option_page_1", "option_page_2"],
             menu_options={
+                "option_page_behaviors": "Behaviors",
                 "option_page_account": "Account",
                 "option_page_tcl_app": "TCL App Settings",
                 "option_page_logs": "Logs",
-                "option_page_behaviors": "Behaviors",
             },
         )
 
