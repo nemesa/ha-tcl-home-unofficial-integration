@@ -1,5 +1,5 @@
 # ha-tcl-home-unofficial-integration  
-**TCL Home Home Assistant integration (unofficial)**
+**TCL Home - Home Assistant integration (unofficial)**
 
 ## Discord invite link
 For direct messages or for collaboration with missing device types
@@ -26,7 +26,7 @@ This may eventually become available in the [HACS](https://www.home-assistant.io
 ![git download](./git_download.jpg "git download")
 2. At HomeAssistant Host, create a folder named `custom_components` next to your `configuration.yaml` (if you don't already have one).  
 3. Inside `custom_components`, create a folder named `tcl_home_unofficial`.  
-4. Copy all files from the ZIP’s `/ha-tcl-home-unofficial-integration-main/src/tcl_home_unofficial/` folder into your new `custom_components/tcl_home_unofficial` folder. Should look like this: 
+4. Copy all files from the ZIP’s `/ha-tcl-home-unofficial-integration-main/custom_components/tcl_home_unofficial/` folder into your new `custom_components/tcl_home_unofficial` folder. Should look like this: 
 ![files in HA](./ha_files.jpg "files in HA")
 Note the translations folder with the en.json, you have to copy that foler and file too.
 5. Restart Home Assistant.  
