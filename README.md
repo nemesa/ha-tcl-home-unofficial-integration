@@ -1,6 +1,10 @@
 # ha-tcl-home-unofficial-integration  
 **TCL Home Home Assistant integration (unofficial)**
 
+## Discord invite link
+For direct messages or for collaboration with missing device types
+https://discord.gg/8AcrRmNfVj
+
 ## Known issues
 - 
 
