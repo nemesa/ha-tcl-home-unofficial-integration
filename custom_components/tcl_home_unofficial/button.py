@@ -7,10 +7,9 @@ from homeassistant.components.button import ButtonDeviceClass, ButtonEntity
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .aws_iot import AwsIot
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device, DeviceTypeEnum
+from .device import Device, Device, getSupportedFeatures,DeviceFeature
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,7 +25,9 @@ async def async_setup_entry(
 
     switches = []
     for device in config_entry.devices:
-        if device.device_type == DeviceTypeEnum.SPLIT_AC:
+        supported_features = getSupportedFeatures(device.device_type)
+                
+        if DeviceFeature.BUTTON_SELF_CLEAN in supported_features:
             switches.append(SelfCleanButton(coordinator, device))
 
     async_add_entities(switches)

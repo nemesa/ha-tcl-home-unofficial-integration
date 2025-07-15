@@ -13,7 +13,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device, DeviceTypeEnum, TCL_SplitAC_DeviceData_Helper
+from .device import Device, getSupportedFeatures,DeviceFeature
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -30,16 +30,9 @@ async def async_setup_entry(
 
     sensors = []
     for device in config_entry.devices:
-        if device.device_type == DeviceTypeEnum.SPLIT_AC:
-            # sensors.append(
-            #     TemperatureSensor(
-            #         coordinator=coordinator,
-            #         device=device,
-            #         type="TargetTemperature",
-            #         name="Target Temperature",
-            #         value_fn=lambda device: device.data.target_temperature,
-            #     )
-            # )
+        supported_features = getSupportedFeatures(device.device_type)
+                
+        if DeviceFeature.SENSOR_CURRENT_TEMPERATURE in supported_features:
             sensors.append(
                 TemperatureSensor(
                     coordinator=coordinator,
@@ -49,66 +42,7 @@ async def async_setup_entry(
                     value_fn=lambda device: device.data.current_temperature,
                 )
             )
-            # sensors.append(
-            #     EnumSensor(
-            #         coordinator=coordinator,
-            #         device=device,
-            #         type="Mode",
-            #         name="Mode",
-            #         icon="mdi:set-none",
-            #         value_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
-            #             device.data
-            #         ).getMode(),
-            #     )
-            # )
-            # sensors.append(
-            #     EnumSensor(
-            #         coordinator=coordinator,
-            #         device=device,
-            #         type="WindSpeed",
-            #         name="Wind Speed",
-            #         icon="mdi:weather-windy",
-            #         value_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
-            #             device.data
-            #         ).getWindSpeed(),
-            #     )
-            # )
-            # sensors.append(
-            #     EnumSensor(
-            #         coordinator=coordinator,
-            #         device=device,
-            #         type="UpAndDownAirSupplyVector",
-            #         name="Up and Down air supply",
-            #         icon="mdi:swap-vertical",
-            #         value_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
-            #             device.data
-            #         ).getUpAndDownAirSupplyVector(),
-            #     )
-            # )
-            # sensors.append(
-            #     EnumSensor(
-            #         coordinator=coordinator,
-            #         device=device,
-            #         type="LeftAndRightAirSupplyVector",
-            #         name="Left and Right air supply",
-            #         icon="mdi:swap-horizontal",
-            #         value_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
-            #             device.data
-            #         ).getLeftAndRightAirSupplyVector(),
-            #     )
-            # )
-            # sensors.append(
-            #     EnumSensor(
-            #         coordinator=coordinator,
-            #         device=device,
-            #         type="SleepMode",
-            #         name="Sleep Mode",
-            #         icon="mdi:sleep",
-            #         value_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
-            #             device.data
-            #         ).getSleepMode(),
-            #     )
-            # )
+                        
     async_add_entities(sensors)
 
 

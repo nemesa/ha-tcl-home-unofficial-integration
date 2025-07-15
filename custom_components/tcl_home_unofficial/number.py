@@ -7,10 +7,9 @@ from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .aws_iot import AwsIot
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device, DeviceTypeEnum
+from .device import Device, getSupportedFeatures,DeviceFeature
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,7 +25,9 @@ async def async_setup_entry(
 
     customEntities = []
     for device in config_entry.devices:
-        if device.device_type == DeviceTypeEnum.SPLIT_AC:
+        supported_features = getSupportedFeatures(device.device_type)
+                
+        if DeviceFeature.NUMBER_TARGET_TEMPERATURE in supported_features:
             customEntities.append(SetTargetTempEntity(coordinator, device))
 
     async_add_entities(customEntities)
@@ -37,6 +38,8 @@ class SetTargetTempEntity(TclEntityBase, NumberEntity):
         TclEntityBase.__init__(
             self, coordinator, "SetTargetTempEntity", "Set Target Temperature", device
         )
+        
+        self.device_features= getSupportedFeatures(device.device_type)
 
         self.aws_iot = coordinator.get_aws_iot()
 
@@ -50,6 +53,10 @@ class SetTargetTempEntity(TclEntityBase, NumberEntity):
         self._attr_native_min_value = 16
         self._attr_native_max_value = 36
         self._attr_native_step = 1
+        if DeviceFeature.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS in self.device_features:
+            self._attr_native_step = 0.5
+            self._attr_native_min_value = 16.0
+            self._attr_native_max_value = 36.0
 
     @property
     def device_class(self) -> str:
@@ -57,13 +64,19 @@ class SetTargetTempEntity(TclEntityBase, NumberEntity):
 
     @property
     def native_value(self) -> int | float:
-        return float(self.device.data.target_temperature)
+        if DeviceFeature.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS in self.device_features:
+            return float(self.device.data.target_temperature)
+        return int(self.device.data.target_temperature)
 
     async def async_set_native_value(self, value: float) -> None:
         """Update the current value."""
-        # _LOGGER.info("Setting target temperature for device %s to %s",self.device.device_id,value)
+        
+        value_to_set = int(value)
+        if DeviceFeature.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS in self.device_features:
+            value_to_set= float(value)
+        
         await self.aws_iot.async_set_target_temperature(
-            self.device.device_id, int(value)
+            self.device.device_id, value_to_set
         )
         self.device.data.target_temperature = int(value)
         self.coordinator.set_device(self.device)

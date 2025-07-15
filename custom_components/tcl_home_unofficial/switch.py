@@ -9,7 +9,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device, DeviceTypeEnum
+from .device import Device, getSupportedFeatures,DeviceFeature
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -25,7 +25,10 @@ async def async_setup_entry(
 
     switches = []
     for device in config_entry.devices:
-        if device.device_type == DeviceTypeEnum.SPLIT_AC:
+        
+        supported_features = getSupportedFeatures(device.device_type)
+                
+        if DeviceFeature.SWITCH_POWER in supported_features:
             switches.append(
                 Switch(
                     coordinator=coordinator,
@@ -43,7 +46,9 @@ async def async_setup_entry(
                         device.device_id, 0
                     ),
                 )
-            )
+            )       
+        
+        if DeviceFeature.SWITCH_BEEP in supported_features:
             switches.append(
                 Switch(
                     coordinator=coordinator,
@@ -62,6 +67,8 @@ async def async_setup_entry(
                     ),
                 )
             )
+            
+        if DeviceFeature.SWITCH_ECO in supported_features:
             switches.append(
                 Switch(
                     coordinator=coordinator,
@@ -80,6 +87,8 @@ async def async_setup_entry(
                     ),
                 )
             )
+            
+        if DeviceFeature.SWITCH_HEALTHY in supported_features:
             switches.append(
                 Switch(
                     coordinator=coordinator,
@@ -98,6 +107,7 @@ async def async_setup_entry(
                     ),
                 )
             )
+        if DeviceFeature.SWITCH_DRYING in supported_features:
             switches.append(
                 Switch(
                     coordinator=coordinator,
@@ -116,6 +126,7 @@ async def async_setup_entry(
                     ),
                 )
             )
+        if DeviceFeature.SWITCH_SCREEN in supported_features:
             switches.append(
                 Switch(
                     coordinator=coordinator,

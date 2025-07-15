@@ -10,11 +10,11 @@ import boto3.session
 from homeassistant.core import HomeAssistant
 
 from .config_entry import New_NameConfigEntry
-from .device import (
+from .device_ac_common import (
     LeftAndRightAirSupplyVectorEnum,
+    UpAndDownAirSupplyVectorEnum,
     ModeEnum,
     SleepModeEnum,
-    UpAndDownAirSupplyVectorEnum,
     WindSeedEnum,
 )
 from .session_manager import SessionManager
@@ -102,7 +102,7 @@ class AwsIot:
             raise e
 
     async def execute_and_re_try_call_with_device_id_and_value(
-        self, function, device_id: str, value: int, fromException: bool = False
+        self, function, device_id: str, value: int | float, fromException: bool = False
     ):
         try:
             return await self.hass.async_add_executor_job(function, device_id, value)
@@ -189,7 +189,7 @@ class AwsIot:
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
     async def async_set_target_temperature(
-        self, device_id: str, value: int, fromException: bool = False
+        self, device_id: str, value: int | float, fromException: bool = False
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
             self.set_target_temperature, device_id, value, fromException

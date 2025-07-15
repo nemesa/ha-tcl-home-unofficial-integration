@@ -8,15 +8,18 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import (
-    Device,
-    DeviceTypeEnum,
+from .device_spit_ac import TCL_SplitAC_DeviceData_Helper
+from .device_ac_common import (
     LeftAndRightAirSupplyVectorEnum,
+    UpAndDownAirSupplyVectorEnum,
     ModeEnum,
     SleepModeEnum,
-    TCL_SplitAC_DeviceData_Helper,
-    UpAndDownAirSupplyVectorEnum,
     WindSeedEnum,
+)
+from .device import (
+    Device,
+    getSupportedFeatures,
+    DeviceFeature
 )
 from .tcl_entity_base import TclEntityBase
 
@@ -33,7 +36,9 @@ async def async_setup_entry(
 
     switches = []
     for device in config_entry.devices:
-        if device.device_type == DeviceTypeEnum.SPLIT_AC:
+        supported_features = getSupportedFeatures(device.device_type)
+                
+        if DeviceFeature.SELECT_MODE in supported_features:
             switches.append(
                 Select(
                     coordinator=coordinator,
@@ -51,6 +56,8 @@ async def async_setup_entry(
                     ),
                 )
             )
+            
+        if DeviceFeature.SELECT_WIND_SPEED in supported_features:
             switches.append(
                 Select(
                     coordinator=coordinator,
@@ -68,6 +75,8 @@ async def async_setup_entry(
                     ),
                 )
             )
+            
+        if DeviceFeature.SELECT_VERTICAL_DIRECTION in supported_features:
             switches.append(
                 Select(
                     coordinator=coordinator,
@@ -85,6 +94,8 @@ async def async_setup_entry(
                     ),
                 )
             )
+            
+        if DeviceFeature.SELECT_HORIZONTAL_DIRECTION in supported_features:
             switches.append(
                 Select(
                     coordinator=coordinator,
@@ -102,6 +113,8 @@ async def async_setup_entry(
                     ),
                 )
             )
+            
+        if DeviceFeature.SELECT_SLEEP_MODE in supported_features:
             switches.append(
                 Select(
                     coordinator=coordinator,
