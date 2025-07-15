@@ -40,10 +40,10 @@ async def async_setup_entry(
                     else "mdi:power-plug-off",
                     is_on_fn=lambda device: device.data.power_switch,
                     turn_on_fn=lambda device: coordinator.get_aws_iot().async_set_power(
-                        device.device_id, 1
+                        device.device_id, device.device_type, 1
                     ),
                     turn_off_fn=lambda device: coordinator.get_aws_iot().async_set_power(
-                        device.device_id, 0
+                        device.device_id, device.device_type, 0
                     ),
                 )
             )       
@@ -60,10 +60,10 @@ async def async_setup_entry(
                     else "mdi:volume-off",
                     is_on_fn=lambda device: device.data.beep_switch,
                     turn_on_fn=lambda device: coordinator.get_aws_iot().async_set_beep_mode(
-                        device.device_id, 1
+                        device.device_id, device.device_type, 1
                     ),
                     turn_off_fn=lambda device: coordinator.get_aws_iot().async_set_beep_mode(
-                        device.device_id, 0
+                        device.device_id, device.device_type, 0
                     ),
                 )
             )
@@ -80,10 +80,10 @@ async def async_setup_entry(
                     else "mdi:leaf-off",
                     is_on_fn=lambda device: device.data.eco,
                     turn_on_fn=lambda device: coordinator.get_aws_iot().async_set_eco(
-                        device.device_id, 1
+                        device.device_id, device.device_type, 1
                     ),
                     turn_off_fn=lambda device: coordinator.get_aws_iot().async_set_eco(
-                        device.device_id, 0
+                        device.device_id, device.device_type, 0
                     ),
                 )
             )
@@ -100,10 +100,10 @@ async def async_setup_entry(
                     else "mdi:heart-off",
                     is_on_fn=lambda device: device.data.healthy,
                     turn_on_fn=lambda device: coordinator.get_aws_iot().async_set_healthy(
-                        device.device_id, 1
+                        device.device_id, device.device_type, 1
                     ),
                     turn_off_fn=lambda device: coordinator.get_aws_iot().async_set_healthy(
-                        device.device_id, 0
+                        device.device_id, device.device_type, 0
                     ),
                 )
             )
@@ -119,10 +119,10 @@ async def async_setup_entry(
                     else "mdi:water-off-outline",
                     is_on_fn=lambda device: device.data.anti_moldew,
                     turn_on_fn=lambda device: coordinator.get_aws_iot().async_set_drying(
-                        device.device_id, 1
+                        device.device_id, device.device_type, 1
                     ),
                     turn_off_fn=lambda device: coordinator.get_aws_iot().async_set_drying(
-                        device.device_id, 0
+                        device.device_id, device.device_type, 0
                     ),
                 )
             )
@@ -138,10 +138,10 @@ async def async_setup_entry(
                     else "mdi:lightbulb-off-outline",
                     is_on_fn=lambda device: device.data.screen,
                     turn_on_fn=lambda device: coordinator.get_aws_iot().async_set_light(
-                        device.device_id, 1
+                        device.device_id, device.device_type, 1
                     ),
                     turn_off_fn=lambda device: coordinator.get_aws_iot().async_set_light(
-                        device.device_id, 0
+                        device.device_id, device.device_type, 0
                     ),
                 )
             )

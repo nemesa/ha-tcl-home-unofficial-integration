@@ -27,37 +27,6 @@ def getMode(work_mode: int | float) -> ModeEnum:
             return ModeEnum.AUTO
 
 
-class WindSeedEnum(StrEnum):
-    STRONG = "Strong"
-    HEIGH = "Heigh"
-    MID_HEIGH = "Mid-heigh"
-    MID_LOW = "Mid-low"
-    MEDIUM = "Medium"
-    LOW = "Low"
-    MUTE = "Mute"
-    AUTO = "Auto"
-
-
-def getWindSpeed(
-    wind_speed: int | float, turbo: int | float, silence_switch: int | float
-) -> WindSeedEnum:
-    match wind_speed:
-        case 6:
-            return WindSeedEnum.STRONG if turbo == 1 else WindSeedEnum.HEIGH
-        case 5:
-            return WindSeedEnum.MID_HEIGH
-        case 4:
-            return WindSeedEnum.MEDIUM
-        case 3:
-            return WindSeedEnum.MID_LOW
-        case 2:
-            return WindSeedEnum.MUTE if silence_switch == 1 else WindSeedEnum.LOW
-        case 0:
-            return WindSeedEnum.AUTO
-        case _:
-            return WindSeedEnum.AUTO
-
-
 class UpAndDownAirSupplyVectorEnum(StrEnum):
     UP_AND_DOWN_SWING = "Up and down swing"
     UPWARDS_SWING = "Upwards swing"

@@ -9,7 +9,8 @@ https://discord.gg/8AcrRmNfVj
 - 
 
 ## Supported device types
-- Split AC  
+- Split AC
+- Split AC Fresh air (parial - work in progress)  
 
 ## Credit  
 The idea for basic login is from [DavidIlie’s project](https://github.com/DavidIlie/tcl-home-ac).  

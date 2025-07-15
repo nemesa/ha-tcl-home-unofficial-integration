@@ -15,8 +15,10 @@ from .device_ac_common import (
     UpAndDownAirSupplyVectorEnum,
     ModeEnum,
     SleepModeEnum,
-    WindSeedEnum,
 )
+from .device import DeviceTypeEnum
+from .device_spit_ac import WindSeedEnum
+from .device_spit_ac_fresh_air import WindSeed7GearEnum
 from .session_manager import SessionManager
 from .tcl import GetThingsResponse, get_things
 
@@ -80,7 +82,11 @@ class AwsIot:
         return things
 
     async def execute_and_re_try_call_with_device_id(
-        self, function, device_id: str, fromException: bool = False
+        self,
+        function,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        fromException: bool = False,
     ):
         try:
             return await self.hass.async_add_executor_job(function, device_id)
@@ -91,6 +97,7 @@ class AwsIot:
                 await self.async_setup_client()
                 return await self.execute_and_re_try_call_with_device_id(
                     function=function,
+                    deviceType=deviceType,
                     device_id=device_id,
                     fromException=True,
                 )
@@ -102,7 +109,12 @@ class AwsIot:
             raise e
 
     async def execute_and_re_try_call_with_device_id_and_value(
-        self, function, device_id: str, value: int | float, fromException: bool = False
+        self,
+        function,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: int | float,
+        fromException: bool = False,
     ):
         try:
             return await self.hass.async_add_executor_job(function, device_id, value)
@@ -114,6 +126,7 @@ class AwsIot:
                 return await self.execute_and_re_try_call_with_device_id_and_value(
                     function=function,
                     device_id=device_id,
+                    deviceType=deviceType,
                     value=value,
                     fromException=True,
                 )
@@ -141,20 +154,28 @@ class AwsIot:
         return json.loads(payload)
 
     async def async_set_power(
-        self, device_id: str, value: SleepModeEnum, fromException: bool = False
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: SleepModeEnum,
+        fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
-            self.set_power, device_id, value, fromException
+            self.set_power, device_id, deviceType, value, fromException
         )
 
-    def set_power(self, device_id: str, value: int) -> None:
+    def set_power(self, device_id: str, deviceType: DeviceTypeEnum, value: int) -> None:
         turnOffBeep = (
             self.session_manager.get_config_data().behavior_mute_beep_on_power_on
         )
 
         if self.session_manager.is_verbose_device_logging():
             _LOGGER.info(
-                "AwsIot.power: %s - %s (turnOffBeep:%s)", device_id, value, turnOffBeep
+                "AwsIot.power: (%s) %s - %s (turnOffBeep:%s)",
+                deviceType,
+                device_id,
+                value,
+                turnOffBeep,
             )
 
         desired = {"powerSwitch": value}
@@ -171,15 +192,21 @@ class AwsIot:
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
     async def async_set_beep_mode(
-        self, device_id: str, value: SleepModeEnum, fromException: bool = False
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: SleepModeEnum,
+        fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
-            self.set_beep_mode, device_id, value, fromException
+            self.set_beep_mode, device_id, deviceType, value, fromException
         )
 
-    def set_beep_mode(self, device_id: str, value: int) -> None:
+    def set_beep_mode(
+        self, device_id: str, deviceType: DeviceTypeEnum, value: int
+    ) -> None:
         if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.beep_mode: %s - %s", device_id, value)
+            _LOGGER.info("AwsIot.beep_mode: (%s) %s - %s", deviceType, device_id, value)
         payload = json.dumps(
             {
                 "state": {"desired": {"beepSwitch": value}},
@@ -189,15 +216,26 @@ class AwsIot:
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
     async def async_set_target_temperature(
-        self, device_id: str, value: int | float, fromException: bool = False
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: int | float,
+        fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
-            self.set_target_temperature, device_id, value, fromException
+            self.set_target_temperature, device_id, deviceType, value, fromException
         )
 
-    def set_target_temperature(self, device_id: str, value: int) -> None:
+    def set_target_temperature(
+        self, device_id: str, deviceType: DeviceTypeEnum, value: int
+    ) -> None:
         if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.set_target_temperature: %s -> %s", device_id, value)
+            _LOGGER.info(
+                "AwsIot.set_target_temperature: (%s) %s - %s",
+                deviceType,
+                device_id,
+                value,
+            )
 
         if value < 16 or value > 36:
             _LOGGER.error("Invalid target temperature: %s (Min:16 Max:36)", value)
@@ -217,95 +255,189 @@ class AwsIot:
         )
 
     async def async_set_mode(
-        self, device_id: str, value: ModeEnum, fromException: bool = False
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: ModeEnum,
+        fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
-            self.set_mode, device_id, value, fromException
+            self.set_mode, device_id, deviceType, value, fromException
         )
 
-    def set_mode(self, device_id: str, value: ModeEnum) -> None:
+    def set_mode(
+        self, device_id: str, deviceType: DeviceTypeEnum, value: ModeEnum
+    ) -> None:
         if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.set_mode: %s -> %s", device_id, value)
+            _LOGGER.info("AwsIot.set_mode: (%s) %s - %s", deviceType, device_id, value)
 
         desired = {}
         match value:
             case ModeEnum.AUTO:
-                desired = {
-                    "ECO": 0,
-                    "sleep": 0,
-                    "eightAddHot": 0,
-                    "highTemperatureWind": 0,
-                    "workMode": 0,
-                    "horizontalSwitch": 0,
-                    "healthy": 0,
-                    "turbo": 0,
-                    "antiMoldew": 0,
-                    "verticalSwitch": 0,
-                    "silenceSwitch": 0,
-                    "windSpeed": 0,
-                }
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {
+                        "windSpeedAutoSwitch": 1,
+                        "workMode": 0,
+                        "windSpeed7Gear": 0,
+                    }
+                else:
+                    desired = {
+                        "ECO": 0,
+                        "sleep": 0,
+                        "eightAddHot": 0,
+                        "highTemperatureWind": 0,
+                        "workMode": 0,
+                        "horizontalSwitch": 0,
+                        "healthy": 0,
+                        "turbo": 0,
+                        "antiMoldew": 0,
+                        "verticalSwitch": 0,
+                        "silenceSwitch": 0,
+                        "windSpeed": 0,
+                    }
             case ModeEnum.COOL:
-                desired = {
-                    "ECO": 0,
-                    "sleep": 0,
-                    "eightAddHot": 0,
-                    "highTemperatureWind": 0,
-                    "workMode": 1,
-                    "horizontalSwitch": 0,
-                    "healthy": 0,
-                    "turbo": 0,
-                    "antiMoldew": 0,
-                    "verticalSwitch": 0,
-                    "silenceSwitch": 0,
-                    "windSpeed": 0,
-                    "targetTemperature": 24,
-                }
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {
+                        "windSpeedAutoSwitch": 0,
+                        "workMode": 1,
+                        "windSpeed7Gear": 0,
+                    }
+                else:
+                    desired = {
+                        "ECO": 0,
+                        "sleep": 0,
+                        "eightAddHot": 0,
+                        "highTemperatureWind": 0,
+                        "workMode": 1,
+                        "horizontalSwitch": 0,
+                        "healthy": 0,
+                        "turbo": 0,
+                        "antiMoldew": 0,
+                        "verticalSwitch": 0,
+                        "silenceSwitch": 0,
+                        "windSpeed": 0,
+                        "targetTemperature": 24,
+                    }
             case ModeEnum.DEHUMIDIFICATION:
-                desired = {
-                    "ECO": 0,
-                    "sleep": 0,
-                    "eightAddHot": 0,
-                    "highTemperatureWind": 0,
-                    "workMode": 2,
-                    "horizontalSwitch": 0,
-                    "healthy": 0,
-                    "turbo": 0,
-                    "antiMoldew": 0,
-                    "verticalSwitch": 0,
-                    "silenceSwitch": 0,
-                    "windSpeed": 2,
-                }
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {
+                        "windSpeedAutoSwitch": 0,
+                        "workMode": 2,
+                        "windSpeed7Gear": 2,
+                    }
+                else:
+                    desired = {
+                        "ECO": 0,
+                        "sleep": 0,
+                        "eightAddHot": 0,
+                        "highTemperatureWind": 0,
+                        "workMode": 2,
+                        "horizontalSwitch": 0,
+                        "healthy": 0,
+                        "turbo": 0,
+                        "antiMoldew": 0,
+                        "verticalSwitch": 0,
+                        "silenceSwitch": 0,
+                        "windSpeed": 2,
+                    }
             case ModeEnum.FAN:
-                desired = {
-                    "ECO": 0,
-                    "sleep": 0,
-                    "eightAddHot": 0,
-                    "highTemperatureWind": 0,
-                    "workMode": 3,
-                    "horizontalSwitch": 0,
-                    "healthy": 0,
-                    "turbo": 0,
-                    "antiMoldew": 0,
-                    "verticalSwitch": 0,
-                    "silenceSwitch": 0,
-                    "windSpeed": 0,
-                }
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {
+                        "windSpeedAutoSwitch": 1,
+                        "workMode": 3,
+                        "windSpeed7Gear": 0,
+                    }
+                else:
+                    desired = {
+                        "ECO": 0,
+                        "sleep": 0,
+                        "eightAddHot": 0,
+                        "highTemperatureWind": 0,
+                        "workMode": 3,
+                        "horizontalSwitch": 0,
+                        "healthy": 0,
+                        "turbo": 0,
+                        "antiMoldew": 0,
+                        "verticalSwitch": 0,
+                        "silenceSwitch": 0,
+                        "windSpeed": 0,
+                    }
             case ModeEnum.HEAT:
-                desired = {
-                    "ECO": 0,
-                    "sleep": 0,
-                    "eightAddHot": 0,
-                    "highTemperatureWind": 0,
-                    "workMode": 4,
-                    "horizontalSwitch": 0,
-                    "healthy": 0,
-                    "turbo": 0,
-                    "antiMoldew": 0,
-                    "verticalSwitch": 0,
-                    "silenceSwitch": 0,
-                    "windSpeed": 0,
-                    "targetTemperature": 26,
-                }
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {
+                        "windSpeedAutoSwitch": 1,
+                        "workMode": 4,
+                        "windSpeed7Gear": 0,
+                    }
+                else:
+                    desired = {
+                        "ECO": 0,
+                        "sleep": 0,
+                        "eightAddHot": 0,
+                        "highTemperatureWind": 0,
+                        "workMode": 4,
+                        "horizontalSwitch": 0,
+                        "healthy": 0,
+                        "turbo": 0,
+                        "antiMoldew": 0,
+                        "verticalSwitch": 0,
+                        "silenceSwitch": 0,
+                        "windSpeed": 0,
+                        "targetTemperature": 26,
+                    }
+
+        payload = json.dumps(
+            {
+                "state": {"desired": desired},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+
+        self.client.publish(
+            topic=getTopic(device_id),
+            qos=1,
+            payload=payload,
+        )
+
+    async def async_set_wind_7_gear_speed(
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: WindSeed7GearEnum,
+        fromException: bool = False,
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_wind_7_gear_speed, deviceType, device_id, value, fromException
+        )
+
+    def set_wind_7_gear_speed(
+        self, device_id: str, deviceType: DeviceTypeEnum, value: WindSeed7GearEnum
+    ) -> None:
+        if self.session_manager.is_verbose_device_logging():
+            _LOGGER.info(
+                "AwsIot.set_wind_speed: (%s) %s - %s", deviceType, device_id, value
+            )
+
+        desired = {}
+        match value:
+            case WindSeed7GearEnum.NONE:
+                desired = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 0}
+            case WindSeed7GearEnum.AUTO:
+                desired = {"windSpeedAutoSwitch": 1, "windSpeed7Gear": 0}
+            case WindSeed7GearEnum.TURBO:
+                desired = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 7}
+            case WindSeed7GearEnum.SPEED_1:
+                desired = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 1}
+            case WindSeed7GearEnum.SPEED_2:
+                desired = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 2}
+            case WindSeed7GearEnum.SPEED_3:
+                desired = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 3}
+            case WindSeed7GearEnum.SPEED_4:
+                desired = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 4}
+            case WindSeed7GearEnum.SPEED_5:
+                desired = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 5}
+            case WindSeed7GearEnum.SPEED_6:
+                desired = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 6}
 
         payload = json.dumps(
             {
@@ -321,15 +453,23 @@ class AwsIot:
         )
 
     async def async_set_wind_speed(
-        self, device_id: str, value: WindSeedEnum, fromException: bool = False
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: WindSeedEnum,
+        fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
-            self.set_wind_speed, device_id, value, fromException
+            self.set_wind_speed, deviceType, device_id, value, fromException
         )
 
-    def set_wind_speed(self, device_id: str, value: WindSeedEnum) -> None:
+    def set_wind_speed(
+        self, device_id: str, deviceType: DeviceTypeEnum, value: WindSeedEnum
+    ) -> None:
         if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.set_wind_speed: %s -> %s", device_id, value)
+            _LOGGER.info(
+                "AwsIot.set_wind_speed: (%s) %s - %s", deviceType, device_id, value
+            )
 
         desired = {}
         match value:
@@ -406,19 +546,28 @@ class AwsIot:
     async def async_set_up_and_down_air_supply_vector(
         self,
         device_id: str,
+        deviceType: DeviceTypeEnum,
         value: UpAndDownAirSupplyVectorEnum,
         fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
-            self.set_up_and_down_air_supply_vector, device_id, value, fromException
+            self.set_up_and_down_air_supply_vector,
+            device_id,
+            deviceType,
+            value,
+            fromException,
         )
 
     def set_up_and_down_air_supply_vector(
-        self, device_id: str, value: UpAndDownAirSupplyVectorEnum
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: UpAndDownAirSupplyVectorEnum,
     ) -> None:
         if self.session_manager.is_verbose_device_logging():
             _LOGGER.info(
-                "AwsIot.set_up_and_down_air_supply_vector: %s -> %s",
+                "AwsIot.set_up_and_down_air_supply_vector: (%s) %s - %s",
+                deviceType,
                 device_id,
                 value,
             )
@@ -455,19 +604,28 @@ class AwsIot:
     async def async_set_left_and_right_air_supply_vector(
         self,
         device_id: str,
+        deviceType: DeviceTypeEnum,
         value: LeftAndRightAirSupplyVectorEnum,
         fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
-            self.set_left_and_right_air_supply_vector, device_id, value, fromException
+            self.set_left_and_right_air_supply_vector,
+            device_id,
+            deviceType,
+            value,
+            fromException,
         )
 
     def set_left_and_right_air_supply_vector(
-        self, device_id: str, value: LeftAndRightAirSupplyVectorEnum
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: LeftAndRightAirSupplyVectorEnum,
     ) -> None:
         if self.session_manager.is_verbose_device_logging():
             _LOGGER.info(
-                "AwsIot.set_left_and_right_air_supply_vector: %s -> %s",
+                "AwsIot.set_left_and_right_air_supply_vector: (%s) %s - %s",
+                deviceType,
                 device_id,
                 value,
             )
@@ -504,15 +662,23 @@ class AwsIot:
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
     async def async_set_sleep_mode(
-        self, device_id: str, value: SleepModeEnum, fromException: bool = False
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: SleepModeEnum,
+        fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
-            self.set_sleep_mode, device_id, value, fromException
+            self.set_sleep_mode, device_id, deviceType, value, fromException
         )
 
-    def set_sleep_mode(self, device_id: str, value: SleepModeEnum) -> None:
+    def set_sleep_mode(
+        self, device_id: str, deviceType: DeviceTypeEnum, value: SleepModeEnum
+    ) -> None:
         if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.set_sleep_mode: %s -> %s", device_id, value)
+            _LOGGER.info(
+                "AwsIot.set_sleep_mode: (%s) %s - %s", deviceType, device_id, value
+            )
         desired = {}
         match value:
             case SleepModeEnum.STANDARD:
@@ -534,15 +700,19 @@ class AwsIot:
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
     async def async_set_eco(
-        self, device_id: str, value: SleepModeEnum, fromException: bool = False
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: SleepModeEnum,
+        fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
-            self.set_eco, device_id, value, fromException
+            self.set_eco, device_id, deviceType, value, fromException
         )
 
-    def set_eco(self, device_id: str, value: int) -> None:
+    def set_eco(self, device_id: str, deviceType: DeviceTypeEnum, value: int) -> None:
         if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.set_eco: %s - %s", device_id, value)
+            _LOGGER.info("AwsIot.set_eco: (%s) %s - %s", deviceType, device_id, value)
         if value == 1:
             payload = json.dumps(
                 {
@@ -568,15 +738,23 @@ class AwsIot:
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
     async def async_set_healthy(
-        self, device_id: str, value: SleepModeEnum, fromException: bool = False
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: SleepModeEnum,
+        fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
-            self.set_healthy, device_id, value, fromException
+            self.set_healthy, device_id, deviceType, value, fromException
         )
 
-    def set_healthy(self, device_id: str, value: int) -> None:
+    def set_healthy(
+        self, device_id: str, deviceType: DeviceTypeEnum, value: int
+    ) -> None:
         if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.set_healthy: %s - %s", device_id, value)
+            _LOGGER.info(
+                "AwsIot.set_healthy: (%s) %s - %s", deviceType, device_id, value
+            )
         payload = json.dumps(
             {
                 "state": {"desired": {"healthy": value}},
@@ -586,15 +764,23 @@ class AwsIot:
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
     async def async_set_drying(
-        self, device_id: str, value: SleepModeEnum, fromException: bool = False
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: SleepModeEnum,
+        fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
-            self.set_drying, device_id, value, fromException
+            self.set_drying, device_id, deviceType, value, fromException
         )
 
-    def set_drying(self, device_id: str, value: int) -> None:
+    def set_drying(
+        self, device_id: str, deviceType: DeviceTypeEnum, value: int
+    ) -> None:
         if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.set_drying: %s - %s", device_id, value)
+            _LOGGER.info(
+                "AwsIot.set_drying: (%s) %s - %s", deviceType, device_id, value
+            )
         payload = json.dumps(
             {
                 "state": {"desired": {"antiMoldew": value}},
@@ -604,15 +790,23 @@ class AwsIot:
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
     async def async_set_self_clean(
-        self, device_id: str, value: SleepModeEnum, fromException: bool = False
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: SleepModeEnum,
+        fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
-            self.set_self_clean, device_id, value, fromException
+            self.set_self_clean, device_id, deviceType, value, fromException
         )
 
-    def set_self_clean(self, device_id: str, value: int) -> None:
+    def set_self_clean(
+        self, device_id: str, deviceType: DeviceTypeEnum, value: int
+    ) -> None:
         if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.set_self_clean: %s - %s", device_id, value)
+            _LOGGER.info(
+                "AwsIot.set_self_clean: (%s) %s - %s", deviceType, device_id, value
+            )
         if value == 1:
             payload = json.dumps(
                 {
@@ -630,15 +824,19 @@ class AwsIot:
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
     async def async_set_light(
-        self, device_id: str, value: SleepModeEnum, fromException: bool = False
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: SleepModeEnum,
+        fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
-            self.set_light, device_id, value, fromException
+            self.set_light, device_id, deviceType, value, fromException
         )
 
-    def set_light(self, device_id: str, value: int) -> None:
+    def set_light(self, device_id: str, deviceType: DeviceTypeEnum, value: int) -> None:
         if self.session_manager.is_verbose_device_logging():
-            _LOGGER.info("AwsIot.set_light: %s - %s", device_id, value)
+            _LOGGER.info("AwsIot.set_light: (%s) %s - %s", deviceType, device_id, value)
         payload = json.dumps(
             {
                 "state": {"desired": {"screen": value}},

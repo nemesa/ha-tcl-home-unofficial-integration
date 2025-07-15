@@ -8,18 +8,17 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device_spit_ac import TCL_SplitAC_DeviceData_Helper
+from .device import Device, DeviceFeature, getSupportedFeatures
 from .device_ac_common import (
     LeftAndRightAirSupplyVectorEnum,
-    UpAndDownAirSupplyVectorEnum,
     ModeEnum,
     SleepModeEnum,
-    WindSeedEnum,
+    UpAndDownAirSupplyVectorEnum,
 )
-from .device import (
-    Device,
-    getSupportedFeatures,
-    DeviceFeature
+from .device_spit_ac import TCL_SplitAC_DeviceData_Helper, WindSeedEnum
+from .device_spit_ac_fresh_air import (
+    TCL_SplitAC_Fresh_Air_DeviceData_Helper,
+    WindSeed7GearEnum,
 )
 from .tcl_entity_base import TclEntityBase
 
@@ -37,7 +36,7 @@ async def async_setup_entry(
     switches = []
     for device in config_entry.devices:
         supported_features = getSupportedFeatures(device.device_type)
-                
+
         if DeviceFeature.SELECT_MODE in supported_features:
             switches.append(
                 Select(
@@ -52,11 +51,11 @@ async def async_setup_entry(
                     options_values=[e.value for e in ModeEnum],
                     select_option_fn=lambda device,
                     option: coordinator.get_aws_iot().async_set_mode(
-                        device.device_id, option
+                        device.device_id, device.device_type, option
                     ),
                 )
             )
-            
+
         if DeviceFeature.SELECT_WIND_SPEED in supported_features:
             switches.append(
                 Select(
@@ -71,11 +70,30 @@ async def async_setup_entry(
                     options_values=[e.value for e in WindSeedEnum],
                     select_option_fn=lambda device,
                     option: coordinator.get_aws_iot().async_set_wind_speed(
-                        device.device_id, option
+                        device.device_id, device.device_type, option
                     ),
                 )
             )
-            
+
+        if DeviceFeature.SELECT_WIND_SPEED_7_Gear in supported_features:
+            switches.append(
+                Select(
+                    coordinator=coordinator,
+                    device=device,
+                    type="WindSpeed",
+                    name="Wind Speed",
+                    icon_fn=lambda device: "mdi:weather-windy",
+                    current_state_fn=lambda device: TCL_SplitAC_Fresh_Air_DeviceData_Helper(
+                        device.data
+                    ).getFanSpeed(),
+                    options_values=[e.value for e in WindSeed7GearEnum],
+                    select_option_fn=lambda device,
+                    option: coordinator.get_aws_iot().async_set_wind_7_gear_speed(
+                        device.device_id, device.device_type, option
+                    ),
+                )
+            )
+
         if DeviceFeature.SELECT_VERTICAL_DIRECTION in supported_features:
             switches.append(
                 Select(
@@ -90,11 +108,11 @@ async def async_setup_entry(
                     options_values=[e.value for e in UpAndDownAirSupplyVectorEnum],
                     select_option_fn=lambda device,
                     option: coordinator.get_aws_iot().async_set_up_and_down_air_supply_vector(
-                        device.device_id, option
+                        device.device_id, device.device_type, option
                     ),
                 )
             )
-            
+
         if DeviceFeature.SELECT_HORIZONTAL_DIRECTION in supported_features:
             switches.append(
                 Select(
@@ -109,11 +127,11 @@ async def async_setup_entry(
                     options_values=[e.value for e in LeftAndRightAirSupplyVectorEnum],
                     select_option_fn=lambda device,
                     option: coordinator.get_aws_iot().async_set_left_and_right_air_supply_vector(
-                        device.device_id, option
+                        device.device_id, device.device_type, option
                     ),
                 )
             )
-            
+
         if DeviceFeature.SELECT_SLEEP_MODE in supported_features:
             switches.append(
                 Select(
@@ -128,7 +146,7 @@ async def async_setup_entry(
                     options_values=[e.value for e in SleepModeEnum],
                     select_option_fn=lambda device,
                     option: coordinator.get_aws_iot().async_set_sleep_mode(
-                        device.device_id, option
+                        device.device_id, device.device_type, option
                     ),
                 )
             )

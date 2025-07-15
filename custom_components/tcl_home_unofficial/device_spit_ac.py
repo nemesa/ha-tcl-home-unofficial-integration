@@ -1,18 +1,29 @@
 """."""
 
+from dataclasses import dataclass
+from enum import StrEnum
+
 from .device_ac_common import (
     LeftAndRightAirSupplyVectorEnum,
-    getLeftAndRightAirSupplyVector,
-    UpAndDownAirSupplyVectorEnum,
-    getUpAndDownAirSupplyVector,
     ModeEnum,
-    getMode,
     SleepModeEnum,
+    UpAndDownAirSupplyVectorEnum,
+    getLeftAndRightAirSupplyVector,
+    getMode,
     getSleepMode,
-    WindSeedEnum,
-    getWindSpeed
+    getUpAndDownAirSupplyVector,
 )
-from dataclasses import dataclass
+
+
+class WindSeedEnum(StrEnum):
+    STRONG = "Strong"
+    HEIGH = "Heigh"
+    MID_HEIGH = "Mid-heigh"
+    MID_LOW = "Mid-low"
+    MEDIUM = "Medium"
+    LOW = "Low"
+    MUTE = "Mute"
+    AUTO = "Auto"
 
 
 @dataclass
@@ -63,8 +74,8 @@ class TCL_SplitAC_DeviceData:
     device_id: str
     power_switch: int | bool
     beep_switch: int | bool
-    target_temperature: float
-    current_temperature: float
+    target_temperature: int
+    current_temperature: int
     high_temperature_wind: int
     turbo: int
     silence_switch: int
@@ -86,10 +97,30 @@ class TCL_SplitAC_DeviceData_Helper:
         self.data = data
 
     def getMode(self) -> ModeEnum:
-        return getMode(self.data.work_mode)        
+        return getMode(self.data.work_mode)
 
     def getWindSpeed(self) -> WindSeedEnum:
-        return getWindSpeed(wind_speed=self.data.wind_speed, turbo=self.data.turbo, silence_switch=self.data.silence_switch)
+        match self.data.wind_speed:
+            case 6:
+                return (
+                    WindSeedEnum.STRONG if self.data.turbo == 1 else WindSeedEnum.HEIGH
+                )
+            case 5:
+                return WindSeedEnum.MID_HEIGH
+            case 4:
+                return WindSeedEnum.MEDIUM
+            case 3:
+                return WindSeedEnum.MID_LOW
+            case 2:
+                return (
+                    WindSeedEnum.MUTE
+                    if self.data.silence_switch == 1
+                    else WindSeedEnum.LOW
+                )
+            case 0:
+                return WindSeedEnum.AUTO
+            case _:
+                return WindSeedEnum.AUTO
 
     def getUpAndDownAirSupplyVector(self) -> UpAndDownAirSupplyVectorEnum:
         return getUpAndDownAirSupplyVector(self.data.vertical_direction)
@@ -99,4 +130,3 @@ class TCL_SplitAC_DeviceData_Helper:
 
     def getSleepMode(self) -> SleepModeEnum:
         return getSleepMode(self.data.sleep)
-

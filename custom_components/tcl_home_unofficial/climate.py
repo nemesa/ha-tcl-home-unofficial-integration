@@ -205,7 +205,7 @@ class SplitAcClimate(TclEntityBase, ClimateEntity):
         """Set new target temperatures."""
         self._target_temperature = kwargs.get(ATTR_TEMPERATURE)
         await self.aws_iot.async_set_target_temperature(
-            self.device.device_id, int(self._target_temperature)
+            self.device.device_id,self.device.device_type, int(self._target_temperature)
         )
         self.device.data.target_temperature = int(self._target_temperature)
         self.coordinator.set_device(self.device)
@@ -214,39 +214,39 @@ class SplitAcClimate(TclEntityBase, ClimateEntity):
 
     async def async_set_swing_mode(self, swing_mode: str) -> None:
         await self.coordinator.get_aws_iot().async_set_up_and_down_air_supply_vector(
-            self.device.device_id, swing_mode
+            self.device.device_id,self.device.device_type, swing_mode
         )
         await self.coordinator.async_refresh()
 
     async def async_set_swing_horizontal_mode(self, swing_horizontal_mode: str) -> None:
         await self.coordinator.get_aws_iot().async_set_left_and_right_air_supply_vector(
-            self.device.device_id, swing_horizontal_mode
+            self.device.device_id, self.device.device_type, swing_horizontal_mode
         )
         await self.coordinator.async_refresh()
 
     async def async_set_fan_mode(self, fan_mode: str) -> None:
         await self.coordinator.get_aws_iot().async_set_wind_speed(
-            self.device.device_id, fan_mode
+            self.device.device_id, self.device.device_type, fan_mode
         )
         await self.coordinator.async_refresh()
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         if hvac_mode == HVACMode.OFF:
             await self.coordinator.get_aws_iot().async_set_power(
-                self.device.device_id, 0
+                self.device.device_id, self.device.device_type, 0
             )
         else:
             target_temp = self.device.data.target_temperature
             await self.coordinator.get_aws_iot().async_set_power(
-                self.device.device_id, 1
+                self.device.device_id, self.device.device_type, 1
             )
             await self.coordinator.get_aws_iot().async_set_mode(
-                self.device.device_id, map_hvac_mode_tcl_mode(hvac_mode)
+                self.device.device_id, self.device.device_type, map_hvac_mode_tcl_mode(hvac_mode)
             )
 
             if self.coordinator.get_config_data().behavior_keep_target_temperature_at_cliet_mode_change:
                 await self.aws_iot.async_set_target_temperature(
-                    self.device.device_id, int(target_temp)
+                    self.device.device_id, self.device.device_type, int(target_temp)
                 )
 
         await self.coordinator.async_refresh()

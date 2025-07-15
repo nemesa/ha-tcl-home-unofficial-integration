@@ -76,7 +76,7 @@ class SetTargetTempEntity(TclEntityBase, NumberEntity):
             value_to_set= float(value)
         
         await self.aws_iot.async_set_target_temperature(
-            self.device.device_id, value_to_set
+            self.device.device_id,set.device.device_type,  value_to_set
         )
         self.device.data.target_temperature = int(value)
         self.coordinator.set_device(self.device)

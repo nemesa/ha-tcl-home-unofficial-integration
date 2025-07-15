@@ -7,6 +7,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 
 from .const import DOMAIN
 from .device_spit_ac import TCL_SplitAC_DeviceData
+from .device_spit_ac_fresh_air import TCL_SplitAC_Fresh_Air_DeviceData
 
 
 class DeviceTypeEnum(StrEnum):
@@ -16,6 +17,7 @@ class DeviceTypeEnum(StrEnum):
 
 class DeviceFeature(StrEnum):
     SENSOR_CURRENT_TEMPERATURE = "sensor.current_temperature"
+    SENSOR_INTERNAL_UNIT_COIL_TEMPERATURE = "sensor.internal_unit_coil_temperature"
     SWITCH_POWER = "switch.powerSwitch"
     SWITCH_BEEP = "switch.beepSwitch"
     SWITCH_ECO = "switch.eco"
@@ -24,11 +26,14 @@ class DeviceFeature(StrEnum):
     SWITCH_SCREEN = "switch.screen"
     SELECT_MODE = "select.mode"
     SELECT_WIND_SPEED = "select.windSpeed"
+    SELECT_WIND_SPEED_7_Gear = "select.windSpeed7Gear"
     SELECT_VERTICAL_DIRECTION = "select.verticalDirection"
     SELECT_HORIZONTAL_DIRECTION = "select.horizontalDirection"
     SELECT_SLEEP_MODE = "select.sleepMode"
     NUMBER_TARGET_TEMPERATURE = "number.targetTemperature"
-    NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS = "number.targetTemperature.allow_half_digits"
+    NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS = (
+        "number.targetTemperature.allow_half_digits"
+    )
     BUTTON_SELF_CLEAN = "button.selfClean"
     CLIMATE = "climate"
 
@@ -56,25 +61,25 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
         case DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
             return [
                 DeviceFeature.SENSOR_CURRENT_TEMPERATURE,
+                DeviceFeature.SENSOR_INTERNAL_UNIT_COIL_TEMPERATURE,
                 DeviceFeature.SWITCH_POWER,
                 DeviceFeature.SWITCH_BEEP,
-                DeviceFeature.SWITCH_ECO,
-                DeviceFeature.SWITCH_HEALTHY,
-                DeviceFeature.SWITCH_DRYING,
-                DeviceFeature.SWITCH_SCREEN,
+                # DeviceFeature.SWITCH_ECO,
+                # DeviceFeature.SWITCH_HEALTHY,
+                # DeviceFeature.SWITCH_DRYING,
+                # DeviceFeature.SWITCH_SCREEN,
                 DeviceFeature.SELECT_MODE,
-                DeviceFeature.SELECT_WIND_SPEED,
-                DeviceFeature.SELECT_VERTICAL_DIRECTION,
-                DeviceFeature.SELECT_HORIZONTAL_DIRECTION,
-                DeviceFeature.SELECT_SLEEP_MODE,
+                # DeviceFeature.SELECT_VERTICAL_DIRECTION,
+                # DeviceFeature.SELECT_HORIZONTAL_DIRECTION,
+                # DeviceFeature.SELECT_SLEEP_MODE,
+                DeviceFeature.SELECT_WIND_SPEED_7_Gear,
                 DeviceFeature.NUMBER_TARGET_TEMPERATURE,
                 DeviceFeature.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS,
-                DeviceFeature.BUTTON_SELF_CLEAN,
-                DeviceFeature.CLIMATE,
+                # DeviceFeature.BUTTON_SELF_CLEAN,
+                # DeviceFeature.CLIMATE,
             ]
         case _:
             return []
-
 
 
 def is_implemented_by_integration(device_type: str) -> bool:
@@ -106,25 +111,31 @@ class Device:
         self.is_implemented_by_integration = is_implemented_by_integration(
             device_type=device_type
         )
-        match device_type:
-            case DeviceTypeEnum.SPLIT_AC:
-                if aws_thing is not None:
+        if aws_thing is not None:
+            match device_type:
+                case DeviceTypeEnum.SPLIT_AC:
                     self.data = TCL_SplitAC_DeviceData(
                         device_id,
                         aws_thing["state"]["reported"],
                         aws_thing["state"].get("delta", {}),
                     )
-                else:
+                case DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    self.data = TCL_SplitAC_Fresh_Air_DeviceData(
+                        device_id,
+                        aws_thing["state"]["reported"],
+                        aws_thing["state"].get("delta", {}),
+                    )
+                case _:
                     self.data = None
-            case _:
-                self.data = None
+        else:
+            self.data = None
 
     device_id: int
     device_type: str
     name: str
     firmware_version: str
     is_implemented_by_integration: bool
-    data: TCL_SplitAC_DeviceData | None = None
+    data: TCL_SplitAC_DeviceData | TCL_SplitAC_Fresh_Air_DeviceData | None = None
 
 
 def toDeviceInfo(device: Device) -> DeviceInfo:

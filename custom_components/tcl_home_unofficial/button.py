@@ -62,7 +62,7 @@ class SelfCleanButton(TclEntityBase, ButtonEntity):
     async def async_press(self) -> None:
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
         if self.device.data.self_clean == 1:
-            await self.aws_iot.async_set_self_clean(self.device.device_id, 0)
+            await self.aws_iot.async_set_self_clean(self.device.device_id, self.device.device_type, 0)
         else:
-            await self.aws_iot.async_set_self_clean(self.device.device_id, 1)
+            await self.aws_iot.async_set_self_clean(self.device.device_id, self.device.device_type, 1)
         await self.coordinator.async_refresh()
