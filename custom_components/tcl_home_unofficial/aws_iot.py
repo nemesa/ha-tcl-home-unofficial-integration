@@ -18,7 +18,12 @@ from .device_ac_common import (
 )
 from .device import DeviceTypeEnum
 from .device_spit_ac import WindSeedEnum
-from .device_spit_ac_fresh_air import WindSeed7GearEnum
+from .device_spit_ac_fresh_air import (
+    WindSeed7GearEnum,
+    GeneratorModeEnum,
+    FreshAirEnum,
+    WindFeelingEnum,
+)
 from .session_manager import SessionManager
 from .tcl import GetThingsResponse, get_things
 
@@ -85,7 +90,6 @@ class AwsIot:
         self,
         function,
         device_id: str,
-        deviceType: DeviceTypeEnum,
         fromException: bool = False,
     ):
         try:
@@ -97,7 +101,6 @@ class AwsIot:
                 await self.async_setup_client()
                 return await self.execute_and_re_try_call_with_device_id(
                     function=function,
-                    deviceType=deviceType,
                     device_id=device_id,
                     fromException=True,
                 )
@@ -117,7 +120,9 @@ class AwsIot:
         fromException: bool = False,
     ):
         try:
-            return await self.hass.async_add_executor_job(function, device_id, value)
+            return await self.hass.async_add_executor_job(
+                function, device_id, deviceType, value
+            )
         except Exception as e:
             # re-try if the error is due to expired credentials
             if not fromException:
@@ -157,7 +162,7 @@ class AwsIot:
         self,
         device_id: str,
         deviceType: DeviceTypeEnum,
-        value: SleepModeEnum,
+        value: int,
         fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
@@ -195,7 +200,7 @@ class AwsIot:
         self,
         device_id: str,
         deviceType: DeviceTypeEnum,
-        value: SleepModeEnum,
+        value: int,
         fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
@@ -237,8 +242,19 @@ class AwsIot:
                 value,
             )
 
-        if value < 16 or value > 36:
-            _LOGGER.error("Invalid target temperature: %s (Min:16 Max:36)", value)
+        min_temp = 16
+        max_temp = 36
+
+        if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+            max_temp = 31
+
+        if value < min_temp or value > max_temp:
+            _LOGGER.error(
+                "Invalid target temperature: %s (Min:%s Max:%s)",
+                value,
+                min_temp,
+                max_temp,
+            )
             return
 
         payload = json.dumps(
@@ -300,7 +316,7 @@ class AwsIot:
                     desired = {
                         "windSpeedAutoSwitch": 0,
                         "workMode": 1,
-                        "windSpeed7Gear": 0,
+                        "windSpeed7Gear": 6,
                     }
                 else:
                     desired = {
@@ -407,7 +423,7 @@ class AwsIot:
         fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
-            self.set_wind_7_gear_speed, deviceType, device_id, value, fromException
+            self.set_wind_7_gear_speed, device_id, deviceType, value, fromException
         )
 
     def set_wind_7_gear_speed(
@@ -415,13 +431,14 @@ class AwsIot:
     ) -> None:
         if self.session_manager.is_verbose_device_logging():
             _LOGGER.info(
-                "AwsIot.set_wind_speed: (%s) %s - %s", deviceType, device_id, value
+                "AwsIot.set_wind_7_gear_speed: (%s) %s - %s",
+                deviceType,
+                device_id,
+                value,
             )
 
         desired = {}
         match value:
-            case WindSeed7GearEnum.NONE:
-                desired = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 0}
             case WindSeed7GearEnum.AUTO:
                 desired = {"windSpeedAutoSwitch": 1, "windSpeed7Gear": 0}
             case WindSeed7GearEnum.TURBO:
@@ -444,6 +461,13 @@ class AwsIot:
                 "state": {"desired": desired},
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
+        )
+
+        _LOGGER.info(
+            "AwsIot.set_wind_7_gear_speed: (%s) %s - %s",
+            deviceType,
+            device_id,
+            value,
         )
 
         self.client.publish(
@@ -574,23 +598,50 @@ class AwsIot:
         desired = {}
         match value:
             case UpAndDownAirSupplyVectorEnum.UP_AND_DOWN_SWING:
-                desired = {"verticalSwitch": 1, "verticalDirection": 1}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"verticalDirection": 1}
+                else:
+                    desired = {"verticalSwitch": 1, "verticalDirection": 1}
             case UpAndDownAirSupplyVectorEnum.UPWARDS_SWING:
-                desired = {"verticalSwitch": 1, "verticalDirection": 2}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"verticalDirection": 2}
+                else:
+                    desired = {"verticalSwitch": 1, "verticalDirection": 2}
             case UpAndDownAirSupplyVectorEnum.DOWNWARDS_SWING:
-                desired = {"verticalSwitch": 1, "verticalDirection": 3}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"verticalDirection": 3}
+                else:
+                    desired = {"verticalSwitch": 1, "verticalDirection": 3}
             case UpAndDownAirSupplyVectorEnum.TOP_FIX:
-                desired = {"verticalSwitch": 0, "verticalDirection": 9}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"verticalDirection": 9}
+                else:
+                    desired = {"verticalSwitch": 0, "verticalDirection": 9}
             case UpAndDownAirSupplyVectorEnum.UPPER_FIX:
-                desired = {"verticalSwitch": 0, "verticalDirection": 10}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"verticalDirection": 10}
+                else:
+                    desired = {"verticalSwitch": 0, "verticalDirection": 10}
             case UpAndDownAirSupplyVectorEnum.MIDDLE_FIX:
-                desired = {"verticalSwitch": 0, "verticalDirection": 11}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"verticalDirection": 11}
+                else:
+                    desired = {"verticalSwitch": 0, "verticalDirection": 11}
             case UpAndDownAirSupplyVectorEnum.LOWER_FIX:
-                desired = {"verticalSwitch": 0, "verticalDirection": 12}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"verticalDirection": 12}
+                else:
+                    desired = {"verticalSwitch": 0, "verticalDirection": 12}
             case UpAndDownAirSupplyVectorEnum.BOTTOM_FIX:
-                desired = {"verticalSwitch": 0, "verticalDirection": 13}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"verticalDirection": 13}
+                else:
+                    desired = {"verticalSwitch": 0, "verticalDirection": 13}
             case UpAndDownAirSupplyVectorEnum.NOT_SET:
-                desired = {"verticalSwitch": 0, "verticalDirection": 8}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"verticalDirection": 8}
+                else:
+                    desired = {"verticalSwitch": 0, "verticalDirection": 8}
 
         payload = json.dumps(
             {
@@ -632,25 +683,55 @@ class AwsIot:
         desired = {}
         match value:
             case LeftAndRightAirSupplyVectorEnum.LEFT_AND_RIGHT_SWING:
-                desired = {"horizontalDirection": 1, "horizontalSwitch": 1}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"horizontalDirection": 1}
+                else:
+                    desired = {"horizontalDirection": 1, "horizontalSwitch": 1}
             case LeftAndRightAirSupplyVectorEnum.LEFT_SWING:
-                desired = {"horizontalDirection": 2, "horizontalSwitch": 1}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"horizontalDirection": 2}
+                else:
+                    desired = {"horizontalDirection": 2, "horizontalSwitch": 1}
             case LeftAndRightAirSupplyVectorEnum.MIDDLE_SWING:
-                desired = {"horizontalDirection": 3, "horizontalSwitch": 1}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"horizontalDirection": 3}
+                else:
+                    desired = {"horizontalDirection": 3, "horizontalSwitch": 1}
             case LeftAndRightAirSupplyVectorEnum.RIGHT_SWING:
-                desired = {"horizontalDirection": 4, "horizontalSwitch": 1}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"horizontalDirection": 4}
+                else:
+                    desired = {"horizontalDirection": 4, "horizontalSwitch": 1}
             case LeftAndRightAirSupplyVectorEnum.LEFT_FIX:
-                desired = {"horizontalDirection": 9, "horizontalSwitch": 0}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"horizontalDirection": 9}
+                else:
+                    desired = {"horizontalDirection": 9, "horizontalSwitch": 0}
             case LeftAndRightAirSupplyVectorEnum.CENTER_LEFT_FIX:
-                desired = {"horizontalDirection": 10, "horizontalSwitch": 0}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"horizontalDirection": 10}
+                else:
+                    desired = {"horizontalDirection": 10, "horizontalSwitch": 0}
             case LeftAndRightAirSupplyVectorEnum.MIDDLE_FIX:
-                desired = {"horizontalDirection": 11, "horizontalSwitch": 0}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"horizontalDirection": 11}
+                else:
+                    desired = {"horizontalDirection": 11, "horizontalSwitch": 0}
             case LeftAndRightAirSupplyVectorEnum.CENTER_RIGHT_FIX:
-                desired = {"horizontalDirection": 12, "horizontalSwitch": 0}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"horizontalDirection": 12}
+                else:
+                    desired = {"horizontalDirection": 12, "horizontalSwitch": 0}
             case LeftAndRightAirSupplyVectorEnum.RIGHT_FIX:
-                desired = {"horizontalDirection": 13, "horizontalSwitch": 0}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"horizontalDirection": 13}
+                else:
+                    desired = {"horizontalDirection": 13, "horizontalSwitch": 0}
             case LeftAndRightAirSupplyVectorEnum.NOT_SET:
-                desired = {"horizontalDirection": 8, "horizontalSwitch": 0}
+                if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired = {"horizontalDirection": 8}
+                else:
+                    desired = {"horizontalDirection": 8, "horizontalSwitch": 0}
 
         payload = json.dumps(
             {
@@ -703,7 +784,7 @@ class AwsIot:
         self,
         device_id: str,
         deviceType: DeviceTypeEnum,
-        value: SleepModeEnum,
+        value: int,
         fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
@@ -741,7 +822,7 @@ class AwsIot:
         self,
         device_id: str,
         deviceType: DeviceTypeEnum,
-        value: SleepModeEnum,
+        value: int,
         fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
@@ -767,7 +848,7 @@ class AwsIot:
         self,
         device_id: str,
         deviceType: DeviceTypeEnum,
-        value: SleepModeEnum,
+        value: int,
         fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
@@ -793,7 +874,7 @@ class AwsIot:
         self,
         device_id: str,
         deviceType: DeviceTypeEnum,
-        value: SleepModeEnum,
+        value: int,
         fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
@@ -823,11 +904,135 @@ class AwsIot:
             )
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
+    async def async_set_generator_mode(
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: GeneratorModeEnum,
+        fromException: bool = False,
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_generator_mode, device_id, deviceType, value, fromException
+        )
+
+    def set_generator_mode(
+        self, device_id: str, deviceType: DeviceTypeEnum, value: GeneratorModeEnum
+    ) -> None:
+        if self.session_manager.is_verbose_device_logging():
+            _LOGGER.info(
+                "AwsIot.set_generator_mode: (%s) %s - %s", deviceType, device_id, value
+            )
+        desired = {}
+        match value:
+            case GeneratorModeEnum.NONE:
+                desired = {"generatorMode": 0}
+            case GeneratorModeEnum.L1:
+                desired = {"generatorMode": 1}
+            case GeneratorModeEnum.L2:
+                desired = {"generatorMode": 2}
+            case GeneratorModeEnum.L3:
+                desired = {"generatorMode": 3}
+
+        payload = json.dumps(
+            {
+                "state": {"desired": desired},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
+
+    async def async_set_fresh_air(
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: FreshAirEnum,
+        fromException: bool = False,
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_fresh_air, device_id, deviceType, value, fromException
+        )
+
+    def set_fresh_air(
+        self, device_id: str, deviceType: DeviceTypeEnum, value: FreshAirEnum
+    ) -> None:
+        if self.session_manager.is_verbose_device_logging():
+            _LOGGER.info(
+                "AwsIot.set_fresh_air: (%s) %s - %s", deviceType, device_id, value
+            )
+        desired = {}
+        match value:
+            case FreshAirEnum.OFF:
+                desired = {"newWindSwitch": 0}
+            case FreshAirEnum.ON:
+                desired = {"newWindSwitch": 1, "selfClean": 0}
+            case FreshAirEnum.AUTO:
+                desired = {"newWindAutoSwitch": 1, "newWindStrength": 0}
+            case FreshAirEnum.STRENGTH_1:
+                desired = {"newWindAutoSwitch": 0, "newWindStrength": 1}
+            case FreshAirEnum.STRENGTH_2:
+                desired = {"newWindAutoSwitch": 0, "newWindStrength": 2}
+            case FreshAirEnum.STRENGTH_3:
+                desired = {"newWindAutoSwitch": 0, "newWindStrength": 3}
+
+        payload = json.dumps(
+            {
+                "state": {"desired": desired},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
+
+    async def async_set_wind_feeling(
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: WindFeelingEnum,
+        fromException: bool = False,
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_wind_feeling, device_id, deviceType, value, fromException
+        )
+
+    def set_wind_feeling(
+        self, device_id: str, deviceType: DeviceTypeEnum, value: FreshAirEnum
+    ) -> None:
+        if self.session_manager.is_verbose_device_logging():
+            _LOGGER.info(
+                "AwsIot.set_fresh_air: (%s) %s - %s", deviceType, device_id, value
+            )
+        desired = {}
+        match value:
+            case WindFeelingEnum.NONE:
+                desired = {"softWind": 0}
+            case WindFeelingEnum.SOFT:
+                desired = {"horizontalDirection": 8, "softWind": 1}
+            case WindFeelingEnum.SHOWER:
+                desired = {
+                    "horizontalDirection": 8,
+                    "softWind": 2,
+                    "verticalDirection": 9,
+                }
+            case WindFeelingEnum.CARPET:
+                desired = {
+                    "horizontalDirection": 8,
+                    "softWind": 3,
+                    "verticalDirection": 13,
+                }
+            case WindFeelingEnum.SURROUND:
+                desired = {"softWind": 4, "verticalDirection": 8}
+        payload = json.dumps(
+            {
+                "state": {"desired": desired},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
+
     async def async_set_light(
         self,
         device_id: str,
         deviceType: DeviceTypeEnum,
-        value: SleepModeEnum,
+        value: int,
         fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
@@ -840,6 +1045,32 @@ class AwsIot:
         payload = json.dumps(
             {
                 "state": {"desired": {"screen": value}},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
+
+    async def async_set_light_sense(
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: int,
+        fromException: bool = False,
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_light_sense, device_id, deviceType, value, fromException
+        )
+
+    def set_light_sense(
+        self, device_id: str, deviceType: DeviceTypeEnum, value: int
+    ) -> None:
+        if self.session_manager.is_verbose_device_logging():
+            _LOGGER.info(
+                "AwsIot.set_light_sense: (%s) %s - %s", deviceType, device_id, value
+            )
+        payload = json.dumps(
+            {
+                "state": {"desired": {"lightSense": value}},
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
         )

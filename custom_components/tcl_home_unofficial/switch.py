@@ -9,10 +9,16 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device, getSupportedFeatures,DeviceFeature
+from .device import Device, getSupportedFeatures, DeviceFeature, DeviceTypeEnum
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def get_SWITCH_DRYING_name(device: Device) -> str:
+    if device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+        return "Mildewproof Switch"
+    return "Drying Switch"
 
 
 async def async_setup_entry(
@@ -25,9 +31,8 @@ async def async_setup_entry(
 
     switches = []
     for device in config_entry.devices:
-        
         supported_features = getSupportedFeatures(device.device_type)
-                
+
         if DeviceFeature.SWITCH_POWER in supported_features:
             switches.append(
                 Switch(
@@ -46,8 +51,8 @@ async def async_setup_entry(
                         device.device_id, device.device_type, 0
                     ),
                 )
-            )       
-        
+            )
+
         if DeviceFeature.SWITCH_BEEP in supported_features:
             switches.append(
                 Switch(
@@ -67,7 +72,7 @@ async def async_setup_entry(
                     ),
                 )
             )
-            
+
         if DeviceFeature.SWITCH_ECO in supported_features:
             switches.append(
                 Switch(
@@ -87,7 +92,7 @@ async def async_setup_entry(
                     ),
                 )
             )
-            
+
         if DeviceFeature.SWITCH_HEALTHY in supported_features:
             switches.append(
                 Switch(
@@ -107,6 +112,7 @@ async def async_setup_entry(
                     ),
                 )
             )
+
         if DeviceFeature.SWITCH_DRYING in supported_features:
             switches.append(
                 Switch(
@@ -126,6 +132,7 @@ async def async_setup_entry(
                     ),
                 )
             )
+
         if DeviceFeature.SWITCH_SCREEN in supported_features:
             switches.append(
                 Switch(
@@ -141,6 +148,24 @@ async def async_setup_entry(
                         device.device_id, device.device_type, 1
                     ),
                     turn_off_fn=lambda device: coordinator.get_aws_iot().async_set_light(
+                        device.device_id, device.device_type, 0
+                    ),
+                )
+            )
+
+        if DeviceFeature.SWITCH_LIGHT_SENSE in supported_features:
+            switches.append(
+                Switch(
+                    coordinator=coordinator,
+                    device=device,
+                    type="LightSense",
+                    name="Light Sense",
+                    icon_fn=lambda device: "mdi:theme-light-dark",
+                    is_on_fn=lambda device: device.data.light_sense,
+                    turn_on_fn=lambda device: coordinator.get_aws_iot().async_set_light_sense(
+                        device.device_id, device.device_type, 1
+                    ),
+                    turn_off_fn=lambda device: coordinator.get_aws_iot().async_set_light_sense(
                         device.device_id, device.device_type, 0
                     ),
                 )

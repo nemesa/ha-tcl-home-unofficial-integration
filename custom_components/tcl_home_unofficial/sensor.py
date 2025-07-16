@@ -54,6 +54,39 @@ async def async_setup_entry(
                 )
             )
 
+        if DeviceFeature.SENSOR_EXTERNAL_UNIT_COIL_TEMPERATURE in supported_features:
+            sensors.append(
+                TemperatureSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="ExternalUnitCoilTemperature",
+                    name="External Unit Coil Temperature",
+                    value_fn=lambda device: device.data.external_unit_coil_temperature,
+                )
+            )
+
+        if DeviceFeature.SENSOR_EXTERNAL_UNIT_TEMPERATURE in supported_features:
+            sensors.append(
+                TemperatureSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="ExternalUnitTemperature",
+                    name="External Unit Temperature",
+                    value_fn=lambda device: device.data.external_unit_temperature,
+                )
+            )
+
+        if DeviceFeature.SENSOR_EXTERNAL_UNIT_EXHAUST_TEMPERATURE in supported_features:
+            sensors.append(
+                TemperatureSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="ExternalUnitExhaustTemperature",
+                    name="External Unit Exhaust Temperature",
+                    value_fn=lambda device: device.data.external_unit_exhaust_temperature,
+                )
+            )
+
     async_add_entities(sensors)
 
 

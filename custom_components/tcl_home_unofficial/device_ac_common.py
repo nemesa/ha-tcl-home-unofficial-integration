@@ -62,7 +62,6 @@ def getUpAndDownAirSupplyVector(
         case 13:
             return UpAndDownAirSupplyVectorEnum.BOTTOM_FIX
 
-
 class LeftAndRightAirSupplyVectorEnum(StrEnum):
     LEFT_AND_RIGHT_SWING = "Left and right swing"
     LEFT_SWING = "Left swing"
@@ -100,7 +99,6 @@ def getLeftAndRightAirSupplyVector(
             return LeftAndRightAirSupplyVectorEnum.CENTER_RIGHT_FIX
         case 13:
             return LeftAndRightAirSupplyVectorEnum.RIGHT_FIX
-
 
 class SleepModeEnum(StrEnum):
     STANDARD = "Standard"

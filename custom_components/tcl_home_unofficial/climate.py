@@ -16,21 +16,18 @@ from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .aws_iot import AwsIot
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-
-from .device_spit_ac import TCL_SplitAC_DeviceData_Helper
+from .device import Device, DeviceFeature, DeviceTypeEnum, getSupportedFeatures
 from .device_ac_common import (
     LeftAndRightAirSupplyVectorEnum,
-    UpAndDownAirSupplyVectorEnum,
     ModeEnum,
-    WindSeedEnum,
+    UpAndDownAirSupplyVectorEnum,
 )
-from .device import (
-    Device,
-    getSupportedFeatures,
-    DeviceFeature
+from .device_spit_ac import TCL_SplitAC_DeviceData_Helper, WindSeedEnum
+from .device_spit_ac_fresh_air import (
+    TCL_SplitAC_Fresh_Air_DeviceData_Helper,
+    WindSeed7GearEnum,
 )
 from .tcl_entity_base import TclEntityBase
 
@@ -45,14 +42,17 @@ async def async_setup_entry(
     """Set up the Binary Sensors."""
     coordinator = config_entry.runtime_data.coordinator
 
-    switches = []
+    climates = []
     for device in config_entry.devices:
         supported_features = getSupportedFeatures(device.device_type)
-                
-        if DeviceFeature.CLIMATE in supported_features:
-            switches.append(SplitAcClimate(coordinator, device))
 
-    async_add_entities(switches)
+        if DeviceFeature.CLIMATE in supported_features:
+            if device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                climates.append(SplitAcFreshAirClimate(coordinator, device))
+            else:
+                climates.append(SplitAcClimate(coordinator, device))
+
+    async_add_entities(climates)
 
 
 def map_mode_to_hvac_mode(mode: ModeEnum) -> HVACMode:
@@ -205,7 +205,9 @@ class SplitAcClimate(TclEntityBase, ClimateEntity):
         """Set new target temperatures."""
         self._target_temperature = kwargs.get(ATTR_TEMPERATURE)
         await self.aws_iot.async_set_target_temperature(
-            self.device.device_id,self.device.device_type, int(self._target_temperature)
+            self.device.device_id,
+            self.device.device_type,
+            int(self._target_temperature),
         )
         self.device.data.target_temperature = int(self._target_temperature)
         self.coordinator.set_device(self.device)
@@ -214,7 +216,7 @@ class SplitAcClimate(TclEntityBase, ClimateEntity):
 
     async def async_set_swing_mode(self, swing_mode: str) -> None:
         await self.coordinator.get_aws_iot().async_set_up_and_down_air_supply_vector(
-            self.device.device_id,self.device.device_type, swing_mode
+            self.device.device_id, self.device.device_type, swing_mode
         )
         await self.coordinator.async_refresh()
 
@@ -241,7 +243,180 @@ class SplitAcClimate(TclEntityBase, ClimateEntity):
                 self.device.device_id, self.device.device_type, 1
             )
             await self.coordinator.get_aws_iot().async_set_mode(
-                self.device.device_id, self.device.device_type, map_hvac_mode_tcl_mode(hvac_mode)
+                self.device.device_id,
+                self.device.device_type,
+                map_hvac_mode_tcl_mode(hvac_mode),
+            )
+
+            if self.coordinator.get_config_data().behavior_keep_target_temperature_at_cliet_mode_change:
+                await self.aws_iot.async_set_target_temperature(
+                    self.device.device_id, self.device.device_type, int(target_temp)
+                )
+
+        await self.coordinator.async_refresh()
+
+
+class SplitAcFreshAirClimate(TclEntityBase, ClimateEntity):
+    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
+        TclEntityBase.__init__(self, coordinator, "SplitAcFreshAir", "Climate", device)
+
+        self.aws_iot = coordinator.get_aws_iot()
+
+        self._attr_supported_features = ClimateEntityFeature(0)
+        self._attr_supported_features |= ClimateEntityFeature.TARGET_TEMPERATURE
+        self._attr_supported_features |= ClimateEntityFeature.FAN_MODE
+        self._attr_supported_features |= ClimateEntityFeature.SWING_MODE
+        self._attr_supported_features |= ClimateEntityFeature.SWING_HORIZONTAL_MODE
+        self._attr_supported_features |= (
+            ClimateEntityFeature.TURN_OFF | ClimateEntityFeature.TURN_ON
+        )
+
+        self._target_humidity = None
+        self._unit_of_measurement = UnitOfTemperature.CELSIUS
+        self._preset = None
+        self._preset_modes = None
+        self._current_humidity = None
+
+        self._current_fan_mode = TCL_SplitAC_Fresh_Air_DeviceData_Helper(
+            device.data
+        ).getWindSeed7Gear()
+        self._fan_modes = [e.value for e in WindSeed7GearEnum]
+
+        self._hvac_mode = map_mode_to_hvac_mode(
+            TCL_SplitAC_Fresh_Air_DeviceData_Helper(device.data).getMode()
+        )
+        self._hvac_modes = [map_mode_to_hvac_mode(e.value) for e in ModeEnum] + [
+            HVACMode.OFF
+        ]
+
+        self._current_swing_mode = TCL_SplitAC_Fresh_Air_DeviceData_Helper(
+            device.data
+        ).getUpAndDownAirSupplyVector()
+        self._swing_modes = [e.value for e in UpAndDownAirSupplyVectorEnum]
+
+        self._current_swing_horizontal_mode = TCL_SplitAC_Fresh_Air_DeviceData_Helper(
+            device.data
+        ).getLeftAndRightAirSupplyVector()
+        self._swing_horizontal_modes = [
+            e.value for e in LeftAndRightAirSupplyVectorEnum
+        ]
+
+        self._hvac_action = None
+        self._attr_temperature_unit = UnitOfTemperature.CELSIUS
+
+        self._target_temperature = self.device.data.target_temperature
+        self._attr_target_temperature_step = 0.5
+        self._attr_min_temp = 16
+        self._attr_max_temp = 31
+
+    @property
+    def current_temperature(self) -> float:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        return float(self.device.data.current_temperature)
+
+    @property
+    def target_temperature(self) -> float | None:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        return float(self.device.data.target_temperature)
+
+    @property
+    def hvac_mode(self) -> HVACMode:
+        """Return hvac target hvac state."""
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        if self.device.data.power_switch == 0:
+            return HVACMode.OFF
+        return map_mode_to_hvac_mode(
+            TCL_SplitAC_Fresh_Air_DeviceData_Helper(self.device.data).getMode()
+        )
+
+    @property
+    def hvac_modes(self) -> list[HVACMode]:
+        """Return the list of available operation modes."""
+        return self._hvac_modes
+
+    @property
+    def fan_mode(self) -> str | None:
+        """Return the fan setting."""
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        return TCL_SplitAC_Fresh_Air_DeviceData_Helper(
+            self.device.data
+        ).getWindSeed7Gear()
+
+    @property
+    def fan_modes(self) -> list[str]:
+        """Return the list of available fan modes."""
+        return self._fan_modes
+
+    @property
+    def swing_mode(self) -> str | None:
+        """Return the swing setting."""
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        return TCL_SplitAC_Fresh_Air_DeviceData_Helper(
+            self.device.data
+        ).getUpAndDownAirSupplyVector()
+
+    @property
+    def swing_modes(self) -> list[str]:
+        """List of available swing modes."""
+        return self._swing_modes
+
+    @property
+    def swing_horizontal_mode(self) -> str | None:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        return TCL_SplitAC_Fresh_Air_DeviceData_Helper(
+            self.device.data
+        ).getLeftAndRightAirSupplyVector()
+
+    @property
+    def swing_horizontal_modes(self) -> list[str]:
+        """List of available swing modes."""
+        return self._swing_horizontal_modes
+
+    async def async_set_temperature(self, **kwargs: Any) -> None:
+        """Set new target temperatures."""
+        self._target_temperature = kwargs.get(ATTR_TEMPERATURE)
+        await self.aws_iot.async_set_target_temperature(
+            self.device.device_id,
+            self.device.device_type,
+            float(self._target_temperature),
+        )
+        self.device.data.target_temperature = int(self._target_temperature)
+        self.coordinator.set_device(self.device)
+        await self.coordinator.async_refresh()
+        self.async_write_ha_state()
+
+    async def async_set_swing_mode(self, swing_mode: str) -> None:
+        await self.coordinator.get_aws_iot().async_set_up_and_down_air_supply_vector(
+            self.device.device_id, self.device.device_type, swing_mode
+        )
+        await self.coordinator.async_refresh()
+
+    async def async_set_swing_horizontal_mode(self, swing_horizontal_mode: str) -> None:
+        await self.coordinator.get_aws_iot().async_set_left_and_right_air_supply_vector(
+            self.device.device_id, self.device.device_type, swing_horizontal_mode
+        )
+        await self.coordinator.async_refresh()
+
+    async def async_set_fan_mode(self, fan_mode: str) -> None:
+        await self.coordinator.get_aws_iot().async_set_wind_7_gear_speed(
+            self.device.device_id, self.device.device_type, fan_mode
+        )
+        await self.coordinator.async_refresh()
+
+    async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
+        if hvac_mode == HVACMode.OFF:
+            await self.coordinator.get_aws_iot().async_set_power(
+                self.device.device_id, self.device.device_type, 0
+            )
+        else:
+            target_temp = self.device.data.target_temperature
+            await self.coordinator.get_aws_iot().async_set_power(
+                self.device.device_id, self.device.device_type, 1
+            )
+            await self.coordinator.get_aws_iot().async_set_mode(
+                self.device.device_id,
+                self.device.device_type,
+                map_hvac_mode_tcl_mode(hvac_mode),
             )
 
             if self.coordinator.get_config_data().behavior_keep_target_temperature_at_cliet_mode_change:

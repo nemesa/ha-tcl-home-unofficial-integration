@@ -8,7 +8,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device, DeviceFeature, getSupportedFeatures
+from .device import Device, DeviceFeature, DeviceTypeEnum, getSupportedFeatures
 from .device_ac_common import (
     LeftAndRightAirSupplyVectorEnum,
     ModeEnum,
@@ -17,12 +17,27 @@ from .device_ac_common import (
 )
 from .device_spit_ac import TCL_SplitAC_DeviceData_Helper, WindSeedEnum
 from .device_spit_ac_fresh_air import (
+    FreshAirEnum,
+    GeneratorModeEnum,
     TCL_SplitAC_Fresh_Air_DeviceData_Helper,
+    WindFeelingEnum,
     WindSeed7GearEnum,
 )
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def get_SELECT_VERTICAL_DIRECTION_name(device: Device) -> str:
+    if device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+        return "Air flow"
+    return "Up and Down air supply"
+
+
+def get_SELECT_HORIZONTAL_DIRECTION_name(device: Device) -> str:
+    if device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+        return "Horizontal Air flow"
+    return "Left and Right air supply"
 
 
 async def async_setup_entry(
@@ -85,10 +100,67 @@ async def async_setup_entry(
                     icon_fn=lambda device: "mdi:weather-windy",
                     current_state_fn=lambda device: TCL_SplitAC_Fresh_Air_DeviceData_Helper(
                         device.data
-                    ).getFanSpeed(),
+                    ).getWindSeed7Gear(),
                     options_values=[e.value for e in WindSeed7GearEnum],
                     select_option_fn=lambda device,
                     option: coordinator.get_aws_iot().async_set_wind_7_gear_speed(
+                        device.device_id, device.device_type, option
+                    ),
+                )
+            )
+
+        if DeviceFeature.SELECT_GENERATOR_MODE in supported_features:
+            switches.append(
+                Select(
+                    coordinator=coordinator,
+                    device=device,
+                    type="GeneratorMode",
+                    name="Generator Mode",
+                    icon_fn=lambda device: "mdi:generator-portable",
+                    current_state_fn=lambda device: TCL_SplitAC_Fresh_Air_DeviceData_Helper(
+                        device.data
+                    ).getGeneratorMode(),
+                    options_values=[e.value for e in GeneratorModeEnum],
+                    select_option_fn=lambda device,
+                    option: coordinator.get_aws_iot().async_set_generator_mode(
+                        device.device_id, device.device_type, option
+                    ),
+                )
+            )
+
+        if DeviceFeature.SELECT_FRESH_AIR in supported_features:
+            switches.append(
+                Select(
+                    coordinator=coordinator,
+                    device=device,
+                    type="FreshAir",
+                    name="Fresh Air",
+                    icon_fn=lambda device: "mdi:window-open-variant",
+                    current_state_fn=lambda device: TCL_SplitAC_Fresh_Air_DeviceData_Helper(
+                        device.data
+                    ).getFreshAir(),
+                    options_values=[e.value for e in FreshAirEnum],
+                    select_option_fn=lambda device,
+                    option: coordinator.get_aws_iot().async_set_fresh_air(
+                        device.device_id, device.device_type, option
+                    ),
+                )
+            )
+
+        if DeviceFeature.SELECT_WIND_FEELING in supported_features:
+            switches.append(
+                Select(
+                    coordinator=coordinator,
+                    device=device,
+                    type="WindFeeling",
+                    name="Wind Feeling",
+                    icon_fn=lambda device: "mdi:weather-dust",
+                    current_state_fn=lambda device: TCL_SplitAC_Fresh_Air_DeviceData_Helper(
+                        device.data
+                    ).getWindFeeling(),
+                    options_values=[e.value for e in WindFeelingEnum],
+                    select_option_fn=lambda device,
+                    option: coordinator.get_aws_iot().async_set_wind_feeling(
                         device.device_id, device.device_type, option
                     ),
                 )
@@ -100,7 +172,7 @@ async def async_setup_entry(
                     coordinator=coordinator,
                     device=device,
                     type="UpAndDownAirSupplyVector",
-                    name="Up and Down air supply",
+                    name=get_SELECT_VERTICAL_DIRECTION_name(device),
                     icon_fn=lambda device: "mdi:swap-vertical",
                     current_state_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
                         device.data
@@ -119,7 +191,7 @@ async def async_setup_entry(
                     coordinator=coordinator,
                     device=device,
                     type="LeftAndRightAirSupplyVector",
-                    name="Left and Right air supply",
+                    name=get_SELECT_HORIZONTAL_DIRECTION_name(device),
                     icon_fn=lambda device: "mdi:swap-horizontal",
                     current_state_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
                         device.data

@@ -1,27 +1,39 @@
 # ha-tcl-home-unofficial-integration  
 **TCL Home - Home Assistant integration (unofficial)**
 
-## Discord invite link
-For direct messages or for collaboration with missing device types
-https://discord.gg/8AcrRmNfVj
-
 ## Known issues
-- 
+- Split AC Fresh air - when changing mode (cool/heat/fan etc.) it does not set's back the previously selected temperature of the mode
+- Split AC Fresh air - power statics not implemented
 
 ## Supported device types
 - Split AC
-- Split AC Fresh air (parial - work in progress)  
+- Split AC Fresh air
+
+## Unsupported device types
+  Devices not recognized by the integration will be create as a remote. The device type will be shown, under The Device Info in this sample it's "Smart TV"
+  Use this type when requesting support for it
+
+![Not Implemented Sample](./not_implemented_sample.jpg "Not Implemented Sample")
+  
 
 ## Credit  
 The idea for basic login is from [DavidIlie’s project](https://github.com/DavidIlie/tcl-home-ac).  
 The Home Assistant integration [samples](https://github.com/msp1974/HAIntegrationExamples) helped a lot.
 
+## Discord invite link
+For direct messages or for collaboration with missing device types
+https://discord.gg/8AcrRmNfVj
+
 ## How it works  
 This integration is the result of reverse-engineering the “TCL Home” Android app. For setup, we only need the username/password used for the app. Since this is not an official integration from TCL, I recommend creating a new user for this integration and sharing your devices with that user—just in case TCL decides to ban the account.
 
-## How to install  
-This may eventually become available in the [HACS](https://www.home-assistant.io/integrations), but for now installation is manual only.
+## How to install 
+### HACS
+This integration is now awaliable in HACS, just search for "TCL Home"
 
+![HACS](./HACS.jpg "HACS")
+
+### Manual instalion
 ### Steps:
 1. Download the ZIP from GitHub and extract `ha-tcl-home-unofficial-integration-main.zip`.  
 ![git download](./git_download.jpg "git download")

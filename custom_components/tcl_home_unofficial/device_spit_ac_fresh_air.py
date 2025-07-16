@@ -46,7 +46,6 @@ from .device_ac_common import (
 
 
 class WindSeed7GearEnum(StrEnum):
-    NONE = "Not set"
     TURBO = "Turbo"
     AUTO = "Auto"
     SPEED_1 = "1"
@@ -55,6 +54,30 @@ class WindSeed7GearEnum(StrEnum):
     SPEED_4 = "4"
     SPEED_5 = "5"
     SPEED_6 = "6"
+
+
+class FreshAirEnum(StrEnum):
+    OFF = "Off"
+    ON = "On"
+    AUTO = "Auto"
+    STRENGTH_1 = "1"
+    STRENGTH_2 = "2"
+    STRENGTH_3 = "3"
+
+
+class WindFeelingEnum(StrEnum):
+    NONE = "Not set"
+    SOFT = "Soft"
+    SHOWER = "Shower"
+    CARPET = "Carpet"
+    SURROUND = "Surround"
+
+
+class GeneratorModeEnum(StrEnum):
+    NONE = "Not set"
+    L1 = "L1 30%"
+    L2 = "L1 50%"
+    L3 = "L1 70%"
 
 
 @dataclass
@@ -114,6 +137,10 @@ class TCL_SplitAC_Fresh_Air_DeviceData:
         self.anti_moldew = int(delta.get("antiMoldew", aws_thing_state["antiMoldew"]))
         self.self_clean = int(delta.get("selfClean", aws_thing_state["selfClean"]))
         self.screen = int(delta.get("screen", aws_thing_state["screen"]))
+        self.light_sense = int(delta.get("lightSense", aws_thing_state["lightSense"]))
+        self.external_unit_coil_temperature = int(delta.get("externalUnitCoilTemperature", aws_thing_state["externalUnitCoilTemperature"]))
+        self.external_unit_temperature = int(delta.get("externalUnitTemperature", aws_thing_state["externalUnitTemperature"]))
+        self.external_unit_exhaust_temperature = int(delta.get("externalUnitExhaustTemperature", aws_thing_state["externalUnitExhaustTemperature"]))
         self.device_id = device_id
 
     device_id: str
@@ -122,6 +149,9 @@ class TCL_SplitAC_Fresh_Air_DeviceData:
     target_temperature: float
     current_temperature: float
     internal_unit_coil_temperature: float
+    external_unit_coil_temperature: float
+    external_unit_exhaust_temperature: float
+    external_unit_temperature: float
     vertical_direction: int
     horizontal_direction: int
     sleep: int
@@ -137,6 +167,7 @@ class TCL_SplitAC_Fresh_Air_DeviceData:
     new_wind_strength: int
     soft_wind: int
     generator_mode: int
+    light_sense: int
 
 
 class TCL_SplitAC_Fresh_Air_DeviceData_Helper:
@@ -146,7 +177,7 @@ class TCL_SplitAC_Fresh_Air_DeviceData_Helper:
     def getMode(self) -> ModeEnum:
         return getMode(self.data.work_mode)
 
-    def getFanSpeed(self) -> WindSeed7GearEnum:
+    def getWindSeed7Gear(self) -> WindSeed7GearEnum:
         match self.data.wind_speed_7_gear:
             case 1:
                 return WindSeed7GearEnum.SPEED_1
@@ -163,11 +194,9 @@ class TCL_SplitAC_Fresh_Air_DeviceData_Helper:
             case 7:
                 return WindSeed7GearEnum.TURBO
             case 0:
-                if self.data.wind_speed_auto_switch == 1:
-                    return WindSeed7GearEnum.AUTO
-                return WindSeed7GearEnum.NONE
+                return WindSeed7GearEnum.AUTO
             case _:
-                return WindSeed7GearEnum.NONE
+                return WindSeed7GearEnum.AUTO
 
     def getUpAndDownAirSupplyVector(self) -> UpAndDownAirSupplyVectorEnum:
         return getUpAndDownAirSupplyVector(self.data.vertical_direction)
@@ -178,100 +207,101 @@ class TCL_SplitAC_Fresh_Air_DeviceData_Helper:
     def getSleepMode(self) -> SleepModeEnum:
         return getSleepMode(self.data.sleep)
 
+    def getFreshAir(self) -> FreshAirEnum:
+        match self.data.new_wind_strength:
+            case 1:
+                return FreshAirEnum.STRENGTH_1
+            case 2:
+                return FreshAirEnum.STRENGTH_2
+            case 3:
+                return FreshAirEnum.STRENGTH_3
+            case 0:
+                if self.data.new_wind_switch == 0:
+                    return FreshAirEnum.OFF
+                else:
+                    if self.data.new_wind_auto_switch == 1:
+                        return FreshAirEnum.AUTO
+                    else:
+                        return FreshAirEnum.ON
+            case _:
+                return FreshAirEnum.OFF
+
+    def getWindFeeling(self) -> WindFeelingEnum:
+        match self.data.soft_wind:
+            case 1:
+                return WindFeelingEnum.SOFT
+            case 2:
+                return WindFeelingEnum.SHOWER
+            case 3:
+                return WindFeelingEnum.CARPET
+            case 3:
+                return WindFeelingEnum.SURROUND
+            case 0:
+                return WindFeelingEnum.NONE
+            case _:
+                return WindFeelingEnum.NONE
+
+    def getGeneratorMode(self) -> GeneratorModeEnum:
+        match self.data.generator_mode:
+            case 1:
+                return GeneratorModeEnum.L1
+            case 2:
+                return GeneratorModeEnum.L2
+            case 3:
+                return GeneratorModeEnum.L3
+            case 0:
+                return GeneratorModeEnum.NONE
+
 
 """
-
-FAn to turbo
-{"state":{"desired":{"windSpeedAutoSwitch":0,"windSpeed7Gear":7}},"clientToken":"mobile_1752575376456"}
-Fan to auto
-{"state":{"desired":{"windSpeedAutoSwitch":1,"windSpeed7Gear":0}},"clientToken":"mobile_1752575392037"}
-Fa to 1
-{"state":{"desired":{"windSpeedAutoSwitch":0,"windSpeed7Gear":1}},"clientToken":"mobile_1752575406578"}
-2-6
-{"state":{"desired":{"windSpeedAutoSwitch":0,"windSpeed7Gear":2}},"clientToken":"mobile_1752575420675"}
-{"state":{"desired":{"windSpeedAutoSwitch":0,"windSpeed7Gear":3}},"clientToken":"mobile_1752575431138"}
-{"state":{"desired":{"windSpeedAutoSwitch":0,"windSpeed7Gear":4}},"clientToken":"mobile_1752575439008"}
-{"state":{"desired":{"windSpeedAutoSwitch":0,"windSpeed7Gear":5}},"clientToken":"mobile_1752575450022"}
-{"state":{"desired":{"windSpeedAutoSwitch":0,"windSpeed7Gear":6}},"clientToken":"mobile_1752575459038"}
-Freash air toogle
-{"state":{"desired":{"newWindSwitch":1,"selfClean":0}},"clientToken":"mobile_1752575483171"}
-fresh air auto
-{"state":{"desired":{"newWindAutoSwitch":1,"newWindStrength":0}},"clientToken":"mobile_1752575502900"}
-fresh air 1
-{"state":{"desired":{"newWindAutoSwitch":0,"newWindStrength":1}},"clientToken":"mobile_1752575527454"}
-2-3
-{"state":{"desired":{"newWindAutoSwitch":0,"newWindStrength":2}},"clientToken":"mobile_1752575541330"}
-{"state":{"desired":{"newWindAutoSwitch":0,"newWindStrength":3}},"clientToken":"mobile_1752575545013"}
-Wind feeling
-{"state":{"desired":{"horizontalDirection":8,"softWind":1}},"clientToken":"mobile_1752575563957"} (soft)
-WF - shower
-{"state":{"desired":{"horizontalDirection":8,"softWind":2,"verticalDirection":9}},"clientToken":"mobile_1752575659254"}
-András
- —
-12:35
-WF - Carpet
-{"state":{"desired":{"horizontalDirection":8,"softWind":3,"verticalDirection":13}},"clientToken":"mobile_1752575685738"}
-WF - Surround
-{"state":{"desired":{"softWind":4,"verticalDirection":8}},"clientToken":"mobile_1752575725894"}
-Air flow
-top fix
-{"state":{"desired":{"verticalDirection":9}},"clientToken":"mobile_1752575881474"}
-upper fix
-{"state":{"desired":{"verticalDirection":10}},"clientToken":"mobile_1752575903284"}
-midle fix
-{"state":{"desired":{"verticalDirection":11}},"clientToken":"mobile_1752575916018"}
-lower fix
-{"state":{"desired":{"verticalDirection":12}},"clientToken":"mobile_1752575932386"}
-bottom fix
-{"state":{"desired":{"verticalDirection":13}},"clientToken":"mobile_1752575944060"}
-upwards swing
-{"state":{"desired":{"verticalDirection":2}},"clientToken":"mobile_1752575968057"}
-downward swing
-{"state":{"desired":{"verticalDirection":3}},"clientToken":"mobile_1752575994933"}
-up and down swing
-{"state":{"desired":{"verticalDirection":1}},"clientToken":"mobile_1752576032832"}
-András
- —
-12:42
-Horizontal air flows
-Left swing
-{"state":{"desired":{"horizontalDirection":2}},"clientToken":"mobile_1752576115298"}
-LEft and right swing
-{"state":{"desired":{"horizontalDirection":1}},"clientToken":"mobile_1752576136149"}
-Right swing
-{"state":{"desired":{"horizontalDirection":4}},"clientToken":"mobile_1752576148366"}
-LEft fix
-{"state":{"desired":{"horizontalDirection":9}},"clientToken":"mobile_1752576168165"}
-center left fix
-{"state":{"desired":{"horizontalDirection":10}},"clientToken":"mobile_1752576182199"}
-midle fix
-{"state":{"desired":{"horizontalDirection":11}},"clientToken":"mobile_1752576195352"}
-center right-fix
-{"state":{"desired":{"horizontalDirection":12}},"clientToken":"mobile_1752576203784"}
-right fix
-{"state":{"desired":{"horizontalDirection":13}},"clientToken":"mobile_1752576218467"}
-eco
-{"state":{"desired":{"ECO":1}},"clientToken":"mobile_1752576233454"}
-sleep standard
-{"state":{"desired":{"sleep":1}},"clientToken":"mobile_1752576248420"}
-elder:
-{"state":{"desired":{"sleep":2}},"clientToken":"mobile_1752576291181"}
-child:
-{"state":{"desired":{"sleep":3}},"clientToken":"mobile_1752576291181"}
-Health
-{"state":{"desired":{"healthy":1}},"clientToken":"mobile_1752576347550"}
-Midewproof
-{"state":{"desired":{"antiMoldew":1}},"clientToken":"mobile_1752576368148"}
-Self clean:
-{"state":{"desired":{"powerSwitch":0,"selfClean":1}},"clientToken":"mobile_1752576436154"}
-GEN mode
-L1  30%
-{"state":{"desired":{"generatorMode":1}},"clientToken":"mobile_1752576474816"}
-L2 50%
-{"state":{"desired":{"generatorMode":2}},"clientToken":"mobile_1752576496998"}
-L3 70%
-{"state":{"desired":{"generatorMode":3}},"clientToken":"mobile_1752576508926"}
-Gen mode close
-{"state":{"desired":{"generatorMode":0}},"clientToken":"mobile_1752576527102"}
-
+SAMPLE state wile turned on:
+{
+  authFlag: { google: true },
+  powerSwitch: 1,
+  targetTemperature: 25,
+  currentTemperature: 25.4,
+  temperatureType: 0,
+  windSpeed7Gear: 0,
+  horizontalWind: 0,
+  verticalWind: 1,
+  horizontalDirection: 8,
+  verticalDirection: 1,
+  workMode: 1,
+  ECO: 0,
+  healthy: 0,
+  selfClean: 0,
+  screen: 1,
+  lightSense: 1,
+  sleep: 0,
+  beepSwitch: 0,
+  softWind: 0,
+  antiMoldew: 0,
+  generatorMode: 0,
+  filterBlockStatus: 0,
+  errorCode: [],
+  externalUnitVoltage: 236,
+  externalUnitElectricCurrent: 1,
+  internalUnitCoilTemperature: 23,
+  internalUnitFanSpeed: 0,
+  PTCStatus: 0,
+  externalUnitTemperature: 21,
+  externalUnitCoilTemperature: 22,
+  externalUnitExhaustTemperature: 24,
+  externalUnitFanGear: 0,
+  externalUnitFanSpeed: 0,
+  compressorFrequency: 0,
+  fourWayValveStatus: 0,
+  expansionValve: 480,
+  FreshAirStatus: 0,
+  newWindPercentage: 0,
+  newWindSwitch: 0,
+  windSpeedPercentage: 0,
+  windSpeedAutoSwitch: 1,
+  selfCleanStatus: 6,
+  newWindAutoSwitch: 1,
+  internalUnitFanCurrentGear: 2,
+  lightSenserStatus: 1,
+  newWindStrength: 0,
+  otaStatus: 1
+}
 """
