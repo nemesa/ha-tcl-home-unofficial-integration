@@ -33,6 +33,9 @@ This integration is now awaliable in HACS, just search for "TCL Home"
 
 ![HACS](./HACS.jpg "HACS")
 
+### Update from Manual to HACS
+If you already had a manual installation by hand and now you want to use HACS, just simply download the integration with HACS; it will overwrite the manual installation. Then restart Home Assistant.
+
 ### Manual instalion
 ### Steps:
 1. Download the ZIP from GitHub and extract `ha-tcl-home-unofficial-integration-main.zip`.  
