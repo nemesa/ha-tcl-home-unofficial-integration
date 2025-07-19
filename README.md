@@ -8,6 +8,13 @@
 ## Supported device types
 - Split AC
 - Split AC Fresh air
+- Portable AC
+
+## Notes by device types
+
+### Portable AC 
+
+  No ad-hoc temperature type change between Celsius and Fahrenheit; it will use the System-defined temperature type.
 
 ## Unsupported device types
   Devices not recognized by the integration will be create as a remote. The device type will be shown, under The Device Info in this sample it's "Smart TV"

@@ -128,6 +128,16 @@ class GetThingsResponseData:
         self.category = getValue(data, ["category"])
         self.firmware_version = getValue(data, ["firmware_version", "firmwareVersion"])
         self.is_online = getValue(data, ["is_online", "isOnline"])
+        self.room = getValue(data, ["room"])
+        if self.room is None:
+            if data["labels"] and len(data["labels"]) > 0:
+                for label in data["labels"]:
+                    if label["labelKey"] == "room":
+                        self.room = label["labelValue"]
+                        break
+
+        if self.nick_name is None and self.room is not None:
+            self.nick_name = self.room
 
     device_id: str
     platform: str
@@ -136,7 +146,7 @@ class GetThingsResponseData:
     category: str
     firmware_version: str
     is_online: str
-
+    room: str
 
 @dataclass
 class GetThingsResponse:

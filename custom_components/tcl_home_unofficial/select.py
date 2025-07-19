@@ -8,12 +8,24 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device, DeviceFeature, DeviceTypeEnum, getSupportedFeatures
+from .device import (
+    Device,
+    DeviceFeature,
+    DeviceTypeEnum,
+    get_supported_modes,
+    getSupportedFeatures,
+)
 from .device_ac_common import (
     LeftAndRightAirSupplyVectorEnum,
-    ModeEnum,
     SleepModeEnum,
     UpAndDownAirSupplyVectorEnum,
+    ModeEnum,
+    getMode,
+)
+from .device_portable_ac import (
+    PortableWindSeedEnum,
+    TCL_PortableAC_DeviceData_Helper,
+    TemperatureTypeEnum,
 )
 from .device_spit_ac import TCL_SplitAC_DeviceData_Helper, WindSeedEnum
 from .device_spit_ac_fresh_air import (
@@ -40,6 +52,17 @@ def get_SELECT_HORIZONTAL_DIRECTION_name(device: Device) -> str:
     return "Left and Right air supply"
 
 
+def get_portable_ac_wind_speed_options(device: Device) -> list[str] | None:
+    current_mode = getMode(device.data.work_mode)
+    if current_mode == ModeEnum.DEHUMIDIFICATION:
+        return [PortableWindSeedEnum.AUTO]
+
+    if current_mode == ModeEnum.FAN:
+        return [PortableWindSeedEnum.LOW, PortableWindSeedEnum.HEIGH]
+
+    return [e.value for e in PortableWindSeedEnum]
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: New_NameConfigEntry,
@@ -63,7 +86,7 @@ async def async_setup_entry(
                     current_state_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
                         device.data
                     ).getMode(),
-                    options_values=[e.value for e in ModeEnum],
+                    options_values=get_supported_modes(device),
                     select_option_fn=lambda device,
                     option: coordinator.get_aws_iot().async_set_mode(
                         device.device_id, device.device_type, option
@@ -104,6 +127,29 @@ async def async_setup_entry(
                     options_values=[e.value for e in WindSeed7GearEnum],
                     select_option_fn=lambda device,
                     option: coordinator.get_aws_iot().async_set_wind_7_gear_speed(
+                        device.device_id, device.device_type, option
+                    ),
+                )
+            )
+
+        if DeviceFeature.SELECT_PORTABLE_WIND_SEED in supported_features:
+            switches.append(
+                DynamicOptionsSelect(
+                    coordinator=coordinator,
+                    device=device,
+                    type="PortableWindSpeed",
+                    name="Wind Speed",
+                    icon_fn=lambda device: "mdi:weather-windy",
+                    current_state_fn=lambda device: TCL_PortableAC_DeviceData_Helper(
+                        device.data
+                    ).getWindSpeed(),
+                    options_values=[e.value for e in PortableWindSeedEnum],
+                    options_values_fn=lambda device: get_portable_ac_wind_speed_options(
+                        device
+                    ),
+                    available_fn=lambda device: device.data.sleep != 1,
+                    select_option_fn=lambda device,
+                    option: coordinator.get_aws_iot().async_set_portable_wind_speed(
                         device.device_id, device.device_type, option
                     ),
                 )
@@ -223,6 +269,25 @@ async def async_setup_entry(
                 )
             )
 
+        if DeviceFeature.SELECT_TEMPERATURE_TYPE in supported_features:
+            switches.append(
+                Select(
+                    coordinator=coordinator,
+                    device=device,
+                    type="TemperatureType",
+                    name="Temperature Type",
+                    icon_fn=lambda device: "mdi:home-thermometer",
+                    current_state_fn=lambda device: TCL_PortableAC_DeviceData_Helper(
+                        device.data
+                    ).getTemperatureType(),
+                    options_values=[e.value for e in TemperatureTypeEnum],
+                    select_option_fn=lambda device,
+                    option: coordinator.get_aws_iot().async_set_temperature_type(
+                        device.device_id, device.device_type, option
+                    ),
+                )
+            )
+
     async_add_entities(switches)
 
 
@@ -255,6 +320,55 @@ class Select(TclEntityBase, SelectEntity):
     def state(self):
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
         return self.current_state_fn(self.device)
+
+    async def async_select_option(self, option: str) -> None:
+        await self.select_option_fn(self.device, option)
+        await self.coordinator.async_refresh()
+
+
+class DynamicOptionsSelect(TclEntityBase, SelectEntity):
+    def __init__(
+        self,
+        coordinator: IotDeviceCoordinator,
+        device: Device,
+        type: str,
+        name: str,
+        icon_fn: lambda device: str,
+        current_state_fn: lambda device: str,
+        options_values: list[str] | None,
+        options_values_fn: lambda device: list[str] | None,
+        available_fn: lambda device: bool,
+        select_option_fn: lambda device, option: None,
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, type, name, device)
+
+        self._attr_available = True
+
+        self.icon_fn = icon_fn
+        self.options_values_fn = options_values_fn
+        self.available_fn = available_fn
+        self.select_option_fn = select_option_fn
+        self.current_state_fn = current_state_fn
+
+        self._attr_current_option = self.current_state_fn(device)
+        self._attr_options = options_values
+
+    @property
+    def icon(self):
+        return self.icon_fn(self.device)
+
+    @property
+    def options(self) -> list[str]:
+        return self.options_values_fn(self.device)
+
+    @property
+    def state(self):
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        return self.current_state_fn(self.device)
+
+    @property
+    def available(self) -> bool:
+        return self.available_fn(self.device)
 
     async def async_select_option(self, option: str) -> None:
         await self.select_option_fn(self.device, option)

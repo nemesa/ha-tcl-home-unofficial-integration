@@ -6,16 +6,20 @@ from enum import StrEnum
 from homeassistant.helpers.device_registry import DeviceInfo
 
 from .const import DOMAIN
+from .device_ac_common import ModeEnum
 from .device_spit_ac import TCL_SplitAC_DeviceData
 from .device_spit_ac_fresh_air import TCL_SplitAC_Fresh_Air_DeviceData
+from .device_portable_ac import TCL_PortableAC_DeviceData
 
 
 class DeviceTypeEnum(StrEnum):
     SPLIT_AC = "Split AC"
     SPLIT_AC_FRESH_AIR = "Split AC Fresh air"
+    PORTABLE_AC = "Portable AC"
 
 
 class DeviceFeature(StrEnum):
+    MODE_HEAT = "mode.heat"
     SENSOR_CURRENT_TEMPERATURE = "sensor.current_temperature"
     SENSOR_INTERNAL_UNIT_COIL_TEMPERATURE = "sensor.internal_unit_coil_temperature"
     SENSOR_EXTERNAL_UNIT_COIL_TEMPERATURE = "sensor.external_unit_coil_temperature"
@@ -30,6 +34,8 @@ class DeviceFeature(StrEnum):
     SWITCH_DRYING = "switch.drying"
     SWITCH_SCREEN = "switch.screen"
     SWITCH_LIGHT_SENSE = "switch.lightSense"
+    SWITCH_SWING_WIND = "switch.swingWind"
+    SWITCH_SLEEP = "switch.sleep"
     SELECT_MODE = "select.mode"
     SELECT_WIND_SPEED = "select.windSpeed"
     SELECT_WIND_SPEED_7_Gear = "select.windSpeed7Gear"
@@ -39,6 +45,9 @@ class DeviceFeature(StrEnum):
     SELECT_SLEEP_MODE = "select.sleepMode"
     SELECT_FRESH_AIR = "select.freshAir"
     SELECT_GENERATOR_MODE = "select.generatorMode"
+    SELECT_TEMPERATURE_TYPE = "select.temperatureType"
+    SELECT_PORTABLE_WIND_SEED = "select.portableWindSeed"
+    NUMBER_TARGET_DEGREE = "number.targetDegree"
     NUMBER_TARGET_TEMPERATURE = "number.targetTemperature"
     NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS = (
         "number.targetTemperature.allow_half_digits"
@@ -51,6 +60,7 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
     match device_type:
         case DeviceTypeEnum.SPLIT_AC:
             return [
+                DeviceFeature.MODE_HEAT,
                 DeviceFeature.SENSOR_CURRENT_TEMPERATURE,
                 DeviceFeature.SWITCH_POWER,
                 DeviceFeature.SWITCH_BEEP,
@@ -66,9 +76,12 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
                 DeviceFeature.NUMBER_TARGET_TEMPERATURE,
                 DeviceFeature.BUTTON_SELF_CLEAN,
                 DeviceFeature.CLIMATE,
+                DeviceFeature.NUMBER_TARGET_DEGREE,
+                DeviceFeature.SELECT_PORTABLE_WIND_SEED,
             ]
         case DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
             return [
+                DeviceFeature.MODE_HEAT,
                 DeviceFeature.SENSOR_CURRENT_TEMPERATURE,
                 DeviceFeature.SENSOR_INTERNAL_UNIT_COIL_TEMPERATURE,
                 DeviceFeature.SENSOR_EXTERNAL_UNIT_COIL_TEMPERATURE,
@@ -94,6 +107,16 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
                 DeviceFeature.BUTTON_SELF_CLEAN,
                 DeviceFeature.CLIMATE,
             ]
+        case DeviceTypeEnum.PORTABLE_AC:
+            return [
+                DeviceFeature.SWITCH_POWER,
+                DeviceFeature.SWITCH_SWING_WIND,
+                DeviceFeature.SWITCH_SLEEP,
+                DeviceFeature.SELECT_MODE,
+                # DeviceFeature.SELECT_TEMPERATURE_TYPE,
+                DeviceFeature.SELECT_PORTABLE_WIND_SEED,
+                DeviceFeature.NUMBER_TARGET_DEGREE,
+            ]
         case _:
             return []
 
@@ -103,6 +126,8 @@ def is_implemented_by_integration(device_type: str) -> bool:
         case DeviceTypeEnum.SPLIT_AC:
             return True
         case DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+            return True
+        case DeviceTypeEnum.PORTABLE_AC:
             return True
         case _:
             return False
@@ -141,6 +166,13 @@ class Device:
                         aws_thing["state"]["reported"],
                         aws_thing["state"].get("delta", {}),
                     )
+                case DeviceTypeEnum.PORTABLE_AC:
+                    self.data = TCL_PortableAC_DeviceData(
+                        device_id,
+                        aws_thing["state"]["reported"],
+                        aws_thing["state"].get("delta", {}),
+                    )
+
                 case _:
                     self.data = None
         else:
@@ -151,7 +183,12 @@ class Device:
     name: str
     firmware_version: str
     is_implemented_by_integration: bool
-    data: TCL_SplitAC_DeviceData | TCL_SplitAC_Fresh_Air_DeviceData | None = None
+    data: (
+        TCL_SplitAC_DeviceData
+        | TCL_SplitAC_Fresh_Air_DeviceData
+        | TCL_PortableAC_DeviceData
+        | None
+    ) = None
 
 
 def toDeviceInfo(device: Device) -> DeviceInfo:
@@ -168,3 +205,10 @@ def toDeviceInfo(device: Device) -> DeviceInfo:
             )
         },
     )
+
+
+def get_supported_modes(device: Device) -> list[ModeEnum]:
+    supported_features = getSupportedFeatures(device.device_type)
+    if DeviceFeature.MODE_HEAT not in supported_features:
+        return [e.value for e in ModeEnum if e != ModeEnum.HEAT]
+    return [e.value for e in ModeEnum]
