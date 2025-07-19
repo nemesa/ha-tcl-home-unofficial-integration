@@ -9,5 +9,5 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/nemesa/ha-tcl-home-unofficial-integration/issues",  
   "loggers": ["custom_components.tcl_home_unofficial"],
-  "version": "1.1.0"
+  "version": "1.2.0"
 }

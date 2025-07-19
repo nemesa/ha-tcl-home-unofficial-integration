@@ -171,6 +171,43 @@ async def async_setup_entry(
                 )
             )
 
+        if DeviceFeature.SWITCH_SWING_WIND in supported_features:
+            switches.append(
+                Switch(
+                    coordinator=coordinator,
+                    device=device,
+                    type="SwingWind",
+                    name="Up and down wind",
+                    icon_fn=lambda device: "mdi:swap-vertical",
+                    is_on_fn=lambda device: device.data.swing_wind,
+                    turn_on_fn=lambda device: coordinator.get_aws_iot().async_set_swing_wind(
+                        device.device_id, device.device_type, 1
+                    ),
+                    turn_off_fn=lambda device: coordinator.get_aws_iot().async_set_swing_wind(
+                        device.device_id, device.device_type, 0
+                    ),
+                )
+            )
+
+        if DeviceFeature.SWITCH_SLEEP in supported_features:
+            switches.append(
+                DynamicSwitch(
+                    coordinator=coordinator,
+                    device=device,
+                    type="Sleep",
+                    name="Sleep",
+                    icon_fn=lambda device: "mdi:sleep",
+                    is_on_fn=lambda device: device.data.sleep,
+                    turn_on_fn=lambda device: coordinator.get_aws_iot().async_set_sleep(
+                        device.device_id, device.device_type, 1
+                    ),
+                    turn_off_fn=lambda device: coordinator.get_aws_iot().async_set_sleep(
+                        device.device_id, device.device_type, 0
+                    ),
+                    available_fn=lambda device: (device.data.work_mode != 3),
+                )
+            )
+
     async_add_entities(switches)
 
 
@@ -199,6 +236,52 @@ class Switch(TclEntityBase, SwitchEntity):
     @property
     def icon(self):
         return self.icon_fn(self.device)
+
+    @property
+    def is_on(self) -> bool | None:
+        device = self.coordinator.get_device_by_id(self.device.device_id)
+        return self.is_on_fn(device)
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        await self.turn_on_fn(self.device)
+        await self.coordinator.async_refresh()
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        await self.turn_off_fn(self.device)
+        await self.coordinator.async_refresh()
+
+
+class DynamicSwitch(TclEntityBase, SwitchEntity):
+    def __init__(
+        self,
+        coordinator: IotDeviceCoordinator,
+        device: Device,
+        type: str,
+        name: str,
+        icon_fn: lambda device: str,
+        is_on_fn: lambda device: bool | None,
+        turn_on_fn: lambda device: None,
+        turn_off_fn: lambda device: None,
+        available_fn: lambda device: bool,
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, type, name, device)
+        self.icon_fn = icon_fn
+        self.turn_on_fn = turn_on_fn
+        self.turn_off_fn = turn_off_fn
+        self.is_on_fn = is_on_fn
+        self.available_fn = available_fn
+
+    @property
+    def device_class(self) -> str:
+        return SwitchDeviceClass.SWITCH
+
+    @property
+    def icon(self):
+        return self.icon_fn(self.device)
+
+    @property
+    def available(self) -> bool:
+        return self.available_fn(self.device)
 
     @property
     def is_on(self) -> bool | None:

@@ -18,7 +18,13 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device, DeviceFeature, DeviceTypeEnum, getSupportedFeatures
+from .device import (
+    Device,
+    DeviceFeature,
+    DeviceTypeEnum,
+    getSupportedFeatures,
+    get_supported_modes,
+)
 from .device_ac_common import (
     LeftAndRightAirSupplyVectorEnum,
     ModeEnum,
@@ -116,9 +122,9 @@ class SplitAcClimate(TclEntityBase, ClimateEntity):
         self._hvac_mode = map_mode_to_hvac_mode(
             TCL_SplitAC_DeviceData_Helper(device.data).getMode()
         )
-        self._hvac_modes = [map_mode_to_hvac_mode(e.value) for e in ModeEnum] + [
-            HVACMode.OFF
-        ]
+        self._hvac_modes = [
+            map_mode_to_hvac_mode(e) for e in get_supported_modes(self.device)
+        ] + [HVACMode.OFF]
 
         self._current_swing_mode = TCL_SplitAC_DeviceData_Helper(
             device.data
@@ -285,9 +291,9 @@ class SplitAcFreshAirClimate(TclEntityBase, ClimateEntity):
         self._hvac_mode = map_mode_to_hvac_mode(
             TCL_SplitAC_Fresh_Air_DeviceData_Helper(device.data).getMode()
         )
-        self._hvac_modes = [map_mode_to_hvac_mode(e.value) for e in ModeEnum] + [
-            HVACMode.OFF
-        ]
+        self._hvac_modes = [
+            map_mode_to_hvac_mode(e) for e in get_supported_modes(self.device)
+        ] + [HVACMode.OFF]
 
         self._current_swing_mode = TCL_SplitAC_Fresh_Air_DeviceData_Helper(
             device.data

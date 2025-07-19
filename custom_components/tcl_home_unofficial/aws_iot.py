@@ -18,6 +18,7 @@ from .device_ac_common import (
 )
 from .device import DeviceTypeEnum
 from .device_spit_ac import WindSeedEnum
+from .device_portable_ac import TemperatureTypeEnum, PortableWindSeedEnum
 from .device_spit_ac_fresh_air import (
     WindSeed7GearEnum,
     GeneratorModeEnum,
@@ -26,6 +27,7 @@ from .device_spit_ac_fresh_air import (
 )
 from .session_manager import SessionManager
 from .tcl import GetThingsResponse, get_things
+from .device_data_storage import get_stored_data
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -143,9 +145,84 @@ class AwsIot:
             )
             raise e
 
+    async def execute_and_re_try_call_with_device_id_and_value_and_stored_data(
+        self,
+        function,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: int | float,
+        stored_data: dict[str, any] | None,
+        fromException: bool = False,
+    ):
+        try:
+            return await self.hass.async_add_executor_job(
+                function, device_id, deviceType, value, stored_data
+            )
+        except Exception as e:
+            # re-try if the error is due to expired credentials
+            if not fromException:
+                self.client.close()
+                await self.async_setup_client()
+                return await self.execute_and_re_try_call_with_device_id_and_value_and_stored_data(
+                    function=function,
+                    device_id=device_id,
+                    deviceType=deviceType,
+                    value=value,
+                    stored_data=stored_data,
+                    fromException=True,
+                )
+            _LOGGER.error(
+                "Aws_iot - Error execute_and_re_try_call_with_device_id_and_value_and_stored_data %s - %s | %s | %s",
+                device_id,
+                value,
+                stored_data,
+                e,
+            )
+            raise e
+
+    async def execute_and_re_try_call_with_device_id_and_value2(
+        self,
+        function,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value1: int | float,
+        value2: int | float,
+        fromException: bool = False,
+    ):
+        try:
+            return await self.hass.async_add_executor_job(
+                function, device_id, deviceType, value1, value2
+            )
+        except Exception as e:
+            # re-try if the error is due to expired credentials
+            if not fromException:
+                self.client.close()
+                await self.async_setup_client()
+                return await self.execute_and_re_try_call_with_device_id_and_value2(
+                    function=function,
+                    device_id=device_id,
+                    deviceType=deviceType,
+                    value1=value1,
+                    value2=value2,
+                    fromException=True,
+                )
+            _LOGGER.error(
+                "Aws_iot - Error execute_and_re_try_call_with_device_id_and_value2 %s - %s,%s | %s",
+                device_id,
+                value1,
+                value2,
+                e,
+            )
+            raise e
+
     async def async_get_thing(
         self, device_id: str, fromException: bool = False
     ) -> dict:
+        if self.session_manager.is_verbose_device_logging():
+            stored_data = await get_stored_data(self.hass, device_id)
+            _LOGGER.info(
+                "AwsIot.async_get_thing.stored_data (%s): %s", device_id, stored_data
+            )
         return await self.execute_and_re_try_call_with_device_id(
             self.get_thing, device_id, fromException
         )
@@ -270,6 +347,78 @@ class AwsIot:
             payload=payload,
         )
 
+    async def async_set_target_temperature(
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: int | float,
+        fromException: bool = False,
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_target_temperature, device_id, deviceType, value, fromException
+        )
+
+    async def async_set_target_degree(
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value1: int | float,
+        value2: int | float,
+        fromException: bool = False,
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value2(
+            self.set_target_degree, device_id, deviceType, value1, value2, fromException
+        )
+
+    def set_target_degree(
+        self, device_id: str, deviceType: DeviceTypeEnum, value1: int, value2: int
+    ) -> None:
+        _LOGGER.info(
+            "AwsIot.set_target_degree: (%s) %s - %s|%s",
+            deviceType,
+            device_id,
+            value1,
+            value2,
+        )
+        if self.session_manager.is_verbose_device_logging():
+            _LOGGER.info(
+                "AwsIot.set_target_degree: (%s) %s - %s|%s",
+                deviceType,
+                device_id,
+                value1,
+                value2,
+            )
+
+        min_c_temp = 16
+        max_c_temp = 32
+
+        if value1 < min_c_temp or value1 > max_c_temp:
+            _LOGGER.error(
+                "Invalid target degree: %s (Min:%s Max:%s)",
+                value1,
+                min_c_temp,
+                max_c_temp,
+            )
+            return
+
+        payload = json.dumps(
+            {
+                "state": {
+                    "desired": {
+                        "targetCelsiusDegree": value1,
+                        "targetFahrenheitDegree": value2,
+                    }
+                },
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+
+        self.client.publish(
+            topic=getTopic(device_id),
+            qos=1,
+            payload=payload,
+        )
+
     async def async_set_mode(
         self,
         device_id: str,
@@ -277,12 +426,17 @@ class AwsIot:
         value: ModeEnum,
         fromException: bool = False,
     ) -> None:
-        await self.execute_and_re_try_call_with_device_id_and_value(
-            self.set_mode, device_id, deviceType, value, fromException
+        stored_data = await get_stored_data(self.hass, device_id)
+        await self.execute_and_re_try_call_with_device_id_and_value_and_stored_data(
+            self.set_mode, device_id, deviceType, value, stored_data, fromException
         )
 
     def set_mode(
-        self, device_id: str, deviceType: DeviceTypeEnum, value: ModeEnum
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: ModeEnum,
+        stored_data: dict[str, any] | None = None,
     ) -> None:
         if self.session_manager.is_verbose_device_logging():
             _LOGGER.info("AwsIot.set_mode: (%s) %s - %s", deviceType, device_id, value)
@@ -296,6 +450,8 @@ class AwsIot:
                         "workMode": 0,
                         "windSpeed7Gear": 0,
                     }
+                elif deviceType == DeviceTypeEnum.PORTABLE_AC:
+                    desired = {"sleep": 0, "workMode": 0, "windSpeed": 0}
                 else:
                     desired = {
                         "ECO": 0,
@@ -317,6 +473,25 @@ class AwsIot:
                         "windSpeedAutoSwitch": 0,
                         "workMode": 1,
                         "windSpeed7Gear": 6,
+                    }
+                elif deviceType == DeviceTypeEnum.PORTABLE_AC:
+                    targetCelsiusDegree = 22
+                    targetFahrenheitDegree = 72
+
+                    if stored_data is not None:
+                        targetCelsiusDegree = stored_data.get(
+                            "targetCelsiusDegree", targetCelsiusDegree
+                        )
+                        targetFahrenheitDegree = stored_data.get(
+                            "targetFahrenheitDegree", targetFahrenheitDegree
+                        )
+
+                    desired = {
+                        "sleep": 0,
+                        "workMode": 1,
+                        "windSpeed": 2,
+                        "targetCelsiusDegree": targetCelsiusDegree,
+                        "targetFahrenheitDegree": targetFahrenheitDegree,
                     }
                 else:
                     desired = {
@@ -341,6 +516,8 @@ class AwsIot:
                         "workMode": 2,
                         "windSpeed7Gear": 2,
                     }
+                elif deviceType == DeviceTypeEnum.PORTABLE_AC:
+                    desired = {"sleep": 0, "workMode": 2, "windSpeed": 0}
                 else:
                     desired = {
                         "ECO": 0,
@@ -363,6 +540,8 @@ class AwsIot:
                         "workMode": 3,
                         "windSpeed7Gear": 0,
                     }
+                elif deviceType == DeviceTypeEnum.PORTABLE_AC:
+                    desired = {"sleep": 0, "workMode": 3, "windSpeed": 1}
                 else:
                     desired = {
                         "ECO": 0,
@@ -484,7 +663,7 @@ class AwsIot:
         fromException: bool = False,
     ) -> None:
         await self.execute_and_re_try_call_with_device_id_and_value(
-            self.set_wind_speed, deviceType, device_id, value, fromException
+            self.set_wind_speed, device_id, deviceType, value, fromException
         )
 
     def set_wind_speed(
@@ -1028,6 +1207,82 @@ class AwsIot:
         )
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
 
+    async def async_set_temperature_type(
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: TemperatureTypeEnum,
+        fromException: bool = False,
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_temperature_type, device_id, deviceType, value, fromException
+        )
+
+    def set_temperature_type(
+        self, device_id: str, deviceType: DeviceTypeEnum, value: TemperatureTypeEnum
+    ) -> None:
+        if self.session_manager.is_verbose_device_logging():
+            _LOGGER.info(
+                "AwsIot.set_temperature_type: (%s) %s - %s",
+                deviceType,
+                device_id,
+                value,
+            )
+        desired = {}
+        match value:
+            case TemperatureTypeEnum.FAHRENHEIT:
+                desired = {"temperatureType": 1}
+            case TemperatureTypeEnum.CELSIUS:
+                desired = {"temperatureType": 0}
+
+        payload = json.dumps(
+            {
+                "state": {"desired": desired},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
+
+    async def async_set_portable_wind_speed(
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: PortableWindSeedEnum,
+        fromException: bool = False,
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_portable_wind_speed, device_id, deviceType, value, fromException
+        )
+
+    def set_portable_wind_speed(
+        self, device_id: str, deviceType: DeviceTypeEnum, value: PortableWindSeedEnum
+    ) -> None:
+        if self.session_manager.is_verbose_device_logging():
+            _LOGGER.info(
+                "AwsIot.set_portable_wind_speed: (%s) %s - %s",
+                deviceType,
+                device_id,
+                value,
+            )
+        desired = {}
+        match value:
+            case PortableWindSeedEnum.AUTO:
+                desired = {"windSpeed": 0}
+            case PortableWindSeedEnum.LOW:
+                desired = {"windSpeed": 1}
+            case PortableWindSeedEnum.HEIGH:
+                desired = {"windSpeed": 2}
+
+        payload = json.dumps(
+            {
+                "state": {"desired": desired},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
+
     async def async_set_light(
         self,
         device_id: str,
@@ -1071,6 +1326,69 @@ class AwsIot:
         payload = json.dumps(
             {
                 "state": {"desired": {"lightSense": value}},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
+
+    async def async_set_swing_wind(
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: int,
+        fromException: bool = False,
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_swing_wind, device_id, deviceType, value, fromException
+        )
+
+    def set_swing_wind(
+        self, device_id: str, deviceType: DeviceTypeEnum, value: int
+    ) -> None:
+        if self.session_manager.is_verbose_device_logging():
+            _LOGGER.info(
+                "AwsIot.set_swing_wind: (%s) %s - %s", deviceType, device_id, value
+            )
+        payload = json.dumps(
+            {
+                "state": {"desired": {"swingWind": value}},
+                "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
+            }
+        )
+        self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)
+
+    async def async_set_sleep(
+        self,
+        device_id: str,
+        deviceType: DeviceTypeEnum,
+        value: int,
+        fromException: bool = False,
+    ) -> None:
+        await self.execute_and_re_try_call_with_device_id_and_value(
+            self.set_set_sleep, device_id, deviceType, value, fromException
+        )
+
+    def set_set_sleep(
+        self, device_id: str, deviceType: DeviceTypeEnum, value: int
+    ) -> None:
+        if self.session_manager.is_verbose_device_logging():
+            _LOGGER.info(
+                "AwsIot.set_set_sleep: (%s) %s - %s", deviceType, device_id, value
+            )
+
+        desired = {}
+        if value == 0:
+            desired = {"sleep": 0}
+            if deviceType == DeviceTypeEnum.PORTABLE_AC:
+                desired = {"sleep": 0, "windSpeed": 2}
+        else:
+            desired = {"sleep": 1}
+            if deviceType == DeviceTypeEnum.PORTABLE_AC:
+                desired = {"sleep": 1, "windSpeed": 1}
+
+        payload = json.dumps(
+            {
+                "state": {"desired": desired},
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
         )

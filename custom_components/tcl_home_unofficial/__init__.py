@@ -102,6 +102,7 @@ async def async_setup_entry(
 
 async def async_unload_entry(hass: HomeAssistant, entry: New_NameConfigEntry) -> bool:
     """Unload a config entry."""
+    # TODO: cleanup the device storega data
     return await hass.config_entries.async_unload_platforms(entry, _PLATFORMS)
 
 
