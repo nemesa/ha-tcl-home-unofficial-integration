@@ -76,8 +76,6 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
                 DeviceFeature.NUMBER_TARGET_TEMPERATURE,
                 DeviceFeature.BUTTON_SELF_CLEAN,
                 DeviceFeature.CLIMATE,
-                DeviceFeature.NUMBER_TARGET_DEGREE,
-                DeviceFeature.SELECT_PORTABLE_WIND_SEED,
             ]
         case DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
             return [
