@@ -1,5 +1,7 @@
 """."""
 
+from homeassistant.core import HomeAssistant
+from .device_data_storage import get_stored_data, set_stored_data
 from dataclasses import dataclass
 from enum import StrEnum
 
@@ -13,36 +15,6 @@ from .device_ac_common import (
     SleepModeEnum,
     getSleepMode,
 )
-
-"""
-{
-  temperatureType: 0,
-  horizontalWind: 0,
-  verticalWind: 0,
-  lightSense: 1,
-  filterBlockStatus: 0,
-  errorCode: [],
-  externalUnitVoltage: 0,
-  externalUnitElectricCurrent: 0,
-  internalUnitFanSpeed: 0,
-  PTCStatus: 0,
-  externalUnitTemperature: 0,
-  externalUnitCoilTemperature: 0,
-  externalUnitExhaustTemperature: 0,
-  externalUnitFanGear: 0,
-  externalUnitFanSpeed: 0,
-  compressorFrequency: 0,
-  fourWayValveStatus: 0,
-  expansionValve: 0,
-  FreshAirStatus: 0,
-  newWindPercentage: 33,
-  windSpeedPercentage: 0,
-  selfCleanStatus: 6,
-  internalUnitFanCurrentGear: 0,
-  lightSenserStatus: 0,
-  otaStatus: 1
-}
-"""
 
 
 class WindSeed7GearEnum(StrEnum):
@@ -138,9 +110,23 @@ class TCL_SplitAC_Fresh_Air_DeviceData:
         self.self_clean = int(delta.get("selfClean", aws_thing_state["selfClean"]))
         self.screen = int(delta.get("screen", aws_thing_state["screen"]))
         self.light_sense = int(delta.get("lightSense", aws_thing_state["lightSense"]))
-        self.external_unit_coil_temperature = int(delta.get("externalUnitCoilTemperature", aws_thing_state["externalUnitCoilTemperature"]))
-        self.external_unit_temperature = int(delta.get("externalUnitTemperature", aws_thing_state["externalUnitTemperature"]))
-        self.external_unit_exhaust_temperature = int(delta.get("externalUnitExhaustTemperature", aws_thing_state["externalUnitExhaustTemperature"]))
+        self.external_unit_coil_temperature = int(
+            delta.get(
+                "externalUnitCoilTemperature",
+                aws_thing_state["externalUnitCoilTemperature"],
+            )
+        )
+        self.external_unit_temperature = int(
+            delta.get(
+                "externalUnitTemperature", aws_thing_state["externalUnitTemperature"]
+            )
+        )
+        self.external_unit_exhaust_temperature = int(
+            delta.get(
+                "externalUnitExhaustTemperature",
+                aws_thing_state["externalUnitExhaustTemperature"],
+            )
+        )
         self.device_id = device_id
 
     device_id: str
@@ -168,6 +154,24 @@ class TCL_SplitAC_Fresh_Air_DeviceData:
     soft_wind: int
     generator_mode: int
     light_sense: int
+
+
+async def get_stored_spit_ac_fresh_data(
+    hass: HomeAssistant, device_id: str
+) -> dict[str, any]:
+    stored_data = await get_stored_data(hass, device_id)
+    if stored_data is None:
+        stored_data = {
+            "target_temperature": {
+                "Cool": 24,
+                "Heat": 26,
+                "Dehumidification": 24,
+                "Fan": 24,
+                "Auto": 24,
+            }
+        }
+        await set_stored_data(hass, device_id, stored_data)
+    return stored_data
 
 
 class TCL_SplitAC_Fresh_Air_DeviceData_Helper:
@@ -251,57 +255,3 @@ class TCL_SplitAC_Fresh_Air_DeviceData_Helper:
                 return GeneratorModeEnum.L3
             case 0:
                 return GeneratorModeEnum.NONE
-
-
-"""
-SAMPLE state wile turned on:
-{
-  authFlag: { google: true },
-  powerSwitch: 1,
-  targetTemperature: 25,
-  currentTemperature: 25.4,
-  temperatureType: 0,
-  windSpeed7Gear: 0,
-  horizontalWind: 0,
-  verticalWind: 1,
-  horizontalDirection: 8,
-  verticalDirection: 1,
-  workMode: 1,
-  ECO: 0,
-  healthy: 0,
-  selfClean: 0,
-  screen: 1,
-  lightSense: 1,
-  sleep: 0,
-  beepSwitch: 0,
-  softWind: 0,
-  antiMoldew: 0,
-  generatorMode: 0,
-  filterBlockStatus: 0,
-  errorCode: [],
-  externalUnitVoltage: 236,
-  externalUnitElectricCurrent: 1,
-  internalUnitCoilTemperature: 23,
-  internalUnitFanSpeed: 0,
-  PTCStatus: 0,
-  externalUnitTemperature: 21,
-  externalUnitCoilTemperature: 22,
-  externalUnitExhaustTemperature: 24,
-  externalUnitFanGear: 0,
-  externalUnitFanSpeed: 0,
-  compressorFrequency: 0,
-  fourWayValveStatus: 0,
-  expansionValve: 480,
-  FreshAirStatus: 0,
-  newWindPercentage: 0,
-  newWindSwitch: 0,
-  windSpeedPercentage: 0,
-  windSpeedAutoSwitch: 1,
-  selfCleanStatus: 6,
-  newWindAutoSwitch: 1,
-  internalUnitFanCurrentGear: 2,
-  lightSenserStatus: 1,
-  newWindStrength: 0,
-  otaStatus: 1
-}
-"""

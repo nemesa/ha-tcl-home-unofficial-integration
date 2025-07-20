@@ -3,13 +3,17 @@
 from dataclasses import dataclass
 from enum import StrEnum
 
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 
 from .const import DOMAIN
 from .device_ac_common import ModeEnum
-from .device_spit_ac import TCL_SplitAC_DeviceData
-from .device_spit_ac_fresh_air import TCL_SplitAC_Fresh_Air_DeviceData
-from .device_portable_ac import TCL_PortableAC_DeviceData
+from .device_spit_ac import TCL_SplitAC_DeviceData, get_stored_spit_ac_data
+from .device_spit_ac_fresh_air import (
+    TCL_SplitAC_Fresh_Air_DeviceData,
+    get_stored_spit_ac_fresh_data,
+)
+from .device_portable_ac import TCL_PortableAC_DeviceData, get_stored_portable_ac_data
 
 
 class DeviceTypeEnum(StrEnum):
@@ -210,3 +214,13 @@ def get_supported_modes(device: Device) -> list[ModeEnum]:
     if DeviceFeature.MODE_HEAT not in supported_features:
         return [e.value for e in ModeEnum if e != ModeEnum.HEAT]
     return [e.value for e in ModeEnum]
+
+
+async def init_device_storage(hass: HomeAssistant, device: Device) -> None:
+    """Initialize device storage."""
+    if device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+        await get_stored_spit_ac_fresh_data(hass, device.device_id)
+    elif device.device_type == DeviceTypeEnum.SPLIT_AC:
+        await get_stored_spit_ac_data(hass, device.device_id)
+    elif device.device_type == DeviceTypeEnum.PORTABLE_AC:
+        await get_stored_portable_ac_data(hass, device.device_id)

@@ -12,6 +12,9 @@ from .coordinator import IotDeviceCoordinator
 from .device import Device, DeviceFeature, DeviceTypeEnum, getSupportedFeatures
 from .device_data_storage import set_stored_data
 from .device_ac_common import getMode, ModeEnum
+from .device_portable_ac import get_stored_portable_ac_data
+from .device_spit_ac import get_stored_spit_ac_data
+from .device_spit_ac_fresh_air import get_stored_spit_ac_fresh_data
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -30,7 +33,7 @@ async def async_setup_entry(
         supported_features = getSupportedFeatures(device.device_type)
 
         if DeviceFeature.NUMBER_TARGET_TEMPERATURE in supported_features:
-            customEntities.append(SetTargetTempEntity(coordinator, device))
+            customEntities.append(SetTargetTempEntity(hass, coordinator, device))
 
         if DeviceFeature.NUMBER_TARGET_DEGREE in supported_features:
             customEntities.append(
@@ -47,10 +50,13 @@ async def async_setup_entry(
 
 
 class SetTargetTempEntity(TclEntityBase, NumberEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
+    def __init__(
+        self, hass: HomeAssistant, coordinator: IotDeviceCoordinator, device: Device
+    ) -> None:
         TclEntityBase.__init__(
             self, coordinator, "SetTargetTempEntity", "Set Target Temperature", device
         )
+        self.hass = hass
 
         self.device_features = getSupportedFeatures(device.device_type)
 
@@ -99,6 +105,20 @@ class SetTargetTempEntity(TclEntityBase, NumberEntity):
             in self.device_features
         ):
             value_to_set = float(value)
+
+        data_to_store = None
+        mode = getMode(self.device.data.work_mode)
+        if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+            data_to_store = await get_stored_spit_ac_fresh_data(self.hass, self.device.device_id)
+        if self.device.device_type == DeviceTypeEnum.SPLIT_AC:
+            data_to_store = await get_stored_spit_ac_data(self.hass, self.device.device_id)
+        data_to_store["target_temperature"][mode] = value_to_set
+
+        await set_stored_data(
+            self.hass,
+            self.device.device_id,
+            data_to_store,
+        )
 
         await self.aws_iot.async_set_target_temperature(
             self.device.device_id, self.device.device_type, value_to_set
@@ -158,14 +178,17 @@ class SetTargetDegreeEntity(TclEntityBase, NumberEntity):
         value_fahrenheit_to_set = round((value_celsius_to_set * (9 / 5)) + 32)
 
         if self.device.device_type == DeviceTypeEnum.PORTABLE_AC:
-            await set_stored_data(
-                self.hass,
-                self.device.device_id,
-                {
-                    "targetCelsiusDegree": value_celsius_to_set,
-                    "targetFahrenheitDegree": value_fahrenheit_to_set,
-                },
+            data_to_store = await get_stored_portable_ac_data(
+                self.hass, self.device.device_id
             )
+            data_to_store["target_temperature"]["Cool"]["targetCelsiusDegree"] = (
+                value_celsius_to_set
+            )
+            data_to_store["target_temperature"]["Cool"]["targetFahrenheitDegree"] = (
+                value_fahrenheit_to_set
+            )
+
+            await set_stored_data(self.hass, self.device.device_id, data_to_store)
 
         await self.aws_iot.async_set_target_degree(
             self.device.device_id,

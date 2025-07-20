@@ -1,5 +1,7 @@
 """."""
 
+from homeassistant.core import HomeAssistant
+from .device_data_storage import get_stored_data, set_stored_data
 from dataclasses import dataclass
 from enum import StrEnum
 
@@ -91,6 +93,22 @@ class TCL_SplitAC_DeviceData:
     self_clean: int
     screen: int
 
+async def get_stored_spit_ac_data(
+    hass: HomeAssistant, device_id: str
+) -> dict[str, any]:
+    stored_data = await get_stored_data(hass, device_id)
+    if stored_data is None:
+        stored_data = {
+            "target_temperature": {
+                "Cool": 24,
+                "Heat": 26,
+                "Dehumidification": 24,
+                "Fan": 24,
+                "Auto": 24,
+            }
+        }
+        await set_stored_data(hass, device_id, stored_data)
+    return stored_data
 
 class TCL_SplitAC_DeviceData_Helper:
     def __init__(self, data: TCL_SplitAC_DeviceData) -> None:

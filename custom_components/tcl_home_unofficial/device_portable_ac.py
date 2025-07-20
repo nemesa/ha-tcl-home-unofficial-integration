@@ -1,28 +1,24 @@
 """."""
 
+from homeassistant.core import HomeAssistant
+from .device_data_storage import get_stored_data, set_stored_data
+
 from dataclasses import dataclass
 from enum import StrEnum
 
 from .device_ac_common import (
-    LeftAndRightAirSupplyVectorEnum,
     ModeEnum,
-    SleepModeEnum,
-    UpAndDownAirSupplyVectorEnum,
-    getLeftAndRightAirSupplyVector,
     getMode,
-    getSleepMode,
-    getUpAndDownAirSupplyVector,
 )
 
 
-class PortableWindSeedEnum(StrEnum):    
+class PortableWindSeedEnum(StrEnum):
     HEIGH = "Heigh"
     LOW = "Low"
     AUTO = "Auto"
-    
-    
 
-class TemperatureTypeEnum(StrEnum):    
+
+class TemperatureTypeEnum(StrEnum):
     FAHRENHEIT = "Fahrenheit"
     CELSIUS = "Celsius"
 
@@ -30,16 +26,24 @@ class TemperatureTypeEnum(StrEnum):
 @dataclass
 class TCL_PortableAC_DeviceData:
     def __init__(self, device_id: str, aws_thing_state: dict, delta: dict) -> None:
-        
-        self.power_switch = int(delta.get("powerSwitch", aws_thing_state["powerSwitch"]))
+        self.power_switch = int(
+            delta.get("powerSwitch", aws_thing_state["powerSwitch"])
+        )
         self.wind_speed = int(delta.get("windSpeed", aws_thing_state["windSpeed"]))
         self.swing_wind = int(delta.get("swingWind", aws_thing_state["swingWind"]))
         self.work_mode = int(delta.get("workMode", aws_thing_state["workMode"]))
-        self.target_fahrenheit_degree = int(delta.get("targetFahrenheitDegree", aws_thing_state["targetFahrenheitDegree"]))
-        self.target_celsius_degree = int(delta.get("targetCelsiusDegree", aws_thing_state["targetCelsiusDegree"]))
-        self.temperature_type = int(delta.get("temperatureType", aws_thing_state["temperatureType"]))
+        self.target_fahrenheit_degree = int(
+            delta.get(
+                "targetFahrenheitDegree", aws_thing_state["targetFahrenheitDegree"]
+            )
+        )
+        self.target_celsius_degree = int(
+            delta.get("targetCelsiusDegree", aws_thing_state["targetCelsiusDegree"])
+        )
+        self.temperature_type = int(
+            delta.get("temperatureType", aws_thing_state["temperatureType"])
+        )
         self.sleep = int(delta.get("sleep", aws_thing_state["sleep"]))
-        
 
     power_switch: int | bool
     wind_speed: int | bool
@@ -49,6 +53,33 @@ class TCL_PortableAC_DeviceData:
     target_celsius_degree: int | bool
     temperature_type: int | bool
     sleep: int | bool
+
+
+async def get_stored_portable_ac_data(
+    hass: HomeAssistant, device_id: str
+) -> dict[str, any]:
+    stored_data = await get_stored_data(hass, device_id)
+    need_save = False
+    if stored_data is None:
+        stored_data = {
+            "target_temperature": {
+                "Cool": {"targetCelsiusDegree": 22, "targetFahrenheitDegree": 72},
+            }
+        }
+        need_save = True
+    else:
+        if stored_data["target_temperature"]["Cool"] in None and stored_data["target_temperature"]["targetCelsiusDegree"] is not None:
+            stored_data["target_temperature"]["Cool"] = {
+                "targetCelsiusDegree": stored_data["target_temperature"]["targetCelsiusDegree"],
+                "targetFahrenheitDegree": stored_data["target_temperature"]["targetFahrenheitDegree"],
+            }
+            stored_data["target_temperature"]["targetCelsiusDegree"]=None
+            stored_data["target_temperature"]["targetFahrenheitDegree"]=None
+            need_save = True
+    if need_save:
+        await set_stored_data(hass, device_id, stored_data)
+    return stored_data
+
 
 class TCL_PortableAC_DeviceData_Helper:
     def __init__(self, data: TCL_PortableAC_DeviceData) -> None:
@@ -76,4 +107,3 @@ class TCL_PortableAC_DeviceData_Helper:
                 return TemperatureTypeEnum.CELSIUS
             case _:
                 return TemperatureTypeEnum.CELSIUS
-

@@ -10,24 +10,29 @@ import boto3.session
 from homeassistant.core import HomeAssistant
 
 from .config_entry import New_NameConfigEntry
+from .device import DeviceTypeEnum
 from .device_ac_common import (
     LeftAndRightAirSupplyVectorEnum,
-    UpAndDownAirSupplyVectorEnum,
     ModeEnum,
     SleepModeEnum,
+    UpAndDownAirSupplyVectorEnum,
 )
-from .device import DeviceTypeEnum
+from .device_data_storage import get_stored_data
+from .device_portable_ac import (
+    PortableWindSeedEnum,
+    TemperatureTypeEnum,
+    get_stored_portable_ac_data,
+)
 from .device_spit_ac import WindSeedEnum
-from .device_portable_ac import TemperatureTypeEnum, PortableWindSeedEnum
 from .device_spit_ac_fresh_air import (
-    WindSeed7GearEnum,
-    GeneratorModeEnum,
     FreshAirEnum,
+    GeneratorModeEnum,
     WindFeelingEnum,
+    WindSeed7GearEnum,
+    get_stored_spit_ac_fresh_data,
 )
 from .session_manager import SessionManager
 from .tcl import GetThingsResponse, get_things
-from .device_data_storage import get_stored_data
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -426,7 +431,11 @@ class AwsIot:
         value: ModeEnum,
         fromException: bool = False,
     ) -> None:
-        stored_data = await get_stored_data(self.hass, device_id)
+        stored_data = {}
+        if deviceType == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+            stored_data = await get_stored_spit_ac_fresh_data(self.hass, device_id)
+        if deviceType == DeviceTypeEnum.PORTABLE_AC:
+            stored_data = await get_stored_portable_ac_data(self.hass, device_id)
         await self.execute_and_re_try_call_with_device_id_and_value_and_stored_data(
             self.set_mode, device_id, deviceType, value, stored_data, fromException
         )
@@ -449,6 +458,9 @@ class AwsIot:
                         "windSpeedAutoSwitch": 1,
                         "workMode": 0,
                         "windSpeed7Gear": 0,
+                        "targetTemperature": stored_data["target_temperature"][
+                            ModeEnum.AUTO
+                        ],
                     }
                 elif deviceType == DeviceTypeEnum.PORTABLE_AC:
                     desired = {"sleep": 0, "workMode": 0, "windSpeed": 0}
@@ -473,18 +485,17 @@ class AwsIot:
                         "windSpeedAutoSwitch": 0,
                         "workMode": 1,
                         "windSpeed7Gear": 6,
+                        "targetTemperature": stored_data["target_temperature"][
+                            ModeEnum.COOL
+                        ],
                     }
                 elif deviceType == DeviceTypeEnum.PORTABLE_AC:
-                    targetCelsiusDegree = 22
-                    targetFahrenheitDegree = 72
-
-                    if stored_data is not None:
-                        targetCelsiusDegree = stored_data.get(
-                            "targetCelsiusDegree", targetCelsiusDegree
-                        )
-                        targetFahrenheitDegree = stored_data.get(
-                            "targetFahrenheitDegree", targetFahrenheitDegree
-                        )
+                    targetCelsiusDegree = stored_data["target_temperature"][
+                        ModeEnum.COOL
+                    ]["targetCelsiusDegree"]
+                    targetFahrenheitDegree = stored_data["target_temperature"][
+                        ModeEnum.COOL
+                    ]["targetFahrenheitDegree"]
 
                     desired = {
                         "sleep": 0,
@@ -515,6 +526,9 @@ class AwsIot:
                         "windSpeedAutoSwitch": 0,
                         "workMode": 2,
                         "windSpeed7Gear": 2,
+                        "targetTemperature": stored_data["target_temperature"][
+                            ModeEnum.DEHUMIDIFICATION
+                        ],
                     }
                 elif deviceType == DeviceTypeEnum.PORTABLE_AC:
                     desired = {"sleep": 0, "workMode": 2, "windSpeed": 0}
@@ -539,6 +553,9 @@ class AwsIot:
                         "windSpeedAutoSwitch": 1,
                         "workMode": 3,
                         "windSpeed7Gear": 0,
+                        "targetTemperature": stored_data["target_temperature"][
+                            ModeEnum.FAN
+                        ],
                     }
                 elif deviceType == DeviceTypeEnum.PORTABLE_AC:
                     desired = {"sleep": 0, "workMode": 3, "windSpeed": 1}
@@ -563,6 +580,9 @@ class AwsIot:
                         "windSpeedAutoSwitch": 1,
                         "workMode": 4,
                         "windSpeed7Gear": 0,
+                        "targetTemperature": stored_data["target_temperature"][
+                            ModeEnum.HEAT
+                        ],
                     }
                 else:
                     desired = {
