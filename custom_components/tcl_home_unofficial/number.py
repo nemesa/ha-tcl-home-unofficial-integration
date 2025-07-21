@@ -13,7 +13,7 @@ from .device import Device, DeviceFeature, DeviceTypeEnum, getSupportedFeatures
 from .device_data_storage import set_stored_data
 from .device_ac_common import getMode, ModeEnum
 from .device_portable_ac import get_stored_portable_ac_data
-from .device_spit_ac import get_stored_spit_ac_data
+from .device_spit_ac_type1 import get_stored_spit_ac_type1_data
 from .device_spit_ac_fresh_air import get_stored_spit_ac_fresh_data
 from .tcl_entity_base import TclEntityBase
 
@@ -110,8 +110,8 @@ class SetTargetTempEntity(TclEntityBase, NumberEntity):
         mode = getMode(self.device.data.work_mode)
         if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
             data_to_store = await get_stored_spit_ac_fresh_data(self.hass, self.device.device_id)
-        if self.device.device_type == DeviceTypeEnum.SPLIT_AC:
-            data_to_store = await get_stored_spit_ac_data(self.hass, self.device.device_id)
+        if self.device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_1:
+            data_to_store = await get_stored_spit_ac_type1_data(self.hass, self.device.device_id)
         data_to_store["target_temperature"][mode] = value_to_set
 
         await set_stored_data(

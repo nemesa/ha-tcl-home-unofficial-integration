@@ -23,7 +23,7 @@ from .device_portable_ac import (
     TemperatureTypeEnum,
     get_stored_portable_ac_data,
 )
-from .device_spit_ac import WindSeedEnum
+from .device_spit_ac_type1 import WindSeedEnum
 from .device_spit_ac_fresh_air import (
     FreshAirEnum,
     GeneratorModeEnum,

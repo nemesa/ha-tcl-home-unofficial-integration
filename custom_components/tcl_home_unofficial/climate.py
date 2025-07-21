@@ -30,7 +30,7 @@ from .device_ac_common import (
     ModeEnum,
     UpAndDownAirSupplyVectorEnum,
 )
-from .device_spit_ac import TCL_SplitAC_DeviceData_Helper, WindSeedEnum
+from .device_spit_ac_type1 import TCL_SplitAC_Type1_DeviceData_Helper, WindSeedEnum
 from .device_spit_ac_fresh_air import (
     TCL_SplitAC_Fresh_Air_DeviceData_Helper,
     WindSeed7GearEnum,
@@ -114,24 +114,24 @@ class SplitAcClimate(TclEntityBase, ClimateEntity):
         self._preset_modes = None
         self._current_humidity = None
 
-        self._current_fan_mode = TCL_SplitAC_DeviceData_Helper(
+        self._current_fan_mode = TCL_SplitAC_Type1_DeviceData_Helper(
             device.data
         ).getWindSpeed()
         self._fan_modes = [e.value for e in WindSeedEnum]
 
         self._hvac_mode = map_mode_to_hvac_mode(
-            TCL_SplitAC_DeviceData_Helper(device.data).getMode()
+            TCL_SplitAC_Type1_DeviceData_Helper(device.data).getMode()
         )
         self._hvac_modes = [
             map_mode_to_hvac_mode(e) for e in get_supported_modes(self.device)
         ] + [HVACMode.OFF]
 
-        self._current_swing_mode = TCL_SplitAC_DeviceData_Helper(
+        self._current_swing_mode = TCL_SplitAC_Type1_DeviceData_Helper(
             device.data
         ).getUpAndDownAirSupplyVector()
         self._swing_modes = [e.value for e in UpAndDownAirSupplyVectorEnum]
 
-        self._current_swing_horizontal_mode = TCL_SplitAC_DeviceData_Helper(
+        self._current_swing_horizontal_mode = TCL_SplitAC_Type1_DeviceData_Helper(
             device.data
         ).getLeftAndRightAirSupplyVector()
         self._swing_horizontal_modes = [
@@ -163,7 +163,7 @@ class SplitAcClimate(TclEntityBase, ClimateEntity):
         if self.device.data.power_switch == 0:
             return HVACMode.OFF
         return map_mode_to_hvac_mode(
-            TCL_SplitAC_DeviceData_Helper(self.device.data).getMode()
+            TCL_SplitAC_Type1_DeviceData_Helper(self.device.data).getMode()
         )
 
     @property
@@ -175,7 +175,7 @@ class SplitAcClimate(TclEntityBase, ClimateEntity):
     def fan_mode(self) -> str | None:
         """Return the fan setting."""
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        return TCL_SplitAC_DeviceData_Helper(self.device.data).getWindSpeed()
+        return TCL_SplitAC_Type1_DeviceData_Helper(self.device.data).getWindSpeed()
 
     @property
     def fan_modes(self) -> list[str]:
@@ -186,7 +186,7 @@ class SplitAcClimate(TclEntityBase, ClimateEntity):
     def swing_mode(self) -> str | None:
         """Return the swing setting."""
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        return TCL_SplitAC_DeviceData_Helper(
+        return TCL_SplitAC_Type1_DeviceData_Helper(
             self.device.data
         ).getUpAndDownAirSupplyVector()
 
@@ -198,7 +198,7 @@ class SplitAcClimate(TclEntityBase, ClimateEntity):
     @property
     def swing_horizontal_mode(self) -> str | None:
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        return TCL_SplitAC_DeviceData_Helper(
+        return TCL_SplitAC_Type1_DeviceData_Helper(
             self.device.data
         ).getLeftAndRightAirSupplyVector()
 

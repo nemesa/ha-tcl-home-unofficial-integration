@@ -7,6 +7,8 @@
 
 ## Supported device types
 - Split AC
+  - Type 1: capabilities: [3,  7,  8,  9, 11, 12, 13, 21]
+  - Type 2: capabilities: [2,  3,  7,  8,  9, 11, 12, 13, 21, 23, 31, 33, 34, 35, 36, 39, 40, 41, 42, 43, 48],
 - Split AC Fresh air
 - Portable AC
 

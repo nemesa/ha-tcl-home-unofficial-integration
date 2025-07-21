@@ -27,7 +27,7 @@ from .device_portable_ac import (
     TCL_PortableAC_DeviceData_Helper,
     TemperatureTypeEnum,
 )
-from .device_spit_ac import TCL_SplitAC_DeviceData_Helper, WindSeedEnum
+from .device_spit_ac_type1 import TCL_SplitAC_Type1_DeviceData_Helper, WindSeedEnum
 from .device_spit_ac_fresh_air import (
     FreshAirEnum,
     GeneratorModeEnum,
@@ -83,7 +83,7 @@ async def async_setup_entry(
                     type="Mode",
                     name="Mode",
                     icon_fn=lambda device: "mdi:set-none",
-                    current_state_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
+                    current_state_fn=lambda device: TCL_SplitAC_Type1_DeviceData_Helper(
                         device.data
                     ).getMode(),
                     options_values=get_supported_modes(device),
@@ -102,7 +102,7 @@ async def async_setup_entry(
                     type="WindSpeed",
                     name="Wind Speed",
                     icon_fn=lambda device: "mdi:weather-windy",
-                    current_state_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
+                    current_state_fn=lambda device: TCL_SplitAC_Type1_DeviceData_Helper(
                         device.data
                     ).getWindSpeed(),
                     options_values=[e.value for e in WindSeedEnum],
@@ -220,7 +220,7 @@ async def async_setup_entry(
                     type="UpAndDownAirSupplyVector",
                     name=get_SELECT_VERTICAL_DIRECTION_name(device),
                     icon_fn=lambda device: "mdi:swap-vertical",
-                    current_state_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
+                    current_state_fn=lambda device: TCL_SplitAC_Type1_DeviceData_Helper(
                         device.data
                     ).getUpAndDownAirSupplyVector(),
                     options_values=[e.value for e in UpAndDownAirSupplyVectorEnum],
@@ -239,7 +239,7 @@ async def async_setup_entry(
                     type="LeftAndRightAirSupplyVector",
                     name=get_SELECT_HORIZONTAL_DIRECTION_name(device),
                     icon_fn=lambda device: "mdi:swap-horizontal",
-                    current_state_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
+                    current_state_fn=lambda device: TCL_SplitAC_Type1_DeviceData_Helper(
                         device.data
                     ).getLeftAndRightAirSupplyVector(),
                     options_values=[e.value for e in LeftAndRightAirSupplyVectorEnum],
@@ -258,7 +258,7 @@ async def async_setup_entry(
                     type="SleepMode",
                     name="Sleep Mode",
                     icon_fn=lambda device: "mdi:sleep",
-                    current_state_fn=lambda device: TCL_SplitAC_DeviceData_Helper(
+                    current_state_fn=lambda device: TCL_SplitAC_Type1_DeviceData_Helper(
                         device.data
                     ).getSleepMode(),
                     options_values=[e.value for e in SleepModeEnum],

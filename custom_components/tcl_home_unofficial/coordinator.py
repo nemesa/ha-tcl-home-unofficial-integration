@@ -64,6 +64,7 @@ class IotDeviceCoordinator(DataUpdateCoordinator):
                 d = Device(
                     device_id=device.device_id,
                     device_type=device.device_type,
+                    device_type_str=None,
                     name=device.name,
                     firmware_version=device.firmware_version,
                     aws_thing=aws_thing,
