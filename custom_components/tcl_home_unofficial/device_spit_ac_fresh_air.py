@@ -14,18 +14,11 @@ from .device_ac_common import (
     getMode,
     SleepModeEnum,
     getSleepMode,
+    WindSeed7GearEnum,
 )
 
 
-class WindSeed7GearEnum(StrEnum):
-    TURBO = "Turbo"
-    AUTO = "Auto"
-    SPEED_1 = "1"
-    SPEED_2 = "2"
-    SPEED_3 = "3"
-    SPEED_4 = "4"
-    SPEED_5 = "5"
-    SPEED_6 = "6"
+
 
 
 class FreshAirEnum(StrEnum):
@@ -170,12 +163,20 @@ async def get_stored_spit_ac_fresh_data(
     stored_data, need_save = safe_set_value(stored_data, "non_user_config.native_temp_step", 0.5)
 
     stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.memorize_temp_by_mode", True)
+    stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.memorize_fan_speed_by_mode", True)
+    stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.silent_beep_when_turn_on", False)
 
     stored_data, need_save = safe_set_value(stored_data, "target_temperature.Cool.value", 24)
     stored_data, need_save = safe_set_value(stored_data, "target_temperature.Heat.value", 36)
     stored_data, need_save = safe_set_value(stored_data, "target_temperature.Dehumidification.value", 24)
     stored_data, need_save = safe_set_value(stored_data, "target_temperature.Fan.value", 24)
     stored_data, need_save = safe_set_value(stored_data, "target_temperature.Auto.value", 24)
+    
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Cool.value", WindSeed7GearEnum.AUTO)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Heat.value", WindSeed7GearEnum.AUTO)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Dehumidification.value", WindSeed7GearEnum.AUTO)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Fan.value", WindSeed7GearEnum.AUTO)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Auto.value", WindSeed7GearEnum.AUTO)
 
     if need_save:
         await set_stored_data(hass, device_id, stored_data)
@@ -188,27 +189,6 @@ class TCL_SplitAC_Fresh_Air_DeviceData_Helper:
 
     def getMode(self) -> ModeEnum:
         return getMode(self.data.work_mode)
-
-    def getWindSeed7Gear(self) -> WindSeed7GearEnum:
-        match self.data.wind_speed_7_gear:
-            case 1:
-                return WindSeed7GearEnum.SPEED_1
-            case 2:
-                return WindSeed7GearEnum.SPEED_2
-            case 3:
-                return WindSeed7GearEnum.SPEED_3
-            case 4:
-                return WindSeed7GearEnum.SPEED_4
-            case 5:
-                return WindSeed7GearEnum.SPEED_5
-            case 6:
-                return WindSeed7GearEnum.SPEED_6
-            case 7:
-                return WindSeed7GearEnum.TURBO
-            case 0:
-                return WindSeed7GearEnum.AUTO
-            case _:
-                return WindSeed7GearEnum.AUTO
 
     def getUpAndDownAirSupplyVector(self) -> UpAndDownAirSupplyVectorEnum:
         return getUpAndDownAirSupplyVector(self.data.vertical_direction)

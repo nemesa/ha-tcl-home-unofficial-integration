@@ -13,11 +13,10 @@ from .device import (
     Device,
     DeviceFeature,
     DeviceTypeEnum,
-    get_device_storage,
     getSupportedFeatures,
 )
 from .device_ac_common import ModeEnum, getMode
-from .device_data_storage import set_stored_data
+from .device_data_storage import set_stored_data,get_stored_data
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -50,14 +49,12 @@ class DesiredStateHandlerForNumber:
                 return await self.NUMBER_TARGET_DEGREE(value=value)
 
     async def store_target_temp(self, value: int | float):
-        stored_data = await get_device_storage(self.hass, self.device)
+        stored_data = await get_stored_data(self.hass, self.device.device_id)
         mode = getMode(self.device.data.work_mode)
         # _LOGGER.info("Storing target temperature %s for mode %s in device storage %s",value,mode,self.device.device_id)
+        stored_data["target_temperature"][mode]["value"] = value
         match self.deviceFeature:
-            case DeviceFeature.NUMBER_TARGET_TEMPERATURE:
-                stored_data["target_temperature"][mode] = value
             case DeviceFeature.NUMBER_TARGET_DEGREE:
-                stored_data["target_temperature"][mode]["value"] = value
                 stored_data["target_temperature"][mode]["targetCelsiusDegree"] = value
                 stored_data["target_temperature"][mode]["targetFahrenheitDegree"] = (
                     self.celsius_to_fahrenheit(value)

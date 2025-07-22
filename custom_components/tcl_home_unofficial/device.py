@@ -83,6 +83,12 @@ class DeviceFeature(StrEnum):
     USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE = (
         "user_config.behavior.memorize_temp_by_mode"
     )
+    USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE = (
+        "user_config.behavior.memorize_fan_speed_by_mode"
+    )
+    USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON = (
+        "user_config.behavior.silent_beep_when_turn_on"
+    )
 
 
 def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
@@ -107,7 +113,9 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
                 DeviceFeature.BUTTON_SELF_CLEAN,
                 DeviceFeature.CLIMATE,
                 DeviceFeature.INTERNAL_HAS_SWING_SWITCH,
-                DeviceFeature.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE
+                DeviceFeature.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE,
+                DeviceFeature.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE,
+                DeviceFeature.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON,
             ]
         case DeviceTypeEnum.SPLIT_AC_TYPE_2:
             return [
@@ -134,6 +142,8 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
                 DeviceFeature.CLIMATE,
                 DeviceFeature.INTERNAL_SET_TFT_WITH_TT,
                 DeviceFeature.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE,
+                DeviceFeature.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE,
+                DeviceFeature.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON,
             ]
         case DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
             return [
@@ -163,6 +173,8 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
                 DeviceFeature.BUTTON_SELF_CLEAN,
                 DeviceFeature.CLIMATE,
                 DeviceFeature.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE,
+                DeviceFeature.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE,
+                DeviceFeature.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON,
             ]
         case DeviceTypeEnum.PORTABLE_AC:
             return [

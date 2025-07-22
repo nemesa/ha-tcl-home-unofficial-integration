@@ -11,7 +11,12 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
 from .device import Device, getSupportedFeatures, DeviceFeature, DeviceTypeEnum
-from .device_data_storage import safe_get_value, safe_set_value, set_stored_data
+from .device_data_storage import (
+    get_stored_data,
+    safe_get_value,
+    safe_set_value,
+    set_stored_data,
+)
 from .device_ac_common import getMode, ModeEnum
 from .tcl_entity_base import TclEntityBase
 
@@ -101,9 +106,12 @@ class DesiredStateHandlerForSwitch:
                 return True
 
     async def SWITCH_POWER(self, value: int):
-        turnOffBeep = self.coordinator.get_config_data().behavior_mute_beep_on_power_on
+        stored_data = await get_stored_data(self.hass, self.device.device_id)
+        silent_beep_when_turn_on = safe_get_value(
+            stored_data, "user_config.behavior.silent_beep_when_turn_on", False
+        )
         desired_state = {"powerSwitch": value}
-        if turnOffBeep and value == 1:
+        if silent_beep_when_turn_on:
             desired_state["beepSwitch"] = 0
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
@@ -389,7 +397,35 @@ async def async_setup_entry(
                     coordinator=coordinator,
                     device=device,
                     config_path="user_config.behavior.memorize_temp_by_mode",
-                    name="Memorize temperature by mode",
+                    name="Save temp by mode",
+                )
+            )
+
+        if (
+            DeviceFeature.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE
+            in supported_features
+        ):
+            switches.append(
+                ConfigSwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    config_path="user_config.behavior.memorize_fan_speed_by_mode",
+                    name="Save fan speed by mode",
+                )
+            )
+
+        if (
+            DeviceFeature.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON
+            in supported_features
+        ):
+            switches.append(
+                ConfigSwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    config_path="user_config.behavior.silent_beep_when_turn_on",
+                    name="Silen beep when turn on",
                 )
             )
 

@@ -62,6 +62,7 @@ def getUpAndDownAirSupplyVector(
         case 13:
             return UpAndDownAirSupplyVectorEnum.BOTTOM_FIX
 
+
 class LeftAndRightAirSupplyVectorEnum(StrEnum):
     LEFT_AND_RIGHT_SWING = "Left and right swing"
     LEFT_SWING = "Left swing"
@@ -100,6 +101,7 @@ def getLeftAndRightAirSupplyVector(
         case 13:
             return LeftAndRightAirSupplyVectorEnum.RIGHT_FIX
 
+
 class SleepModeEnum(StrEnum):
     STANDARD = "Standard"
     ELDERLY = "Elderly"
@@ -117,3 +119,36 @@ def getSleepMode(sleep: int | float) -> SleepModeEnum:
             return SleepModeEnum.CHILD
         case 0:
             return SleepModeEnum.OFF
+
+
+class WindSeed7GearEnum(StrEnum):
+    TURBO = "Turbo"
+    AUTO = "Auto"
+    SPEED_1 = "1"
+    SPEED_2 = "2"
+    SPEED_3 = "3"
+    SPEED_4 = "4"
+    SPEED_5 = "5"
+    SPEED_6 = "6"
+
+
+def getWindSeed7Gear(wind_speed_7_gear: int) -> WindSeed7GearEnum:
+    match wind_speed_7_gear:
+        case 1:
+            return WindSeed7GearEnum.SPEED_1
+        case 2:
+            return WindSeed7GearEnum.SPEED_2
+        case 3:
+            return WindSeed7GearEnum.SPEED_3
+        case 4:
+            return WindSeed7GearEnum.SPEED_4
+        case 5:
+            return WindSeed7GearEnum.SPEED_5
+        case 6:
+            return WindSeed7GearEnum.SPEED_6
+        case 7:
+            return WindSeed7GearEnum.TURBO
+        case 0:
+            return WindSeed7GearEnum.AUTO
+        case _:
+            return WindSeed7GearEnum.AUTO

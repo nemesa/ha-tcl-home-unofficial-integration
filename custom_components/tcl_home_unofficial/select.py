@@ -14,7 +14,6 @@ from .device import (
     DeviceTypeEnum,
     get_supported_modes,
     getSupportedFeatures,
-    get_device_storage,
 )
 from .device_ac_common import (
     LeftAndRightAirSupplyVectorEnum,
@@ -22,6 +21,8 @@ from .device_ac_common import (
     UpAndDownAirSupplyVectorEnum,
     ModeEnum,
     getMode,
+    WindSeed7GearEnum,
+    getWindSeed7Gear,
 )
 from .device_portable_ac import (
     PortableWindSeedEnum,
@@ -34,9 +35,14 @@ from .device_spit_ac_fresh_air import (
     GeneratorModeEnum,
     TCL_SplitAC_Fresh_Air_DeviceData_Helper,
     WindFeelingEnum,
-    WindSeed7GearEnum,
 )
 from .tcl_entity_base import TclEntityBase
+from .device_data_storage import (
+    safe_get_value,
+    get_stored_data,
+    safe_set_value,
+    set_stored_data,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -58,7 +64,6 @@ class DesiredStateHandlerForSelect:
         self.device = device
 
     async def call_select_option(self, value: str) -> str:
-        # _LOGGER.info("DesiredStateHandlerForSelect.call_switch: %s, %s, %s", self.deviceFeature, self.device, value)
         match self.deviceFeature:
             case DeviceFeature.SELECT_SLEEP_MODE:
                 return await self.SELECT_SLEEP_MODE(value=value)
@@ -94,9 +99,7 @@ class DesiredStateHandlerForSelect:
                     self.device.data
                 ).getWindSpeed()
             case DeviceFeature.SELECT_WIND_SPEED_7_GEAR:
-                return TCL_SplitAC_Fresh_Air_DeviceData_Helper(
-                    self.device.data
-                ).getWindSeed7Gear()
+                return getWindSeed7Gear(self.device.data.wind_speed_7_gear)
             case DeviceFeature.SELECT_PORTABLE_WIND_SEED:
                 return TCL_PortableAC_DeviceData_Helper(self.device.data).getWindSpeed()
             case DeviceFeature.SELECT_GENERATOR_MODE:
@@ -176,7 +179,13 @@ class DesiredStateHandlerForSelect:
         )
 
     async def SELECT_MODE(self, value: ModeEnum):
-        stored_data = await get_device_storage(self.hass, self.device)
+        stored_data = await get_stored_data(self.hass, self.device.device_id)
+        memorize_temp_by_mode = safe_get_value(
+            stored_data, "user_config.behavior.memorize_temp_by_mode", False
+        )
+        memorize_fan_speed_by_mode = safe_get_value(
+            stored_data, "user_config.behavior.memorize_fan_speed_by_mode", False
+        )
 
         desired_state = {}
         match value:
@@ -186,9 +195,6 @@ class DesiredStateHandlerForSelect:
                         "windSpeedAutoSwitch": 1,
                         "workMode": 0,
                         "windSpeed7Gear": 0,
-                        "targetTemperature": stored_data["target_temperature"][
-                            ModeEnum.AUTO
-                        ],
                     }
                 elif self.device.device_type == DeviceTypeEnum.PORTABLE_AC:
                     desired_state = {"sleep": 0, "workMode": 0, "windSpeed": 0}
@@ -219,9 +225,6 @@ class DesiredStateHandlerForSelect:
                         "windSpeedAutoSwitch": 0,
                         "workMode": 1,
                         "windSpeed7Gear": 6,
-                        "targetTemperature": stored_data["target_temperature"][
-                            ModeEnum.COOL
-                        ],
                     }
                 elif self.device.device_type == DeviceTypeEnum.PORTABLE_AC:
                     targetCelsiusDegree = stored_data["target_temperature"][
@@ -240,8 +243,8 @@ class DesiredStateHandlerForSelect:
                     }
                 elif self.device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_2:
                     desired_state = {
-                        "eightAddHot":0,
-                        "workMode":1,
+                        "eightAddHot": 0,
+                        "workMode": 1,
                     }
                 else:
                     desired_state = {
@@ -265,16 +268,13 @@ class DesiredStateHandlerForSelect:
                         "windSpeedAutoSwitch": 0,
                         "workMode": 2,
                         "windSpeed7Gear": 2,
-                        "targetTemperature": stored_data["target_temperature"][
-                            ModeEnum.DEHUMIDIFICATION
-                        ],
                     }
                 elif self.device.device_type == DeviceTypeEnum.PORTABLE_AC:
                     desired_state = {"sleep": 0, "workMode": 2, "windSpeed": 0}
                 elif self.device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_2:
                     desired_state = {
-                        "eightAddHot":0,
-                        "workMode":2,
+                        "eightAddHot": 0,
+                        "workMode": 2,
                     }
                 else:
                     desired_state = {
@@ -297,16 +297,13 @@ class DesiredStateHandlerForSelect:
                         "windSpeedAutoSwitch": 1,
                         "workMode": 3,
                         "windSpeed7Gear": 0,
-                        "targetTemperature": stored_data["target_temperature"][
-                            ModeEnum.FAN
-                        ],
                     }
                 elif self.device.device_type == DeviceTypeEnum.PORTABLE_AC:
                     desired_state = {"sleep": 0, "workMode": 3, "windSpeed": 1}
                 elif self.device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_2:
                     desired_state = {
-                        "eightAddHot":0,
-                        "workMode":3,
+                        "eightAddHot": 0,
+                        "workMode": 3,
                     }
                 else:
                     desired_state = {
@@ -329,14 +326,11 @@ class DesiredStateHandlerForSelect:
                         "windSpeedAutoSwitch": 1,
                         "workMode": 4,
                         "windSpeed7Gear": 0,
-                        "targetTemperature": stored_data["target_temperature"][
-                            ModeEnum.HEAT
-                        ],
                     }
                 elif self.device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_2:
                     desired_state = {
-                        "eightAddHot":0,
-                        "workMode":4,
+                        "eightAddHot": 0,
+                        "workMode": 4,
                     }
                 else:
                     desired_state = {
@@ -354,11 +348,40 @@ class DesiredStateHandlerForSelect:
                         "windSpeed": 0,
                         "targetTemperature": 26,
                     }
+
+        if memorize_temp_by_mode:
+            saved_target_temperature = stored_data["target_temperature"][value]["value"]
+            desired_state["targetTemperature"] = saved_target_temperature
+
+        if memorize_fan_speed_by_mode:
+            saved_fan_speed = stored_data["fan_speed"][value]["value"]
+            match self.device.device_type:
+                case DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {
+                        **desired_state,
+                        **self.desired_state_SELECT_WIND_SPEED_7_GEAR(saved_fan_speed),
+                    }
+                case DeviceTypeEnum.SPLIT_AC_TYPE_2:
+                    desired_state = {
+                        **desired_state,
+                        **self.desired_state_SELECT_WIND_SPEED_7_GEAR(saved_fan_speed),
+                    }
+                case DeviceTypeEnum.SPLIT_AC_TYPE_1:
+                    new_ds = self.desired_state_SELECT_WIND_SPEED(saved_fan_speed)
+                    desired_state = {
+                        **desired_state,
+                        **new_ds,
+                    }
+                case DeviceTypeEnum.PORTABLE_AC:
+                    desired_state = {
+                        **desired_state,
+                        **self.desired_state_SELECT_PORTABLE_WIND_SEED(saved_fan_speed),
+                    }
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
         )
 
-    async def SELECT_WIND_SPEED(self, value: WindSeedEnum):
+    def desired_state_SELECT_WIND_SPEED(self, value: WindSeedEnum):
         desired_state = {}
         match value:
             case WindSeedEnum.STRONG:
@@ -417,11 +440,23 @@ class DesiredStateHandlerForSelect:
                     "silenceSwitch": 0,
                     "windSpeed": 0,
                 }
+        return desired_state
+
+    async def SELECT_WIND_SPEED(self, value: WindSeedEnum):
+        stored_data = await get_stored_data(self.hass, self.device.device_id)
+        mode = getMode(self.device.data.work_mode)
+        stored_data, need_save = safe_set_value(
+            stored_data, "fan_speed." + mode + ".value", value, overwrite_if_exists=True
+        )
+        if need_save:
+            await set_stored_data(self.hass, self.device.device_id, stored_data)
+
+        desired_state = self.desired_state_SELECT_WIND_SPEED(value)
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
         )
 
-    async def SELECT_WIND_SPEED_7_GEAR(self, value: WindSeed7GearEnum):
+    def desired_state_SELECT_WIND_SPEED_7_GEAR(self, value: WindSeed7GearEnum):
         desired_state = {}
         match value:
             case WindSeed7GearEnum.AUTO:
@@ -440,11 +475,23 @@ class DesiredStateHandlerForSelect:
                 desired_state = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 5}
             case WindSeed7GearEnum.SPEED_6:
                 desired_state = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 6}
+        return desired_state
+
+    async def SELECT_WIND_SPEED_7_GEAR(self, value: WindSeed7GearEnum):
+        stored_data = await get_stored_data(self.hass, self.device.device_id)
+        mode = getMode(self.device.data.work_mode)
+        stored_data, need_save = safe_set_value(
+            stored_data, "fan_speed." + mode + ".value", value, overwrite_if_exists=True
+        )
+        if need_save:
+            await set_stored_data(self.hass, self.device.device_id, stored_data)
+
+        desired_state = self.desired_state_SELECT_WIND_SPEED_7_GEAR(value)
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
         )
 
-    async def SELECT_PORTABLE_WIND_SEED(self, value: PortableWindSeedEnum):
+    def desired_state_SELECT_PORTABLE_WIND_SEED(self, value: PortableWindSeedEnum):
         desired_state = {}
         match value:
             case PortableWindSeedEnum.AUTO:
@@ -453,6 +500,17 @@ class DesiredStateHandlerForSelect:
                 desired_state = {"windSpeed": 1}
             case PortableWindSeedEnum.HEIGH:
                 desired_state = {"windSpeed": 2}
+        return desired_state
+
+    async def SELECT_PORTABLE_WIND_SEED(self, value: PortableWindSeedEnum):
+        stored_data = await get_stored_data(self.hass, self.device.device_id)
+        mode = getMode(self.device.data.work_mode)
+        stored_data, need_save = safe_set_value(
+            stored_data, "fan_speed." + mode + ".value", value, overwrite_if_exists=True
+        )
+        if need_save:
+            await set_stored_data(self.hass, self.device.device_id, stored_data)
+        desired_state = self.desired_state_SELECT_PORTABLE_WIND_SEED(value)
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
         )
