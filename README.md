@@ -2,7 +2,6 @@
 **TCL Home - Home Assistant integration (unofficial)**
 
 ## Known issues
-- Split AC Fresh air - when changing mode (cool/heat/fan etc.) it does not set's back the previously selected temperature of the mode
 - Split AC Fresh air - power statics not implemented
 
 ## Supported device types
