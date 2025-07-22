@@ -14,6 +14,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .aws_iot import AwsIot
 from .const import DEFAULT_SCAN_INTERVAL, DOMAIN
 from .device import Device
+from .device_data_storage import get_stored_data
 from .config_entry import ConfigData
 
 _LOGGER = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ class IotDeviceCoordinator(DataUpdateCoordinator):
     ) -> None:
         """Initialize coordinator."""
 
+        self.hass = hass
         self.aws_iot = aws_iot
         self.poll_interval = config_entry.options.get(
             CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
@@ -69,6 +71,7 @@ class IotDeviceCoordinator(DataUpdateCoordinator):
                     firmware_version=device.firmware_version,
                     aws_thing=aws_thing,
                 )
+                d.storage = await get_stored_data(self.hass, d.device_id)
                 devices.append(d)
         except Exception as err:
             raise UpdateFailed(f"Error communicating with API: {err}") from err

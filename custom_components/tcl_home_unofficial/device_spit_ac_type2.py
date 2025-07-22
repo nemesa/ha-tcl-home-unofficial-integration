@@ -123,17 +123,62 @@ class TCL_SplitAC_Type2_DeviceData:
 async def get_stored_spit_ac_type2_data(
     hass: HomeAssistant, device_id: str
 ) -> dict[str, any]:
+    need_save = False
     stored_data = await get_stored_data(hass, device_id)
     if stored_data is None:
-        stored_data = {
-            "target_temperature": {
-                "Cool": 24,
-                "Heat": 26,
-                "Dehumidification": 24,
-                "Fan": 24,
-                "Auto": 24,
-            }
-        }
+        stored_data = {}
+        need_save = True
+
+    if stored_data.get("non_user_config") is None:
+        stored_data["non_user_config"] = {}
+        need_save = True
+    if stored_data["non_user_config"].get("min_celsius_temp") is None:
+        stored_data["non_user_config"]["min_celsius_temp"] = 16
+        need_save = True
+    if stored_data["non_user_config"].get("max_celsius_temp") is None:
+        stored_data["non_user_config"]["max_celsius_temp"] = 36
+        need_save = True
+    if stored_data["non_user_config"].get("native_temp_step") is None:
+        stored_data["non_user_config"]["native_temp_step"] = 1
+        need_save = True
+
+    if stored_data.get("target_temperature") is None:
+        stored_data["target_temperature"] = {}
+        need_save = True
+    if stored_data["target_temperature"].get("Cool") is None:
+        stored_data["target_temperature"]["Cool"] = {}
+        need_save = True
+        if stored_data["target_temperature"]["Cool"].get("value") is None:
+            stored_data["target_temperature"]["Cool"]["value"] = 24
+            need_save = True
+    if stored_data["target_temperature"].get("Heat") is None:
+        stored_data["target_temperature"]["Heat"] = {}
+        need_save = True
+        if stored_data["target_temperature"]["Heat"].get("value") is None:
+            stored_data["target_temperature"]["Heat"]["value"] = 26
+            need_save = True
+    if stored_data["target_temperature"].get("Dehumidification") is None:
+        stored_data["target_temperature"]["Dehumidification"] = {}
+        need_save = True
+        if stored_data["target_temperature"]["Dehumidification"].get("value") is None:
+            stored_data["target_temperature"]["Dehumidification"]["value"] = 26
+            need_save = True
+    if stored_data["target_temperature"].get("Fan") is None:
+        stored_data["target_temperature"]["Fan"] = {}
+        need_save = True
+        if stored_data["target_temperature"]["Fan"].get("value") is None:
+            stored_data["target_temperature"]["Fan"]["value"] = 24
+            need_save = True
+        need_save = True
+    if stored_data["target_temperature"].get("Auto") is None:
+        stored_data["target_temperature"]["Auto"] = {}
+        need_save = True
+        if stored_data["target_temperature"]["Auto"].get("value") is None:
+            stored_data["target_temperature"]["Auto"]["value"] = 24
+            need_save = True
+        need_save = True
+
+    if need_save:
         await set_stored_data(hass, device_id, stored_data)
     return stored_data
 

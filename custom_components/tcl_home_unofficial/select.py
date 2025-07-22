@@ -14,6 +14,7 @@ from .device import (
     DeviceTypeEnum,
     get_supported_modes,
     getSupportedFeatures,
+    get_device_storage,
 )
 from .device_ac_common import (
     LeftAndRightAirSupplyVectorEnum,
@@ -38,6 +39,565 @@ from .device_spit_ac_fresh_air import (
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
+
+
+class DesiredStateHandlerForSelect:
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        coordinator: IotDeviceCoordinator,
+        deviceFeature: DeviceFeature,
+        device: Device,
+    ) -> None:
+        self.hass = hass
+        self.coordinator = coordinator
+        self.deviceFeature = deviceFeature
+        self.device = device
+
+    def refreshDevice(self, device: Device):
+        self.device = device
+
+    async def call_select_option(self, value: str) -> str:
+        # _LOGGER.info("DesiredStateHandlerForSelect.call_switch: %s, %s, %s", self.deviceFeature, self.device, value)
+        match self.deviceFeature:
+            case DeviceFeature.SELECT_SLEEP_MODE:
+                return await self.SELECT_SLEEP_MODE(value=value)
+            case DeviceFeature.SELECT_MODE:
+                return await self.SELECT_MODE(value=value)
+            case DeviceFeature.SELECT_WIND_SPEED:
+                return await self.SELECT_WIND_SPEED(value=value)
+            case DeviceFeature.SELECT_WIND_SPEED_7_GEAR:
+                return await self.SELECT_WIND_SPEED_7_GEAR(value=value)
+            case DeviceFeature.SELECT_PORTABLE_WIND_SEED:
+                return await self.SELECT_PORTABLE_WIND_SEED(value=value)
+            case DeviceFeature.SELECT_GENERATOR_MODE:
+                return await self.SELECT_GENERATOR_MODE(value=value)
+            case DeviceFeature.SELECT_WIND_FEELING:
+                return await self.SELECT_WIND_FEELING(value=value)
+            case DeviceFeature.SELECT_VERTICAL_DIRECTION:
+                return await self.SELECT_VERTICAL_DIRECTION(value=value)
+            case DeviceFeature.SELECT_HORIZONTAL_DIRECTION:
+                return await self.SELECT_HORIZONTAL_DIRECTION(value=value)
+            case DeviceFeature.SELECT_TEMPERATURE_TYPE:
+                return await self.SELECT_TEMPERATURE_TYPE(value=value)
+
+    def current_state(self) -> str:
+        match self.deviceFeature:
+            case DeviceFeature.SELECT_SLEEP_MODE:
+                return TCL_SplitAC_Type1_DeviceData_Helper(
+                    self.device.data
+                ).getSleepMode()
+            case DeviceFeature.SELECT_MODE:
+                return TCL_SplitAC_Type1_DeviceData_Helper(self.device.data).getMode()
+            case DeviceFeature.SELECT_WIND_SPEED:
+                return TCL_SplitAC_Type1_DeviceData_Helper(
+                    self.device.data
+                ).getWindSpeed()
+            case DeviceFeature.SELECT_WIND_SPEED_7_GEAR:
+                return TCL_SplitAC_Fresh_Air_DeviceData_Helper(
+                    self.device.data
+                ).getWindSeed7Gear()
+            case DeviceFeature.SELECT_PORTABLE_WIND_SEED:
+                return TCL_PortableAC_DeviceData_Helper(self.device.data).getWindSpeed()
+            case DeviceFeature.SELECT_GENERATOR_MODE:
+                return TCL_SplitAC_Fresh_Air_DeviceData_Helper(
+                    self.device.data
+                ).getGeneratorMode()
+            case DeviceFeature.SELECT_FRESH_AIR:
+                return TCL_SplitAC_Fresh_Air_DeviceData_Helper(
+                    self.device.data
+                ).getFreshAir()
+            case DeviceFeature.SELECT_WIND_FEELING:
+                return TCL_SplitAC_Fresh_Air_DeviceData_Helper(
+                    self.device.data
+                ).getWindFeeling()
+            case DeviceFeature.SELECT_VERTICAL_DIRECTION:
+                return TCL_SplitAC_Type1_DeviceData_Helper(
+                    self.device.data
+                ).getUpAndDownAirSupplyVector()
+            case DeviceFeature.SELECT_HORIZONTAL_DIRECTION:
+                return TCL_SplitAC_Type1_DeviceData_Helper(
+                    self.device.data
+                ).getLeftAndRightAirSupplyVector()
+            case DeviceFeature.SELECT_TEMPERATURE_TYPE:
+                return TCL_PortableAC_DeviceData_Helper(
+                    self.device.data
+                ).getTemperatureType()
+
+    def options_values(self) -> str:
+        match self.deviceFeature:
+            case DeviceFeature.SELECT_SLEEP_MODE:
+                return [e.value for e in SleepModeEnum]
+            case DeviceFeature.SELECT_MODE:
+                return get_supported_modes(self.device)
+            case DeviceFeature.SELECT_WIND_SPEED:
+                return [e.value for e in WindSeedEnum]
+            case DeviceFeature.SELECT_WIND_SPEED_7_GEAR:
+                return [e.value for e in WindSeed7GearEnum]
+            case DeviceFeature.SELECT_PORTABLE_WIND_SEED:
+                return [e.value for e in PortableWindSeedEnum]
+            case DeviceFeature.SELECT_GENERATOR_MODE:
+                return [e.value for e in GeneratorModeEnum]
+            case DeviceFeature.SELECT_FRESH_AIR:
+                return [e.value for e in FreshAirEnum]
+            case DeviceFeature.SELECT_WIND_FEELING:
+                return [e.value for e in WindFeelingEnum]
+            case DeviceFeature.SELECT_VERTICAL_DIRECTION:
+                return [e.value for e in UpAndDownAirSupplyVectorEnum]
+            case DeviceFeature.SELECT_HORIZONTAL_DIRECTION:
+                return [e.value for e in LeftAndRightAirSupplyVectorEnum]
+            case DeviceFeature.SELECT_TEMPERATURE_TYPE:
+                return [e.value for e in TemperatureTypeEnum]
+
+    async def SELECT_SLEEP_MODE(self, value: SleepModeEnum):
+        desired_state = {}
+        match value:
+            case SleepModeEnum.STANDARD:
+                desired_state = {"sleep": 1}
+            case SleepModeEnum.ELDERLY:
+                desired_state = {"sleep": 2}
+            case SleepModeEnum.CHILD:
+                desired_state = {"sleep": 3}
+            case SleepModeEnum.OFF:
+                desired_state = {"sleep": 0}
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
+    async def SELECT_TEMPERATURE_TYPE(self, value: TemperatureTypeEnum):
+        desired_state = {}
+        match value:
+            case TemperatureTypeEnum.FAHRENHEIT:
+                desired_state = {"temperatureType": 1}
+            case TemperatureTypeEnum.CELSIUS:
+                desired_state = {"temperatureType": 0}
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
+    async def SELECT_MODE(self, value: ModeEnum):
+        stored_data = await get_device_storage(self.hass, self.device)
+
+        desired_state = {}
+        match value:
+            case ModeEnum.AUTO:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {
+                        "windSpeedAutoSwitch": 1,
+                        "workMode": 0,
+                        "windSpeed7Gear": 0,
+                        "targetTemperature": stored_data["target_temperature"][
+                            ModeEnum.AUTO
+                        ],
+                    }
+                elif self.device.device_type == DeviceTypeEnum.PORTABLE_AC:
+                    desired_state = {"sleep": 0, "workMode": 0, "windSpeed": 0}
+                else:
+                    desired_state = {
+                        "ECO": 0,
+                        "sleep": 0,
+                        "eightAddHot": 0,
+                        "highTemperatureWind": 0,
+                        "workMode": 0,
+                        "horizontalSwitch": 0,
+                        "healthy": 0,
+                        "turbo": 0,
+                        "antiMoldew": 0,
+                        "verticalSwitch": 0,
+                        "silenceSwitch": 0,
+                        "windSpeed": 0,
+                    }
+            case ModeEnum.COOL:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {
+                        "windSpeedAutoSwitch": 0,
+                        "workMode": 1,
+                        "windSpeed7Gear": 6,
+                        "targetTemperature": stored_data["target_temperature"][
+                            ModeEnum.COOL
+                        ],
+                    }
+                elif self.device.device_type == DeviceTypeEnum.PORTABLE_AC:
+                    targetCelsiusDegree = stored_data["target_temperature"][
+                        ModeEnum.COOL
+                    ]["targetCelsiusDegree"]
+                    targetFahrenheitDegree = stored_data["target_temperature"][
+                        ModeEnum.COOL
+                    ]["targetFahrenheitDegree"]
+
+                    desired_state = {
+                        "sleep": 0,
+                        "workMode": 1,
+                        "windSpeed": 2,
+                        "targetCelsiusDegree": targetCelsiusDegree,
+                        "targetFahrenheitDegree": targetFahrenheitDegree,
+                    }
+                else:
+                    desired_state = {
+                        "ECO": 0,
+                        "sleep": 0,
+                        "eightAddHot": 0,
+                        "highTemperatureWind": 0,
+                        "workMode": 1,
+                        "horizontalSwitch": 0,
+                        "healthy": 0,
+                        "turbo": 0,
+                        "antiMoldew": 0,
+                        "verticalSwitch": 0,
+                        "silenceSwitch": 0,
+                        "windSpeed": 0,
+                        "targetTemperature": 24,
+                    }
+            case ModeEnum.DEHUMIDIFICATION:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {
+                        "windSpeedAutoSwitch": 0,
+                        "workMode": 2,
+                        "windSpeed7Gear": 2,
+                        "targetTemperature": stored_data["target_temperature"][
+                            ModeEnum.DEHUMIDIFICATION
+                        ],
+                    }
+                elif self.device.device_type == DeviceTypeEnum.PORTABLE_AC:
+                    desired_state = {"sleep": 0, "workMode": 2, "windSpeed": 0}
+                else:
+                    desired_state = {
+                        "ECO": 0,
+                        "sleep": 0,
+                        "eightAddHot": 0,
+                        "highTemperatureWind": 0,
+                        "workMode": 2,
+                        "horizontalSwitch": 0,
+                        "healthy": 0,
+                        "turbo": 0,
+                        "antiMoldew": 0,
+                        "verticalSwitch": 0,
+                        "silenceSwitch": 0,
+                        "windSpeed": 2,
+                    }
+            case ModeEnum.FAN:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {
+                        "windSpeedAutoSwitch": 1,
+                        "workMode": 3,
+                        "windSpeed7Gear": 0,
+                        "targetTemperature": stored_data["target_temperature"][
+                            ModeEnum.FAN
+                        ],
+                    }
+                elif self.device.device_type == DeviceTypeEnum.PORTABLE_AC:
+                    desired_state = {"sleep": 0, "workMode": 3, "windSpeed": 1}
+                else:
+                    desired_state = {
+                        "ECO": 0,
+                        "sleep": 0,
+                        "eightAddHot": 0,
+                        "highTemperatureWind": 0,
+                        "workMode": 3,
+                        "horizontalSwitch": 0,
+                        "healthy": 0,
+                        "turbo": 0,
+                        "antiMoldew": 0,
+                        "verticalSwitch": 0,
+                        "silenceSwitch": 0,
+                        "windSpeed": 0,
+                    }
+            case ModeEnum.HEAT:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {
+                        "windSpeedAutoSwitch": 1,
+                        "workMode": 4,
+                        "windSpeed7Gear": 0,
+                        "targetTemperature": stored_data["target_temperature"][
+                            ModeEnum.HEAT
+                        ],
+                    }
+                else:
+                    desired_state = {
+                        "ECO": 0,
+                        "sleep": 0,
+                        "eightAddHot": 0,
+                        "highTemperatureWind": 0,
+                        "workMode": 4,
+                        "horizontalSwitch": 0,
+                        "healthy": 0,
+                        "turbo": 0,
+                        "antiMoldew": 0,
+                        "verticalSwitch": 0,
+                        "silenceSwitch": 0,
+                        "windSpeed": 0,
+                        "targetTemperature": 26,
+                    }
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
+    async def SELECT_WIND_SPEED(self, value: WindSeedEnum):
+        desired_state = {}
+        match value:
+            case WindSeedEnum.STRONG:
+                desired_state = {
+                    "highTemperatureWind": 0,
+                    "turbo": 1,
+                    "silenceSwitch": 0,
+                    "windSpeed": 6,
+                }
+            case WindSeedEnum.HEIGH:
+                desired_state = {
+                    "highTemperatureWind": 0,
+                    "turbo": 0,
+                    "silenceSwitch": 0,
+                    "windSpeed": 6,
+                }
+            case WindSeedEnum.MID_HEIGH:
+                desired_state = {
+                    "highTemperatureWind": 0,
+                    "turbo": 0,
+                    "silenceSwitch": 0,
+                    "windSpeed": 5,
+                }
+            case WindSeedEnum.MEDIUM:
+                desired_state = {
+                    "highTemperatureWind": 0,
+                    "turbo": 0,
+                    "silenceSwitch": 0,
+                    "windSpeed": 4,
+                }
+            case WindSeedEnum.MID_LOW:
+                desired_state = {
+                    "highTemperatureWind": 0,
+                    "turbo": 0,
+                    "silenceSwitch": 0,
+                    "windSpeed": 3,
+                }
+            case WindSeedEnum.LOW:
+                desired_state = {
+                    "highTemperatureWind": 0,
+                    "turbo": 0,
+                    "silenceSwitch": 0,
+                    "windSpeed": 2,
+                }
+            case WindSeedEnum.MUTE:
+                desired_state = {
+                    "highTemperatureWind": 0,
+                    "turbo": 0,
+                    "silenceSwitch": 1,
+                    "windSpeed": 2,
+                }
+            case WindSeedEnum.AUTO:
+                desired_state = {
+                    "highTemperatureWind": 0,
+                    "turbo": 0,
+                    "silenceSwitch": 0,
+                    "windSpeed": 0,
+                }
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
+    async def SELECT_WIND_SPEED_7_GEAR(self, value: WindSeed7GearEnum):
+        desired_state = {}
+        match value:
+            case WindSeed7GearEnum.AUTO:
+                desired_state = {"windSpeedAutoSwitch": 1, "windSpeed7Gear": 0}
+            case WindSeed7GearEnum.TURBO:
+                desired_state = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 7}
+            case WindSeed7GearEnum.SPEED_1:
+                desired_state = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 1}
+            case WindSeed7GearEnum.SPEED_2:
+                desired_state = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 2}
+            case WindSeed7GearEnum.SPEED_3:
+                desired_state = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 3}
+            case WindSeed7GearEnum.SPEED_4:
+                desired_state = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 4}
+            case WindSeed7GearEnum.SPEED_5:
+                desired_state = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 5}
+            case WindSeed7GearEnum.SPEED_6:
+                desired_state = {"windSpeedAutoSwitch": 0, "windSpeed7Gear": 6}
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
+    async def SELECT_PORTABLE_WIND_SEED(self, value: PortableWindSeedEnum):
+        desired_state = {}
+        match value:
+            case PortableWindSeedEnum.AUTO:
+                desired_state = {"windSpeed": 0}
+            case PortableWindSeedEnum.LOW:
+                desired_state = {"windSpeed": 1}
+            case PortableWindSeedEnum.HEIGH:
+                desired_state = {"windSpeed": 2}
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
+    async def SELECT_GENERATOR_MODE(self, value: GeneratorModeEnum):
+        desired_state = {}
+        match value:
+            case GeneratorModeEnum.NONE:
+                desired_state = {"generatorMode": 0}
+            case GeneratorModeEnum.L1:
+                desired_state = {"generatorMode": 1}
+            case GeneratorModeEnum.L2:
+                desired_state = {"generatorMode": 2}
+            case GeneratorModeEnum.L3:
+                desired_state = {"generatorMode": 3}
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
+    async def SELECT_FRESH_AIR(self, value: FreshAirEnum):
+        desired_state = {}
+        match value:
+            case FreshAirEnum.OFF:
+                desired_state = {"newWindSwitch": 0}
+            case FreshAirEnum.ON:
+                desired_state = {"newWindSwitch": 1, "selfClean": 0}
+            case FreshAirEnum.AUTO:
+                desired_state = {"newWindAutoSwitch": 1, "newWindStrength": 0}
+            case FreshAirEnum.STRENGTH_1:
+                desired_state = {"newWindAutoSwitch": 0, "newWindStrength": 1}
+            case FreshAirEnum.STRENGTH_2:
+                desired_state = {"newWindAutoSwitch": 0, "newWindStrength": 2}
+            case FreshAirEnum.STRENGTH_3:
+                desired_state = {"newWindAutoSwitch": 0, "newWindStrength": 3}
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
+    async def SELECT_WIND_FEELING(self, value: WindFeelingEnum):
+        desired_state = {}
+        match value:
+            case WindFeelingEnum.NONE:
+                desired_state = {"softWind": 0}
+            case WindFeelingEnum.SOFT:
+                desired_state = {"horizontalDirection": 8, "softWind": 1}
+            case WindFeelingEnum.SHOWER:
+                desired_state = {
+                    "horizontalDirection": 8,
+                    "softWind": 2,
+                    "verticalDirection": 9,
+                }
+            case WindFeelingEnum.CARPET:
+                desired_state = {
+                    "horizontalDirection": 8,
+                    "softWind": 3,
+                    "verticalDirection": 13,
+                }
+            case WindFeelingEnum.SURROUND:
+                desired_state = {"softWind": 4, "verticalDirection": 8}
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
+    async def SELECT_VERTICAL_DIRECTION(self, value: UpAndDownAirSupplyVectorEnum):
+        desired_state = {}
+        match value:
+            case UpAndDownAirSupplyVectorEnum.UP_AND_DOWN_SWING:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"verticalDirection": 1}
+                else:
+                    desired_state = {"verticalSwitch": 1, "verticalDirection": 1}
+            case UpAndDownAirSupplyVectorEnum.UPWARDS_SWING:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"verticalDirection": 2}
+                else:
+                    desired_state = {"verticalSwitch": 1, "verticalDirection": 2}
+            case UpAndDownAirSupplyVectorEnum.DOWNWARDS_SWING:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"verticalDirection": 3}
+                else:
+                    desired_state = {"verticalSwitch": 1, "verticalDirection": 3}
+            case UpAndDownAirSupplyVectorEnum.TOP_FIX:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"verticalDirection": 9}
+                else:
+                    desired_state = {"verticalSwitch": 0, "verticalDirection": 9}
+            case UpAndDownAirSupplyVectorEnum.UPPER_FIX:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"verticalDirection": 10}
+                else:
+                    desired_state = {"verticalSwitch": 0, "verticalDirection": 10}
+            case UpAndDownAirSupplyVectorEnum.MIDDLE_FIX:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"verticalDirection": 11}
+                else:
+                    desired_state = {"verticalSwitch": 0, "verticalDirection": 11}
+            case UpAndDownAirSupplyVectorEnum.LOWER_FIX:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"verticalDirection": 12}
+                else:
+                    desired_state = {"verticalSwitch": 0, "verticalDirection": 12}
+            case UpAndDownAirSupplyVectorEnum.BOTTOM_FIX:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"verticalDirection": 13}
+                else:
+                    desired_state = {"verticalSwitch": 0, "verticalDirection": 13}
+            case UpAndDownAirSupplyVectorEnum.NOT_SET:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"verticalDirection": 8}
+                else:
+                    desired_state = {"verticalSwitch": 0, "verticalDirection": 8}
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
+    async def SELECT_HORIZONTAL_DIRECTION(self, value: LeftAndRightAirSupplyVectorEnum):
+        desired_state = {}
+        match value:
+            case LeftAndRightAirSupplyVectorEnum.LEFT_AND_RIGHT_SWING:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"horizontalDirection": 1}
+                else:
+                    desired_state = {"horizontalDirection": 1, "horizontalSwitch": 1}
+            case LeftAndRightAirSupplyVectorEnum.LEFT_SWING:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"horizontalDirection": 2}
+                else:
+                    desired_state = {"horizontalDirection": 2, "horizontalSwitch": 1}
+            case LeftAndRightAirSupplyVectorEnum.MIDDLE_SWING:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"horizontalDirection": 3}
+                else:
+                    desired_state = {"horizontalDirection": 3, "horizontalSwitch": 1}
+            case LeftAndRightAirSupplyVectorEnum.RIGHT_SWING:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"horizontalDirection": 4}
+                else:
+                    desired_state = {"horizontalDirection": 4, "horizontalSwitch": 1}
+            case LeftAndRightAirSupplyVectorEnum.LEFT_FIX:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"horizontalDirection": 9}
+                else:
+                    desired_state = {"horizontalDirection": 9, "horizontalSwitch": 0}
+            case LeftAndRightAirSupplyVectorEnum.CENTER_LEFT_FIX:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"horizontalDirection": 10}
+                else:
+                    desired_state = {"horizontalDirection": 10, "horizontalSwitch": 0}
+            case LeftAndRightAirSupplyVectorEnum.MIDDLE_FIX:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"horizontalDirection": 11}
+                else:
+                    desired_state = {"horizontalDirection": 11, "horizontalSwitch": 0}
+            case LeftAndRightAirSupplyVectorEnum.CENTER_RIGHT_FIX:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"horizontalDirection": 12}
+                else:
+                    desired_state = {"horizontalDirection": 12, "horizontalSwitch": 0}
+            case LeftAndRightAirSupplyVectorEnum.RIGHT_FIX:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"horizontalDirection": 13}
+                else:
+                    desired_state = {"horizontalDirection": 13, "horizontalSwitch": 0}
+            case LeftAndRightAirSupplyVectorEnum.NOT_SET:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+                    desired_state = {"horizontalDirection": 8}
+                else:
+                    desired_state = {"horizontalDirection": 8, "horizontalSwitch": 0}
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
 
 
 def get_SELECT_VERTICAL_DIRECTION_name(device: Device) -> str:
@@ -77,240 +637,177 @@ async def async_setup_entry(
 
         if DeviceFeature.SELECT_MODE in supported_features:
             switches.append(
-                Select(
+                SelectHandler(
+                    hass=hass,
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeature.SELECT_MODE,
                     type="Mode",
                     name="Mode",
                     icon_fn=lambda device: "mdi:set-none",
-                    current_state_fn=lambda device: TCL_SplitAC_Type1_DeviceData_Helper(
-                        device.data
-                    ).getMode(),
-                    options_values=get_supported_modes(device),
-                    select_option_fn=lambda device,
-                    option: coordinator.get_aws_iot().async_set_mode(
-                        device.device_id, device.device_type, option
-                    ),
                 )
             )
 
         if DeviceFeature.SELECT_WIND_SPEED in supported_features:
             switches.append(
-                Select(
+                SelectHandler(
+                    hass=hass,
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeature.SELECT_WIND_SPEED,
                     type="WindSpeed",
                     name="Wind Speed",
                     icon_fn=lambda device: "mdi:weather-windy",
-                    current_state_fn=lambda device: TCL_SplitAC_Type1_DeviceData_Helper(
-                        device.data
-                    ).getWindSpeed(),
-                    options_values=[e.value for e in WindSeedEnum],
-                    select_option_fn=lambda device,
-                    option: coordinator.get_aws_iot().async_set_wind_speed(
-                        device.device_id, device.device_type, option
-                    ),
                 )
             )
 
-        if DeviceFeature.SELECT_WIND_SPEED_7_Gear in supported_features:
+        if DeviceFeature.SELECT_WIND_SPEED_7_GEAR in supported_features:
             switches.append(
-                Select(
+                SelectHandler(
+                    hass=hass,
                     coordinator=coordinator,
                     device=device,
-                    type="WindSpeed",
+                    deviceFeature=DeviceFeature.SELECT_WIND_SPEED_7_GEAR,
+                    type="WindSpeed7Gear",
                     name="Wind Speed",
                     icon_fn=lambda device: "mdi:weather-windy",
-                    current_state_fn=lambda device: TCL_SplitAC_Fresh_Air_DeviceData_Helper(
-                        device.data
-                    ).getWindSeed7Gear(),
-                    options_values=[e.value for e in WindSeed7GearEnum],
-                    select_option_fn=lambda device,
-                    option: coordinator.get_aws_iot().async_set_wind_7_gear_speed(
-                        device.device_id, device.device_type, option
-                    ),
                 )
             )
 
         if DeviceFeature.SELECT_PORTABLE_WIND_SEED in supported_features:
             switches.append(
-                DynamicOptionsSelect(
+                DynamicSelectHandler(
+                    hass=hass,
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeature.SELECT_PORTABLE_WIND_SEED,
                     type="PortableWindSpeed",
                     name="Wind Speed",
                     icon_fn=lambda device: "mdi:weather-windy",
-                    current_state_fn=lambda device: TCL_PortableAC_DeviceData_Helper(
-                        device.data
-                    ).getWindSpeed(),
-                    options_values=[e.value for e in PortableWindSeedEnum],
                     options_values_fn=lambda device: get_portable_ac_wind_speed_options(
                         device
                     ),
                     available_fn=lambda device: device.data.sleep != 1,
-                    select_option_fn=lambda device,
-                    option: coordinator.get_aws_iot().async_set_portable_wind_speed(
-                        device.device_id, device.device_type, option
-                    ),
                 )
             )
 
         if DeviceFeature.SELECT_GENERATOR_MODE in supported_features:
             switches.append(
-                Select(
+                SelectHandler(
+                    hass=hass,
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeature.SELECT_GENERATOR_MODE,
                     type="GeneratorMode",
                     name="Generator Mode",
                     icon_fn=lambda device: "mdi:generator-portable",
-                    current_state_fn=lambda device: TCL_SplitAC_Fresh_Air_DeviceData_Helper(
-                        device.data
-                    ).getGeneratorMode(),
-                    options_values=[e.value for e in GeneratorModeEnum],
-                    select_option_fn=lambda device,
-                    option: coordinator.get_aws_iot().async_set_generator_mode(
-                        device.device_id, device.device_type, option
-                    ),
                 )
             )
 
         if DeviceFeature.SELECT_FRESH_AIR in supported_features:
             switches.append(
-                Select(
+                SelectHandler(
+                    hass=hass,
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeature.SELECT_FRESH_AIR,
                     type="FreshAir",
                     name="Fresh Air",
                     icon_fn=lambda device: "mdi:window-open-variant",
-                    current_state_fn=lambda device: TCL_SplitAC_Fresh_Air_DeviceData_Helper(
-                        device.data
-                    ).getFreshAir(),
-                    options_values=[e.value for e in FreshAirEnum],
-                    select_option_fn=lambda device,
-                    option: coordinator.get_aws_iot().async_set_fresh_air(
-                        device.device_id, device.device_type, option
-                    ),
                 )
             )
 
         if DeviceFeature.SELECT_WIND_FEELING in supported_features:
             switches.append(
-                Select(
+                SelectHandler(
+                    hass=hass,
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeature.SELECT_WIND_FEELING,
                     type="WindFeeling",
                     name="Wind Feeling",
                     icon_fn=lambda device: "mdi:weather-dust",
-                    current_state_fn=lambda device: TCL_SplitAC_Fresh_Air_DeviceData_Helper(
-                        device.data
-                    ).getWindFeeling(),
-                    options_values=[e.value for e in WindFeelingEnum],
-                    select_option_fn=lambda device,
-                    option: coordinator.get_aws_iot().async_set_wind_feeling(
-                        device.device_id, device.device_type, option
-                    ),
                 )
             )
 
         if DeviceFeature.SELECT_VERTICAL_DIRECTION in supported_features:
             switches.append(
-                Select(
+                SelectHandler(
+                    hass=hass,
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeature.SELECT_VERTICAL_DIRECTION,
                     type="UpAndDownAirSupplyVector",
                     name=get_SELECT_VERTICAL_DIRECTION_name(device),
                     icon_fn=lambda device: "mdi:swap-vertical",
-                    current_state_fn=lambda device: TCL_SplitAC_Type1_DeviceData_Helper(
-                        device.data
-                    ).getUpAndDownAirSupplyVector(),
-                    options_values=[e.value for e in UpAndDownAirSupplyVectorEnum],
-                    select_option_fn=lambda device,
-                    option: coordinator.get_aws_iot().async_set_up_and_down_air_supply_vector(
-                        device.device_id, device.device_type, option
-                    ),
                 )
             )
 
         if DeviceFeature.SELECT_HORIZONTAL_DIRECTION in supported_features:
             switches.append(
-                Select(
+                SelectHandler(
+                    hass=hass,
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeature.SELECT_HORIZONTAL_DIRECTION,
                     type="LeftAndRightAirSupplyVector",
                     name=get_SELECT_HORIZONTAL_DIRECTION_name(device),
                     icon_fn=lambda device: "mdi:swap-horizontal",
-                    current_state_fn=lambda device: TCL_SplitAC_Type1_DeviceData_Helper(
-                        device.data
-                    ).getLeftAndRightAirSupplyVector(),
-                    options_values=[e.value for e in LeftAndRightAirSupplyVectorEnum],
-                    select_option_fn=lambda device,
-                    option: coordinator.get_aws_iot().async_set_left_and_right_air_supply_vector(
-                        device.device_id, device.device_type, option
-                    ),
                 )
             )
 
         if DeviceFeature.SELECT_SLEEP_MODE in supported_features:
             switches.append(
-                Select(
+                SelectHandler(
+                    hass=hass,
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeature.SELECT_SLEEP_MODE,
                     type="SleepMode",
                     name="Sleep Mode",
                     icon_fn=lambda device: "mdi:sleep",
-                    current_state_fn=lambda device: TCL_SplitAC_Type1_DeviceData_Helper(
-                        device.data
-                    ).getSleepMode(),
-                    options_values=[e.value for e in SleepModeEnum],
-                    select_option_fn=lambda device,
-                    option: coordinator.get_aws_iot().async_set_sleep_mode(
-                        device.device_id, device.device_type, option
-                    ),
                 )
             )
 
         if DeviceFeature.SELECT_TEMPERATURE_TYPE in supported_features:
             switches.append(
-                Select(
+                SelectHandler(
+                    hass=hass,
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeature.SELECT_TEMPERATURE_TYPE,
                     type="TemperatureType",
                     name="Temperature Type",
                     icon_fn=lambda device: "mdi:home-thermometer",
-                    current_state_fn=lambda device: TCL_PortableAC_DeviceData_Helper(
-                        device.data
-                    ).getTemperatureType(),
-                    options_values=[e.value for e in TemperatureTypeEnum],
-                    select_option_fn=lambda device,
-                    option: coordinator.get_aws_iot().async_set_temperature_type(
-                        device.device_id, device.device_type, option
-                    ),
                 )
             )
 
     async_add_entities(switches)
 
 
-class Select(TclEntityBase, SelectEntity):
+class SelectHandler(TclEntityBase, SelectEntity):
     def __init__(
         self,
+        hass: HomeAssistant,
         coordinator: IotDeviceCoordinator,
         device: Device,
         type: str,
         name: str,
+        deviceFeature: DeviceFeature,
         icon_fn: lambda device: str,
-        current_state_fn: lambda device: str,
-        options_values: list[str] | None,
-        select_option_fn: lambda device, option: None,
     ) -> None:
         TclEntityBase.__init__(self, coordinator, type, name, device)
 
         self.icon_fn = icon_fn
-        self.select_option_fn = select_option_fn
-        self.current_state_fn = current_state_fn
+        self.iot_handler = DesiredStateHandlerForSelect(
+            hass=hass,
+            coordinator=coordinator,
+            deviceFeature=deviceFeature,
+            device=self.device,
+        )
 
-        self._attr_current_option = self.current_state_fn(device)
-        self._attr_options = options_values
+        self._attr_current_option = self.iot_handler.current_state()
+        self._attr_options = self.iot_handler.options_values()
 
     @property
     def icon(self):
@@ -319,57 +816,45 @@ class Select(TclEntityBase, SelectEntity):
     @property
     def state(self):
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        return self.current_state_fn(self.device)
+        self.iot_handler.refreshDevice(self.device)
+        return self.iot_handler.current_state()
 
     async def async_select_option(self, option: str) -> None:
-        await self.select_option_fn(self.device, option)
+        await self.iot_handler.call_select_option(option)
         await self.coordinator.async_refresh()
 
-
-class DynamicOptionsSelect(TclEntityBase, SelectEntity):
+class DynamicSelectHandler(SelectHandler, SelectEntity):
     def __init__(
         self,
+        hass: HomeAssistant,
         coordinator: IotDeviceCoordinator,
         device: Device,
         type: str,
         name: str,
+        deviceFeature: DeviceFeature,
         icon_fn: lambda device: str,
-        current_state_fn: lambda device: str,
-        options_values: list[str] | None,
         options_values_fn: lambda device: list[str] | None,
         available_fn: lambda device: bool,
-        select_option_fn: lambda device, option: None,
     ) -> None:
-        TclEntityBase.__init__(self, coordinator, type, name, device)
+        SelectHandler.__init__(
+            self,
+            coordinator=coordinator,
+            device=device,
+            type=type,
+            name=name,
+            deviceFeature=deviceFeature,
+            hass=hass,
+            icon_fn=icon_fn,
+        )
 
-        self._attr_available = True
-
-        self.icon_fn = icon_fn
-        self.options_values_fn = options_values_fn
         self.available_fn = available_fn
-        self.select_option_fn = select_option_fn
-        self.current_state_fn = current_state_fn
-
-        self._attr_current_option = self.current_state_fn(device)
-        self._attr_options = options_values
-
-    @property
-    def icon(self):
-        return self.icon_fn(self.device)
+        self.options_values_fn = options_values_fn
 
     @property
     def options(self) -> list[str]:
         return self.options_values_fn(self.device)
 
     @property
-    def state(self):
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        return self.current_state_fn(self.device)
-
-    @property
     def available(self) -> bool:
         return self.available_fn(self.device)
 
-    async def async_select_option(self, option: str) -> None:
-        await self.select_option_fn(self.device, option)
-        await self.coordinator.async_refresh()

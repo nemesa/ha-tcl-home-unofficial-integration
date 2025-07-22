@@ -101,17 +101,62 @@ class TCL_SplitAC_Type1_DeviceData:
 async def get_stored_spit_ac_type1_data(
     hass: HomeAssistant, device_id: str
 ) -> dict[str, any]:
+    need_save = False
     stored_data = await get_stored_data(hass, device_id)
     if stored_data is None:
-        stored_data = {
-            "target_temperature": {
-                "Cool": 24,
-                "Heat": 26,
-                "Dehumidification": 24,
-                "Fan": 24,
-                "Auto": 24,
-            }
-        }
+        stored_data = {}
+        need_save = True
+
+    if stored_data.get("non_user_config") is None:
+        stored_data["non_user_config"] = {}
+        need_save = True
+    if stored_data["non_user_config"].get("min_celsius_temp") is None:
+        stored_data["non_user_config"]["min_celsius_temp"] = 16
+        need_save = True
+    if stored_data["non_user_config"].get("max_celsius_temp") is None:
+        stored_data["non_user_config"]["max_celsius_temp"] = 36
+        need_save = True
+    if stored_data["non_user_config"].get("native_temp_step") is None:
+        stored_data["non_user_config"]["native_temp_step"] = 1
+        need_save = True
+
+    if stored_data.get("target_temperature") is None:
+        stored_data["target_temperature"] = {}
+        need_save = True
+    if stored_data["target_temperature"].get("Cool") is None:
+        stored_data["target_temperature"]["Cool"] = {}
+        need_save = True
+        if stored_data["target_temperature"]["Cool"].get("value") is None:
+            stored_data["target_temperature"]["Cool"]["value"] = 24
+            need_save = True
+    if stored_data["target_temperature"].get("Heat") is None:
+        stored_data["target_temperature"]["Heat"] = {}
+        need_save = True
+        if stored_data["target_temperature"]["Heat"].get("value") is None:
+            stored_data["target_temperature"]["Heat"]["value"] = 26
+            need_save = True
+    if stored_data["target_temperature"].get("Dehumidification") is None:
+        stored_data["target_temperature"]["Dehumidification"] = {}
+        need_save = True
+        if stored_data["target_temperature"]["Dehumidification"].get("value") is None:
+            stored_data["target_temperature"]["Dehumidification"]["value"] = 26
+            need_save = True
+    if stored_data["target_temperature"].get("Fan") is None:
+        stored_data["target_temperature"]["Fan"] = {}
+        need_save = True
+        if stored_data["target_temperature"]["Fan"].get("value") is None:
+            stored_data["target_temperature"]["Fan"]["value"] = 24
+            need_save = True
+        need_save = True
+    if stored_data["target_temperature"].get("Auto") is None:
+        stored_data["target_temperature"]["Auto"] = {}
+        need_save = True
+        if stored_data["target_temperature"]["Auto"].get("value") is None:
+            stored_data["target_temperature"]["Auto"]["value"] = 24
+            need_save = True
+        need_save = True
+
+    if need_save:
         await set_stored_data(hass, device_id, stored_data)
     return stored_data
 
@@ -154,144 +199,3 @@ class TCL_SplitAC_Type1_DeviceData_Helper:
 
     def getSleepMode(self) -> SleepModeEnum:
         return getSleepMode(self.data.sleep)
-
-
-"""
-Type 2
-
-{
-  powerSwitch: 1,
-  targetTemperature: 20,
-  currentTemperature: 25.1,
-  windSpeed7Gear: 1,
-  verticalWind: 0,
-  horizontalWind: 1,
-  horizontalDirection: 1,
-  verticalDirection: 8,
-  workMode: 1,
-  AIECOSwitch: 0,
-  regularReporting: 2,
-  selfClean: 0,
-  screen: 1,
-  targetFahrenheitTemp: 68,
-  temperatureType: 0,
-  sleep: 0,
-  beepSwitch: 1,
-  softWind: 0,
-  antiMoldew: 0,
-  generatorMode: 0,
-  filterBlockSwitch: 1,
-  filterBlockStatus: 0,
-  errorCode: [],
-  internalUnitCoilTemperature: 8,
-  capabilities: [
-     2,  3,  7,  8,  9, 11, 12,
-    13, 21, 23, 31, 33, 34, 35,
-    36, 39, 40, 41, 42, 43, 48
-  ],
-  PTCStatus: 0,
-  externalUnitTemperature: 32,
-  externalUnitFanSpeed: 700,
-  compressorFrequency: 0,
-  windSpeedPercentage: 1,
-  windSpeedAutoSwitch: 0,
-  selfCleanStatus: 6,
-  selfCleanPercentage: 0,
-  healthy: 0,
-  AIECOStatus: 0,
-  OutDoorCompTarFreqSet: 0,
-  OutDoorFanTarSpeed: 0,
-  OutDoorEEVTarOpenDegree: 0,
-  OutDoorCompTarFreqRun: 40,
-  weekTimer1: ';;;;;;;',
-  weekTimer2: ';;;;;;;',
-  eightAddHot: 0,
-  accessCardInsert: 1,
-  lowerTemperatureLimit: 16,
-  upperTemperatureLimit: 31,
-  specialTimer: ';',
-  highTemperatureWind: 0,
-  coolFeelWind: 0,
-  authFlag: { google: true }
-}
-
-
-min/max temp: 16 / 31
-
-Teamp step 1.0
-
-{"state":{"desired":{"eightAddHot":0,"targetTemperature":20,"targetFahrenheitTemp":68}},"clientToken":"mobile_1753013249008"}
-
-Mode to heat:
-{"state":{"desired":{"eightAddHot":0,"windSpeedAutoSwitch":1,"workMode":4,"targetTemperature":26,"targetFahrenheitTemp":79,"windSpeed7Gear":0}},"clientToken":"mobile_1753013293857"}
-Mode to dry:
-{"state":{"desired":{"eightAddHot":0,"windSpeedAutoSwitch":0,"workMode":2,"targetTemperature":26,"targetFahrenheitTemp":79,"windSpeed7Gear":2}},"clientToken":"mobile_1753013314535"}
-Mode to fan:
-{"state":{"desired":{"eightAddHot":0,"windSpeedAutoSwitch":1,"workMode":3,"targetTemperature":26,"targetFahrenheitTemp":79,"windSpeed7Gear":0}},"clientToken":"mobile_1753013352848"}
-Mode to auto:
-{"state":{"desired":{"eightAddHot":0,"windSpeedAutoSwitch":1,"workMode":0,"targetTemperature":26,"targetFahrenheitTemp":79,"windSpeed7Gear":0}},"clientToken":"mobile_1753013379306"}
-Mode to cool:
-{"state":{"desired":{"eightAddHot":0,"windSpeedAutoSwitch":1,"workMode":1,"targetTemperature":20,"targetFahrenheitTemp":68,"windSpeed7Gear":0}},"clientToken":"mobile_1753013445257"}
-
-Set temperature by mode when change mode
-Set Fan speed by mode when change mode
-
-FAN seepd:
-1: {"state":{"desired":{"windSpeedAutoSwitch":0,"windSpeed7Gear":1}},"clientToken":"mobile_1753013593742"}
-6: {"state":{"desired":{"windSpeedAutoSwitch":0,"windSpeed7Gear":6}},"clientToken":"mobile_1753013639226"}
-7: {"state":{"desired":{"windSpeedAutoSwitch":0,"softWind":0,"windSpeed7Gear":7}},"clientToken":"mobile_1753013650563"}
-
-
-Airflow direction:
-left and right swing:
-{"state":{"desired":{"horizontalDirection":2}},"clientToken":"mobile_1753013672235"}
-
-upper fix:
-{"state":{"desired":{"verticalDirection":10}},"clientToken":"mobile_1753013715203"}
-
-beep switch:
-{"state":{"desired":{"beepSwitch":0}},"clientToken":"mobile_1753013332621"}
-
-
-soft wind:
-on:{"state":{"desired":{"softWind":1}},"clientToken":"mobile_1753013757741"}
-off:{"state":{"desired":{"softWind":0}},"clientToken":"mobile_1753013888307"}
-
-AI ECO:
-on: {"state":{"desired":{"eightAddHot":0,"targetTemperature":26,"AIECOSwitch":1}},"clientToken":"mobile_1753013783602"}
-on: {"state":{"desired":{"eightAddHot":0,"AIECOSwitch":1}},"clientToken":"mobile_1753013939736"}
-off:{"state":{"desired":{"eightAddHot":0,"AIECOSwitch":0}},"clientToken":"mobile_1753014006572"}
-
-Sleep elder:
-{"state":{"desired":{"sleep":2}},"clientToken":"mobile_1753013811820"}
-
-
-GEN mode:
-L1: {"state":{"desired":{"generatorMode":1}},"clientToken":"mobile_1753014090761"}
-L2: {"state":{"desired":{"generatorMode":2}},"clientToken":"mobile_1753014090761"}
-L3: {"state":{"desired":{"generatorMode":3}},"clientToken":"mobile_1753014090761"}
-
-Healthy:
-{"state":{"desired":{"healthy":1}},"clientToken":"mobile_1753014177202"}
-{"state":{"desired":{"healthy":0}},"clientToken":"mobile_1753014200934"}
-
-drying:
-{"state":{"desired":{"antiMoldew":1}},"clientToken":"mobile_1753014211729"}
-{"state":{"desired":{"antiMoldew":0}},"clientToken":"mobile_1753014213517"}
-
-8C heating:
-{"state":{"desired":{"eightAddHot":0}},"clientToken":"mobile_1753014310543"}
-{"state":{"desired":{"eightAddHot":1}},"clientToken":"mobile_1753014312826"}
-
-
-8C heating:
-teamperature disabled
-soft wind disabled
-mildewproof disabled
-
-
-
-Mode Heat/ Fan / Auto:
-Mildewproof disabled
-
-"""

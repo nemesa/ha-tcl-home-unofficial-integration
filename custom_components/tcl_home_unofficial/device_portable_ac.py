@@ -37,6 +37,9 @@ class TCL_PortableAC_DeviceData:
                 "targetFahrenheitDegree", aws_thing_state["targetFahrenheitDegree"]
             )
         )
+        self.target_temperature = int(
+            delta.get("targetCelsiusDegree", aws_thing_state["targetCelsiusDegree"])
+        )
         self.target_celsius_degree = int(
             delta.get("targetCelsiusDegree", aws_thing_state["targetCelsiusDegree"])
         )
@@ -54,28 +57,50 @@ class TCL_PortableAC_DeviceData:
     temperature_type: int | bool
     sleep: int | bool
 
+    target_temperature: int | bool
+
 
 async def get_stored_portable_ac_data(
     hass: HomeAssistant, device_id: str
 ) -> dict[str, any]:
-    stored_data = await get_stored_data(hass, device_id)
     need_save = False
+    stored_data = await get_stored_data(hass, device_id)
     if stored_data is None:
-        stored_data = {
-            "target_temperature": {
-                "Cool": {"targetCelsiusDegree": 22, "targetFahrenheitDegree": 72},
-            }
-        }
+        stored_data = {}
         need_save = True
-    else:
-        if stored_data["target_temperature"]["Cool"] in None and stored_data["target_temperature"]["targetCelsiusDegree"] is not None:
-            stored_data["target_temperature"]["Cool"] = {
-                "targetCelsiusDegree": stored_data["target_temperature"]["targetCelsiusDegree"],
-                "targetFahrenheitDegree": stored_data["target_temperature"]["targetFahrenheitDegree"],
-            }
-            stored_data["target_temperature"]["targetCelsiusDegree"]=None
-            stored_data["target_temperature"]["targetFahrenheitDegree"]=None
+
+    if stored_data.get("non_user_config") is None:
+        stored_data["non_user_config"] = {}
+        need_save = True
+    if stored_data["non_user_config"].get("min_celsius_temp") is None:
+        stored_data["non_user_config"]["min_celsius_temp"] = 18
+        need_save = True
+    if stored_data["non_user_config"].get("max_celsius_temp") is None:
+        stored_data["non_user_config"]["max_celsius_temp"] = 32
+        need_save = True
+    if stored_data["non_user_config"].get("native_temp_step") is None:
+        stored_data["non_user_config"]["native_temp_step"] = 1
+        need_save = True
+
+    if stored_data.get("target_temperature") is None:
+        stored_data["target_temperature"] = {}
+        need_save = True
+    if stored_data["target_temperature"].get("Cool") is None:
+        stored_data["target_temperature"]["Cool"] = {}
+        need_save = True
+        if stored_data["target_temperature"]["Cool"].get("value") is None:
+            stored_data["target_temperature"]["Cool"]["value"] = 22
             need_save = True
+        if stored_data["target_temperature"]["Cool"].get("targetCelsiusDegree") is None:
+            stored_data["target_temperature"]["Cool"]["targetCelsiusDegree"] = 22
+            need_save = True
+        if (
+            stored_data["target_temperature"]["Cool"].get("targetFahrenheitDegree")
+            is None
+        ):
+            stored_data["target_temperature"]["Cool"]["targetFahrenheitDegree"] = 72
+            need_save = True
+
     if need_save:
         await set_stored_data(hass, device_id, stored_data)
     return stored_data

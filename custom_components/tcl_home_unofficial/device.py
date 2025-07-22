@@ -57,7 +57,7 @@ class DeviceFeature(StrEnum):
     SWITCH_SLEEP = "switch.sleep"
     SELECT_MODE = "select.mode"
     SELECT_WIND_SPEED = "select.windSpeed"
-    SELECT_WIND_SPEED_7_Gear = "select.windSpeed7Gear"
+    SELECT_WIND_SPEED_7_GEAR = "select.windSpeed7Gear"
     SELECT_WIND_FEELING = "select.windFeeling"
     SELECT_VERTICAL_DIRECTION = "select.verticalDirection"
     SELECT_HORIZONTAL_DIRECTION = "select.horizontalDirection"
@@ -134,7 +134,7 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
                 DeviceFeature.SELECT_VERTICAL_DIRECTION,
                 DeviceFeature.SELECT_HORIZONTAL_DIRECTION,
                 DeviceFeature.SELECT_SLEEP_MODE,
-                DeviceFeature.SELECT_WIND_SPEED_7_Gear,
+                DeviceFeature.SELECT_WIND_SPEED_7_GEAR,
                 DeviceFeature.SELECT_WIND_FEELING,
                 DeviceFeature.SELECT_FRESH_AIR,
                 DeviceFeature.SELECT_GENERATOR_MODE,
@@ -206,10 +206,10 @@ class Device:
         else:
             self.device_type = device_type
         self.name = name
+        self.storage = {}
         self.firmware_version = firmware_version
         self.is_implemented_by_integration = self.device_type is not None
         if aws_thing is not None:
-            _LOGGER.info("Device %s (%s)", device_id, self.device_type)
             match self.device_type:
                 case DeviceTypeEnum.SPLIT_AC_TYPE_1:
                     self.data = TCL_SplitAC_Type1_DeviceData(
@@ -246,6 +246,7 @@ class Device:
     name: str
     firmware_version: str
     is_implemented_by_integration: bool
+    storage: dict[str, any]
     data: (
         TCL_SplitAC_Type1_DeviceData
         | TCL_SplitAC_Fresh_Air_DeviceData
@@ -277,13 +278,12 @@ def get_supported_modes(device: Device) -> list[ModeEnum]:
     return [e.value for e in ModeEnum]
 
 
-async def init_device_storage(hass: HomeAssistant, device: Device) -> None:
-    """Initialize device storage."""
+async def get_device_storage(hass: HomeAssistant, device: Device) -> None:
     if device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-        await get_stored_spit_ac_fresh_data(hass, device.device_id)
+        return await get_stored_spit_ac_fresh_data(hass, device.device_id)
     elif device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_1:
-        await get_stored_spit_ac_type1_data(hass, device.device_id)
+        return await get_stored_spit_ac_type1_data(hass, device.device_id)
     elif device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_2:
-        await get_stored_spit_ac_type2_data(hass, device.device_id)
+        return await get_stored_spit_ac_type2_data(hass, device.device_id)
     elif device.device_type == DeviceTypeEnum.PORTABLE_AC:
-        await get_stored_portable_ac_data(hass, device.device_id)
+        return await get_stored_portable_ac_data(hass, device.device_id)
