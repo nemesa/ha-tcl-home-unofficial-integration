@@ -4,12 +4,14 @@ import logging
 from typing import Any
 
 from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
 from .device import Device, getSupportedFeatures, DeviceFeature, DeviceTypeEnum
+from .device_data_storage import safe_get_value, safe_set_value, set_stored_data
 from .device_ac_common import getMode, ModeEnum
 from .tcl_entity_base import TclEntityBase
 
@@ -70,7 +72,11 @@ class DesiredStateHandlerForSwitch:
         mode = getMode(self.device.data.work_mode)
         match self.deviceFeature:
             case DeviceFeature.SWITCH_DRYING:
-                if mode == ModeEnum.HEAT or mode == ModeEnum.AUTO or mode == ModeEnum.FAN:
+                if (
+                    mode == ModeEnum.HEAT
+                    or mode == ModeEnum.AUTO
+                    or mode == ModeEnum.FAN
+                ):
                     return False
                 if DeviceFeature.SWITCH_8_C_HEATING in supported_features:
                     if self.device.data.eight_add_hot == 1:
@@ -172,7 +178,7 @@ class DesiredStateHandlerForSwitch:
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
         )
-        
+
     async def SWITCH_SOFT_WIND(self, value: int):
         desired_state = {"softWind": value}
         return await self.coordinator.get_aws_iot().async_set_desired_state(
@@ -265,7 +271,7 @@ async def async_setup_entry(
                     type="8CHeating",
                     name="8 °C Heating",
                     icon_fn=lambda device: "mdi:numeric-8-circle-outline",
-                    is_on_fn=lambda device: device.data.eight_add_hot
+                    is_on_fn=lambda device: device.data.eight_add_hot,
                 )
             )
 
@@ -355,7 +361,7 @@ async def async_setup_entry(
                     type="Sleep",
                     name="Sleep",
                     icon_fn=lambda device: "mdi:sleep",
-                    is_on_fn=lambda device: device.data.sleep
+                    is_on_fn=lambda device: device.data.sleep,
                 )
             )
 
@@ -371,7 +377,21 @@ async def async_setup_entry(
                     icon_fn=lambda device: "mdi:weather-dust",
                     is_on_fn=lambda device: device.data.soft_wind,
                 )
-            )            
+            )
+
+        if (
+            DeviceFeature.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE
+            in supported_features
+        ):
+            switches.append(
+                ConfigSwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    config_path="user_config.behavior.memorize_temp_by_mode",
+                    name="Memorize temperature by mode",
+                )
+            )
 
     async_add_entities(switches)
 
@@ -421,6 +441,56 @@ class SwitchHandler(TclEntityBase, SwitchEntity):
         await self.coordinator.async_refresh()
 
 
+class ConfigSwitchHandler(TclEntityBase, SwitchEntity):
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        coordinator: IotDeviceCoordinator,
+        device: Device,
+        name: str,
+        config_path: str,
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, config_path, name, device)
+        self.hass = hass
+        self.config_path = config_path
+        self._attr_entity_category = EntityCategory.CONFIG
+
+    @property
+    def device_class(self) -> str:
+        return SwitchDeviceClass.SWITCH
+
+    @property
+    def icon(self):
+        return "mdi:cog"
+
+    @property
+    def is_on(self) -> bool | None:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        return safe_get_value(self.device.storage, self.config_path, False)
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+
+        storage_data, need_save = safe_set_value(
+            self.device.storage, self.config_path, True, overwrite_if_exists=True
+        )
+
+        if need_save:
+            await set_stored_data(self.hass, self.device.device_id, storage_data)
+        await self.coordinator.async_refresh()
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+
+        storage_data, need_save = safe_set_value(
+            self.device.storage, self.config_path, False, overwrite_if_exists=True
+        )
+
+        if need_save:
+            await set_stored_data(self.hass, self.device.device_id, storage_data)
+        await self.coordinator.async_refresh()
+
+
 class DynamicSwitchHandler(SwitchHandler, SwitchEntity):
     def __init__(
         self,
@@ -432,7 +502,6 @@ class DynamicSwitchHandler(SwitchHandler, SwitchEntity):
         deviceFeature: DeviceFeature,
         icon_fn: lambda device: str,
         is_on_fn: lambda device: bool | None,
-        available_fn: lambda device: bool,
     ) -> None:
         SwitchHandler.__init__(
             self,
@@ -445,8 +514,6 @@ class DynamicSwitchHandler(SwitchHandler, SwitchEntity):
             icon_fn=icon_fn,
             is_on_fn=is_on_fn,
         )
-
-        self.available_fn = available_fn
 
     @property
     def available(self) -> bool:

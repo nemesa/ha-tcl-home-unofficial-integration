@@ -77,7 +77,12 @@ class DeviceFeature(StrEnum):
     BUTTON_SELF_CLEAN = "button.selfClean"
     CLIMATE = "climate"
     INTERNAL_HAS_SWING_SWITCH = "internal.hasSwingSwitch"
-    INTERNAL_SET_TFT_WITH_TT = "internal.set_targetFahrenheitTemp_with_targetTemperature"
+    INTERNAL_SET_TFT_WITH_TT = (
+        "internal.set_targetFahrenheitTemp_with_targetTemperature"
+    )
+    USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE = (
+        "user_config.behavior.memorize_temp_by_mode"
+    )
 
 
 def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
@@ -102,6 +107,7 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
                 DeviceFeature.BUTTON_SELF_CLEAN,
                 DeviceFeature.CLIMATE,
                 DeviceFeature.INTERNAL_HAS_SWING_SWITCH,
+                DeviceFeature.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE
             ]
         case DeviceTypeEnum.SPLIT_AC_TYPE_2:
             return [
@@ -116,7 +122,7 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
                 DeviceFeature.SWITCH_SCREEN,
                 DeviceFeature.SWITCH_8_C_HEATING,
                 DeviceFeature.SWITCH_SOFT_WIND,
-                DeviceFeature.SELECT_MODE,                
+                DeviceFeature.SELECT_MODE,
                 DeviceFeature.SELECT_WIND_SPEED_7_GEAR,
                 DeviceFeature.SELECT_VERTICAL_DIRECTION,
                 DeviceFeature.SELECT_HORIZONTAL_DIRECTION,
@@ -127,6 +133,7 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
                 DeviceFeature.BUTTON_SELF_CLEAN,
                 DeviceFeature.CLIMATE,
                 DeviceFeature.INTERNAL_SET_TFT_WITH_TT,
+                DeviceFeature.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE,
             ]
         case DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
             return [
@@ -155,6 +162,7 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
                 DeviceFeature.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS,
                 DeviceFeature.BUTTON_SELF_CLEAN,
                 DeviceFeature.CLIMATE,
+                DeviceFeature.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE,
             ]
         case DeviceTypeEnum.PORTABLE_AC:
             return [
@@ -162,7 +170,6 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
                 DeviceFeature.SWITCH_SWING_WIND,
                 DeviceFeature.SWITCH_SLEEP,
                 DeviceFeature.SELECT_MODE,
-                # DeviceFeature.SELECT_TEMPERATURE_TYPE,
                 DeviceFeature.SELECT_PORTABLE_WIND_SEED,
                 DeviceFeature.NUMBER_TARGET_DEGREE,
             ]

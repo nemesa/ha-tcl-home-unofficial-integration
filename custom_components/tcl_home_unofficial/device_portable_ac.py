@@ -1,7 +1,7 @@
 """."""
 
 from homeassistant.core import HomeAssistant
-from .device_data_storage import get_stored_data, set_stored_data
+from .device_data_storage import get_stored_data, set_stored_data, safe_set_value
 
 from dataclasses import dataclass
 from enum import StrEnum
@@ -69,37 +69,13 @@ async def get_stored_portable_ac_data(
         stored_data = {}
         need_save = True
 
-    if stored_data.get("non_user_config") is None:
-        stored_data["non_user_config"] = {}
-        need_save = True
-    if stored_data["non_user_config"].get("min_celsius_temp") is None:
-        stored_data["non_user_config"]["min_celsius_temp"] = 18
-        need_save = True
-    if stored_data["non_user_config"].get("max_celsius_temp") is None:
-        stored_data["non_user_config"]["max_celsius_temp"] = 32
-        need_save = True
-    if stored_data["non_user_config"].get("native_temp_step") is None:
-        stored_data["non_user_config"]["native_temp_step"] = 1
-        need_save = True
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.min_celsius_temp", 18)
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.max_celsius_temp", 32)
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.native_temp_step", 1)
 
-    if stored_data.get("target_temperature") is None:
-        stored_data["target_temperature"] = {}
-        need_save = True
-    if stored_data["target_temperature"].get("Cool") is None:
-        stored_data["target_temperature"]["Cool"] = {}
-        need_save = True
-        if stored_data["target_temperature"]["Cool"].get("value") is None:
-            stored_data["target_temperature"]["Cool"]["value"] = 22
-            need_save = True
-        if stored_data["target_temperature"]["Cool"].get("targetCelsiusDegree") is None:
-            stored_data["target_temperature"]["Cool"]["targetCelsiusDegree"] = 22
-            need_save = True
-        if (
-            stored_data["target_temperature"]["Cool"].get("targetFahrenheitDegree")
-            is None
-        ):
-            stored_data["target_temperature"]["Cool"]["targetFahrenheitDegree"] = 72
-            need_save = True
+    stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.memorize_temp_by_mode", False)
+
+    stored_data, need_save = safe_set_value(stored_data, "target_temperature.Cool.value", 22)
 
     if need_save:
         await set_stored_data(hass, device_id, stored_data)

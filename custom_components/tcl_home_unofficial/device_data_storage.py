@@ -45,3 +45,76 @@ async def delete_stored_data(hass: HomeAssistant, device_id: str) -> None:
 
     _LOGGER.debug("device_data_storage.delete_stored_data %s", key)
     await data_storage.async_save(data=None)
+
+
+def safe_setup_path(data: dict[str, any] | None, path: str):
+    needs_save = False
+    if data is None:
+        data = {}
+        needs_save = True
+
+    keys = path.split(".")
+    current = data
+
+    for key in keys[:-1]:
+        if key not in current or not isinstance(current[key], dict):
+            current[key] = {}
+            needs_save = True
+        current = current[key]
+
+    last_key = keys[-1]
+    if last_key not in current:
+        current[last_key] = {}
+        needs_save = True
+    if current[last_key] != current.get(last_key, {}):
+        needs_save = True
+    current[last_key] = current.get(last_key, {})
+
+    return data, needs_save
+
+
+def safe_set_value(
+    data: dict[str, any] | None,
+    path: str,
+    value: any,
+    overwrite_if_exists: bool = False,
+) -> tuple[dict[str, any], bool]:
+    needs_save = False
+    data_safe, needs_save = safe_setup_path(data, path)
+    pointer = data_safe
+    parts = path.split(".")
+    for index, part in enumerate(parts):
+        is_last_item = True if index == parts.__len__() - 1 else False
+        if is_last_item:
+            if pointer[part] == {}:
+                pointer[part] = value
+                needs_save = True
+            else:
+                if value != pointer[part] and overwrite_if_exists:
+                    pointer[part] = value
+                    needs_save = True
+        else:
+            pointer = pointer[part]
+    return data_safe, needs_save
+
+
+def safe_get_value(data: dict[str, any] | None, path: str, defaul_value: any) -> any:
+    return_value = defaul_value
+    if data is None:
+        return defaul_value
+
+    pointer = data
+    parts = path.split(".")
+
+    for index, part in enumerate(parts):
+        is_last_item = True if index == parts.__len__() - 1 else False
+        if part not in pointer:
+            if is_last_item:
+                return defaul_value
+        else:
+            if is_last_item:
+                return_value = pointer[part]
+            else:
+                pointer = pointer[part]
+
+    return return_value
