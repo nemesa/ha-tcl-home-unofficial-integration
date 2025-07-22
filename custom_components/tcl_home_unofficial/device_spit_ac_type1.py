@@ -69,6 +69,7 @@ class TCL_SplitAC_Type1_DeviceData:
             delta.get("horizontalDirection", aws_thing_state["horizontalDirection"])
         )
 
+        self.eight_add_hot = int(delta.get("eightAddHot", aws_thing_state["eightAddHot"]))
         self.sleep = int(delta.get("sleep", aws_thing_state["sleep"]))
         self.eco = int(delta.get("ECO", aws_thing_state["ECO"]))
         self.healthy = int(delta.get("healthy", aws_thing_state["healthy"]))
@@ -95,6 +96,7 @@ class TCL_SplitAC_Type1_DeviceData:
     eco: int
     anti_moldew: int
     self_clean: int
+    eight_add_hot: int
     screen: int
 
 

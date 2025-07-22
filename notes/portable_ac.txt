@@ -1,0 +1,65 @@
+online state
+thing {
+  authFlag: { google: true },
+  powerSwitch: 1,
+  windSpeed: 2,
+  swingWind: 0,
+  workMode: 1,
+  targetFahrenheitDegree: 77,
+  targetCelsiusDegree: 25,
+  temperatureType: 0,
+  sleep: 0,
+  errorCode: []
+}
+set temp
+{"state":{"desired":{"targetCelsiusDegree":24,"targetFahrenheitDegree":75}},"clientToken":"mobile_1752833975985"}
+{"state":{"desired":{"targetCelsiusDegree":18,"targetFahrenheitDegree":64}},"clientToken":"mobile_1752833988734"}
+{"state":{"desired":{"targetCelsiusDegree":29,"targetFahrenheitDegree":84}},"clientToken":"mobile_1752833997221"}
+{"state":{"desired":{"targetCelsiusDegree":32,"targetFahrenheitDegree":90}},"clientToken":"mobile_1752834004501"}
+mode to dry
+{"state":{"desired":{"workMode":2,"windSpeed":0}},"clientToken":"mobile_1752834019845"}
+mode to fan
+{"state":{"desired":{"workMode":3,"windSpeed":1}},"clientToken":"mobile_1752834029850"}
+mode to auto
+{"state":{"desired":{"workMode":0,"windSpeed":0}},"clientToken":"mobile_1752834040217"}
+mode to cool
+{"state":{"desired":{"targetCelsiusDegree":25,"workMode":1,"targetFahrenheitDegree":77,"windSpeed":2}},"clientToken":"mobile_1752834071602"}
+Can't set the temp in Dry/Fan/Auto mode
+it will remember the cool temp when set it back
+Cold - has 3 fan speed
+auto:
+{"state":{"desired":{"windSpeed":0}},"clientToken":"mobile_1752834256719"}
+low:
+{"state":{"desired":{"windSpeed":1}},"clientToken":"mobile_1752834266284"}
+high:
+{"state":{"desired":{"windSpeed":2}},"clientToken":"mobile_1752834277802"}
+Dry no fan speed
+Fan mode 2 fun speed
+Low:
+{"state":{"desired":{"windSpeed":1}},"clientToken":"mobile_1752834316167"}
+High:
+{"state":{"desired":{"windSpeed":2}},"clientToken":"mobile_1752834316167"}
+Auto mode - has 3 fan speed
+auto:
+{"state":{"desired":{"windSpeed":0}},"clientToken":"mobile_1752834256719"}
+low:
+{"state":{"desired":{"windSpeed":1}},"clientToken":"mobile_1752834266284"}
+high:
+{"state":{"desired":{"windSpeed":2}},"clientToken":"mobile_1752834277802"}
+Sleep mode:
+{"state":{"desired":{"sleep":1,"windSpeed":1}},"clientToken":"mobile_1752834380894"}
+  turn off: {"state":{"desired":{"sleep":0,"windSpeed":2}},"clientToken":"mobile_1752834691636"} 
+"Up and down wind" switch
+{"state":{"desired":{"swingWind":1}},"clientToken":"mobile_1752834400602"}
+turn off
+
+{"state":{"desired":{"swingWind":0}},"clientToken":"mobile_1752834665384"} 
+in Sleep mode, no wind speed change
+Fan mode- no sleep
+from auto mode +sleep to clool mode
+{"state":{"desired":{"sleep":0,"targetCelsiusDegree":22,"workMode":1,"targetFahrenheitDegree":72,"windSpeed":2}},"clientToken":"mobile_1752834549086"}
+if sleep witched on then mode change always turn off the sleep mode
+set temperature to F
+{"state":{"desired":{"temperatureType":1}},"clientToken":"mobile_1752834718003"}
+set temoerature to C
+{"state":{"desired":{"temperatureType":0}},"clientToken":"mobile_1752834740435"}

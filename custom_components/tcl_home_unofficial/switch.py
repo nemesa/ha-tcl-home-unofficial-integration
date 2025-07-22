@@ -10,6 +10,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
 from .device import Device, getSupportedFeatures, DeviceFeature, DeviceTypeEnum
+from .device_ac_common import getMode, ModeEnum
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -57,6 +58,41 @@ class DesiredStateHandlerForSwitch:
                 return await self.SWITCH_SWING_WIND(value=value)
             case DeviceFeature.SWITCH_SLEEP:
                 return await self.SWITCH_SLEEP(value=value)
+            case DeviceFeature.SWITCH_AI_ECO:
+                return await self.SWITCH_AI_ECO(value=value)
+            case DeviceFeature.SWITCH_8_C_HEATING:
+                return await self.SWITCH_8_C_HEATING(value=value)
+            case DeviceFeature.SWITCH_SOFT_WIND:
+                return await self.SWITCH_SOFT_WIND(value=value)
+
+    def is_allowed(self) -> bool:
+        supported_features = getSupportedFeatures(self.device.device_type)
+        mode = getMode(self.device.data.work_mode)
+        match self.deviceFeature:
+            case DeviceFeature.SWITCH_DRYING:
+                if mode == ModeEnum.HEAT or mode == ModeEnum.AUTO or mode == ModeEnum.FAN:
+                    return False
+                if DeviceFeature.SWITCH_8_C_HEATING in supported_features:
+                    if self.device.data.eight_add_hot == 1:
+                        return False
+                return True
+            case DeviceFeature.SWITCH_SOFT_WIND:
+                if DeviceFeature.SWITCH_8_C_HEATING in supported_features:
+                    if self.device.data.eight_add_hot == 1:
+                        return False
+                return True
+            case DeviceFeature.SWITCH_8_C_HEATING:
+                if mode == ModeEnum.HEAT:
+                    return True
+                else:
+                    return False
+            case DeviceFeature.SWITCH_SLEEP:
+                if mode == ModeEnum.FAN:
+                    return False
+                else:
+                    return True
+            case _:
+                return True
 
     async def SWITCH_POWER(self, value: int):
         turnOffBeep = self.coordinator.get_config_data().behavior_mute_beep_on_power_on
@@ -80,6 +116,20 @@ class DesiredStateHandlerForSwitch:
             desired_state["turbo"] = 0
             desired_state["silenceSwitch"] = 0
             desired_state["windSpeed"] = 0
+
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
+    async def SWITCH_AI_ECO(self, value: int):
+        desired_state = {"eightAddHot": 0, "AIECOSwitch": value}
+
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
+    async def SWITCH_8_C_HEATING(self, value: int):
+        desired_state = {"eightAddHot": value}
 
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
@@ -119,6 +169,12 @@ class DesiredStateHandlerForSwitch:
         desired_state = {"sleep": value}
         if self.device.device_type == DeviceTypeEnum.PORTABLE_AC:
             desired_state["windSpeed"] = 1 if value == 1 else 2
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+        
+    async def SWITCH_SOFT_WIND(self, value: int):
+        desired_state = {"softWind": value}
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
         )
@@ -183,6 +239,36 @@ async def async_setup_entry(
                 )
             )
 
+        if DeviceFeature.SWITCH_AI_ECO in supported_features:
+            switches.append(
+                SwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeature.SWITCH_AI_ECO,
+                    type="aiECO",
+                    name="AI ECO Switch",
+                    icon_fn=lambda device: "mdi:leaf"
+                    if device.data.ai_eco == 1
+                    else "mdi:leaf-off",
+                    is_on_fn=lambda device: device.data.ai_eco,
+                )
+            )
+
+        if DeviceFeature.SWITCH_8_C_HEATING in supported_features:
+            switches.append(
+                DynamicSwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeature.SWITCH_8_C_HEATING,
+                    type="8CHeating",
+                    name="8 °C Heating",
+                    icon_fn=lambda device: "mdi:numeric-8-circle-outline",
+                    is_on_fn=lambda device: device.data.eight_add_hot
+                )
+            )
+
         if DeviceFeature.SWITCH_HEALTHY in supported_features:
             switches.append(
                 SwitchHandler(
@@ -201,7 +287,7 @@ async def async_setup_entry(
 
         if DeviceFeature.SWITCH_DRYING in supported_features:
             switches.append(
-                SwitchHandler(
+                DynamicSwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
@@ -269,10 +355,23 @@ async def async_setup_entry(
                     type="Sleep",
                     name="Sleep",
                     icon_fn=lambda device: "mdi:sleep",
-                    is_on_fn=lambda device: device.data.sleep,
-                    available_fn=lambda device: (device.data.work_mode != 3),
+                    is_on_fn=lambda device: device.data.sleep
                 )
             )
+
+        if DeviceFeature.SWITCH_SOFT_WIND in supported_features:
+            switches.append(
+                DynamicSwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeature.SWITCH_SOFT_WIND,
+                    type="SoftWind",
+                    name="Soft Wind",
+                    icon_fn=lambda device: "mdi:weather-dust",
+                    is_on_fn=lambda device: device.data.soft_wind,
+                )
+            )            
 
     async_add_entities(switches)
 
@@ -292,7 +391,11 @@ class SwitchHandler(TclEntityBase, SwitchEntity):
         TclEntityBase.__init__(self, coordinator, type, name, device)
         self.icon_fn = icon_fn
         self.is_on_fn = is_on_fn
-        self.iot_handler = DesiredStateHandlerForSwitch(hass=hass,coordinator=coordinator, deviceFeature=deviceFeature, device=self.device
+        self.iot_handler = DesiredStateHandlerForSwitch(
+            hass=hass,
+            coordinator=coordinator,
+            deviceFeature=deviceFeature,
+            device=self.device,
         )
 
     @property
@@ -347,4 +450,6 @@ class DynamicSwitchHandler(SwitchHandler, SwitchEntity):
 
     @property
     def available(self) -> bool:
-        return self.available_fn(self.device)
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        self.iot_handler.refreshDevice(self.device)
+        return self.iot_handler.is_allowed()

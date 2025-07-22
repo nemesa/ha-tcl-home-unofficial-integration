@@ -79,7 +79,11 @@ class DesiredStateHandlerForNumber:
             )
             return
 
+        supported_features = getSupportedFeatures(self.device.device_type)
         desired_state = {"targetTemperature": value}
+        if DeviceFeature.INTERNAL_SET_TFT_WITH_TT in supported_features:
+            value_fahrenheit_to_set = self.celsius_to_fahrenheit(value)
+            desired_state["targetFahrenheitTemp"] = value_fahrenheit_to_set
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
         )
@@ -115,9 +119,13 @@ def allow_float(supported_features: list[DeviceFeature]) -> bool:
 
 
 def is_allowed(device: Device) -> bool:
+    supported_features = getSupportedFeatures(device.device_type)
     if device.device_type == DeviceTypeEnum.PORTABLE_AC:
         return getMode(device.data.work_mode) == ModeEnum.COOL
     else:
+        if DeviceFeature.SWITCH_8_C_HEATING not in supported_features:
+            if device.data.eight_add_hot == 1:
+                return False
         return True
 
 
@@ -236,160 +244,3 @@ class TemperatureHandler(TclEntityBase, NumberEntity):
         await self.iot_handler.store_target_temp(value)
         await self.coordinator.async_refresh()
         self.async_write_ha_state()
-
-
-# class SetTargetTempEntity(TclEntityBase, NumberEntity):
-#     def __init__(
-#         self, hass: HomeAssistant, coordinator: IotDeviceCoordinator, device: Device
-#     ) -> None:
-#         TclEntityBase.__init__(
-#             self, coordinator, "SetTargetTempEntity", "Set Target Temperature", device
-#         )
-#         self.hass = hass
-
-#         self.device_features = getSupportedFeatures(device.device_type)
-
-#         self.aws_iot = coordinator.get_aws_iot()
-
-#         self._attr_assumed_state = False
-#         self._attr_device_class = NumberDeviceClass.TEMPERATURE
-#         self._attr_translation_key = None
-#         self._attr_mode = NumberMode.BOX
-#         self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-#         self._attr_native_value = device.data.target_temperature
-
-#         self._attr_native_min_value = 16
-#         self._attr_native_max_value = 36
-#         self._attr_native_step = 1
-#         if (
-#             DeviceFeature.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS
-#             in self.device_features
-#         ):
-#             self._attr_native_step = 0.5
-#             self._attr_native_min_value = 16.0
-#             self._attr_native_max_value = 36.0
-
-#         if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-#             self._attr_native_max_value = 31
-
-#     @property
-#     def device_class(self) -> str:
-#         return NumberDeviceClass.TEMPERATURE
-
-#     @property
-#     def native_value(self) -> int | float:
-#         if (
-#             DeviceFeature.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS
-#             in self.device_features
-#         ):
-#             return float(self.device.data.target_temperature)
-#         return int(self.device.data.target_temperature)
-
-#     async def async_set_native_value(self, value: float) -> None:
-#         """Update the current value."""
-
-#         value_to_set = int(value)
-#         if (
-#             DeviceFeature.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS
-#             in self.device_features
-#         ):
-#             value_to_set = float(value)
-
-#         data_to_store = None
-#         mode = getMode(self.device.data.work_mode)
-#         if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-#             data_to_store = await get_stored_spit_ac_fresh_data(
-#                 self.hass, self.device.device_id
-#             )
-#         if self.device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_1:
-#             data_to_store = await get_stored_spit_ac_type1_data(
-#                 self.hass, self.device.device_id
-#             )
-#         data_to_store["target_temperature"][mode] = value_to_set
-
-#         await set_stored_data(
-#             self.hass,
-#             self.device.device_id,
-#             data_to_store,
-#         )
-
-#         await self.aws_iot.async_set_target_temperature(
-#             self.device.device_id, self.device.device_type, value_to_set
-#         )
-#         self.device.data.target_temperature = int(value)
-#         self.coordinator.set_device(self.device)
-#         await self.coordinator.async_refresh()
-#         self.async_write_ha_state()
-
-
-# class SetTargetDegreeEntity(TclEntityBase, NumberEntity):
-#     def __init__(
-#         self,
-#         hass: HomeAssistant,
-#         coordinator: IotDeviceCoordinator,
-#         device: Device,
-#         available_fn: lambda device: bool,
-#     ) -> None:
-#         TclEntityBase.__init__(
-#             self, coordinator, "SetTargetDegree", "Set Target Temperature", device
-#         )
-#         self.hass = hass
-
-#         self._attr_available = True
-#         self.available_fn = available_fn
-#         self.device_features = getSupportedFeatures(device.device_type)
-
-#         self.aws_iot = coordinator.get_aws_iot()
-
-#         self._attr_assumed_state = False
-#         self._attr_device_class = NumberDeviceClass.TEMPERATURE
-#         self._attr_translation_key = None
-#         self._attr_mode = NumberMode.BOX
-#         self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
-#         self._attr_native_value = device.data.target_celsius_degree
-
-#         self._attr_native_min_value = 18
-#         self._attr_native_max_value = 32
-
-#     @property
-#     def available(self) -> bool:
-#         return self.available_fn(self.device)
-
-#     @property
-#     def device_class(self) -> str:
-#         return NumberDeviceClass.TEMPERATURE
-
-#     @property
-#     def native_value(self) -> int | float:
-#         self.device = self.coordinator.get_device_by_id(self.device.device_id)
-#         return int(self.device.data.target_celsius_degree)
-
-#     async def async_set_native_value(self, value: float) -> None:
-#         """Update the current value."""
-#         _LOGGER.info("Setting target degree to %s", value)
-#         value_celsius_to_set = int(value)
-#         value_fahrenheit_to_set = round((value_celsius_to_set * (9 / 5)) + 32)
-
-#         if self.device.device_type == DeviceTypeEnum.PORTABLE_AC:
-#             data_to_store = await get_stored_portable_ac_data(
-#                 self.hass, self.device.device_id
-#             )
-#             data_to_store["target_temperature"]["Cool"]["targetCelsiusDegree"] = (
-#                 value_celsius_to_set
-#             )
-#             data_to_store["target_temperature"]["Cool"]["targetFahrenheitDegree"] = (
-#                 value_fahrenheit_to_set
-#             )
-
-#             await set_stored_data(self.hass, self.device.device_id, data_to_store)
-
-#         await self.aws_iot.async_set_target_degree(
-#             self.device.device_id,
-#             self.device.device_type,
-#             value_celsius_to_set,
-#             value_fahrenheit_to_set,
-#         )
-#         self.device.data.target_celsius_degree = int(value)
-#         self.coordinator.set_device(self.device)
-#         await self.coordinator.async_refresh()
-#         self.async_write_ha_state()

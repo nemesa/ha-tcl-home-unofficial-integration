@@ -49,12 +49,15 @@ class DeviceFeature(StrEnum):
     SWITCH_POWER = "switch.powerSwitch"
     SWITCH_BEEP = "switch.beepSwitch"
     SWITCH_ECO = "switch.eco"
+    SWITCH_AI_ECO = "switch.AIeco"
     SWITCH_HEALTHY = "switch.healthy"
     SWITCH_DRYING = "switch.drying"
     SWITCH_SCREEN = "switch.screen"
     SWITCH_LIGHT_SENSE = "switch.lightSense"
     SWITCH_SWING_WIND = "switch.swingWind"
     SWITCH_SLEEP = "switch.sleep"
+    SWITCH_8_C_HEATING = "switch.8CHeating"
+    SWITCH_SOFT_WIND = "switch.softWind"
     SELECT_MODE = "select.mode"
     SELECT_WIND_SPEED = "select.windSpeed"
     SELECT_WIND_SPEED_7_GEAR = "select.windSpeed7Gear"
@@ -73,6 +76,8 @@ class DeviceFeature(StrEnum):
     )
     BUTTON_SELF_CLEAN = "button.selfClean"
     CLIMATE = "climate"
+    INTERNAL_HAS_SWING_SWITCH = "internal.hasSwingSwitch"
+    INTERNAL_SET_TFT_WITH_TT = "internal.set_targetFahrenheitTemp_with_targetTemperature"
 
 
 def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
@@ -87,6 +92,7 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
                 DeviceFeature.SWITCH_HEALTHY,
                 DeviceFeature.SWITCH_DRYING,
                 DeviceFeature.SWITCH_SCREEN,
+                DeviceFeature.SWITCH_8_C_HEATING,
                 DeviceFeature.SELECT_MODE,
                 DeviceFeature.SELECT_WIND_SPEED,
                 DeviceFeature.SELECT_VERTICAL_DIRECTION,
@@ -95,25 +101,32 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
                 DeviceFeature.NUMBER_TARGET_TEMPERATURE,
                 DeviceFeature.BUTTON_SELF_CLEAN,
                 DeviceFeature.CLIMATE,
+                DeviceFeature.INTERNAL_HAS_SWING_SWITCH,
             ]
         case DeviceTypeEnum.SPLIT_AC_TYPE_2:
             return [
-                # DeviceFeature.MODE_HEAT,
+                DeviceFeature.MODE_HEAT,
                 DeviceFeature.SENSOR_CURRENT_TEMPERATURE,
+                DeviceFeature.SENSOR_EXTERNAL_UNIT_TEMPERATURE,
                 DeviceFeature.SWITCH_POWER,
                 DeviceFeature.SWITCH_BEEP,
-                # DeviceFeature.SWITCH_ECO,
-                # DeviceFeature.SWITCH_HEALTHY,
-                # DeviceFeature.SWITCH_DRYING,
-                # DeviceFeature.SWITCH_SCREEN,
-                # DeviceFeature.SELECT_MODE,
-                # DeviceFeature.SELECT_WIND_SPEED,
-                # DeviceFeature.SELECT_VERTICAL_DIRECTION,
-                # DeviceFeature.SELECT_HORIZONTAL_DIRECTION,
-                # DeviceFeature.SELECT_SLEEP_MODE,
+                DeviceFeature.SWITCH_AI_ECO,
+                DeviceFeature.SWITCH_HEALTHY,
+                DeviceFeature.SWITCH_DRYING,
+                DeviceFeature.SWITCH_SCREEN,
+                DeviceFeature.SWITCH_8_C_HEATING,
+                DeviceFeature.SWITCH_SOFT_WIND,
+                DeviceFeature.SELECT_MODE,                
+                DeviceFeature.SELECT_WIND_SPEED_7_GEAR,
+                DeviceFeature.SELECT_VERTICAL_DIRECTION,
+                DeviceFeature.SELECT_HORIZONTAL_DIRECTION,
+                DeviceFeature.SELECT_WIND_FEELING,
+                DeviceFeature.SELECT_SLEEP_MODE,
                 DeviceFeature.NUMBER_TARGET_TEMPERATURE,
-                # DeviceFeature.BUTTON_SELF_CLEAN,
-                # DeviceFeature.CLIMATE,
+                DeviceFeature.SELECT_GENERATOR_MODE,
+                DeviceFeature.BUTTON_SELF_CLEAN,
+                DeviceFeature.CLIMATE,
+                DeviceFeature.INTERNAL_SET_TFT_WITH_TT,
             ]
         case DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
             return [

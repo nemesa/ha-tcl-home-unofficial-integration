@@ -192,6 +192,12 @@ class DesiredStateHandlerForSelect:
                     }
                 elif self.device.device_type == DeviceTypeEnum.PORTABLE_AC:
                     desired_state = {"sleep": 0, "workMode": 0, "windSpeed": 0}
+                elif self.device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_2:
+                    desired_state = {
+                        "eightAddHot": 0,
+                        "workMode": 0,
+                        "windSpeed7Gear": 0,
+                    }
                 else:
                     desired_state = {
                         "ECO": 0,
@@ -232,6 +238,11 @@ class DesiredStateHandlerForSelect:
                         "targetCelsiusDegree": targetCelsiusDegree,
                         "targetFahrenheitDegree": targetFahrenheitDegree,
                     }
+                elif self.device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_2:
+                    desired_state = {
+                        "eightAddHot":0,
+                        "workMode":1,
+                    }
                 else:
                     desired_state = {
                         "ECO": 0,
@@ -260,6 +271,11 @@ class DesiredStateHandlerForSelect:
                     }
                 elif self.device.device_type == DeviceTypeEnum.PORTABLE_AC:
                     desired_state = {"sleep": 0, "workMode": 2, "windSpeed": 0}
+                elif self.device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_2:
+                    desired_state = {
+                        "eightAddHot":0,
+                        "workMode":2,
+                    }
                 else:
                     desired_state = {
                         "ECO": 0,
@@ -287,6 +303,11 @@ class DesiredStateHandlerForSelect:
                     }
                 elif self.device.device_type == DeviceTypeEnum.PORTABLE_AC:
                     desired_state = {"sleep": 0, "workMode": 3, "windSpeed": 1}
+                elif self.device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_2:
+                    desired_state = {
+                        "eightAddHot":0,
+                        "workMode":3,
+                    }
                 else:
                     desired_state = {
                         "ECO": 0,
@@ -311,6 +332,11 @@ class DesiredStateHandlerForSelect:
                         "targetTemperature": stored_data["target_temperature"][
                             ModeEnum.HEAT
                         ],
+                    }
+                elif self.device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_2:
+                    desired_state = {
+                        "eightAddHot":0,
+                        "workMode":4,
                     }
                 else:
                     desired_state = {
@@ -492,109 +518,96 @@ class DesiredStateHandlerForSelect:
 
     async def SELECT_VERTICAL_DIRECTION(self, value: UpAndDownAirSupplyVectorEnum):
         desired_state = {}
+        supported_features = getSupportedFeatures(self.device.device_type)
+        has_swing_switch = DeviceFeature.INTERNAL_HAS_SWING_SWITCH in supported_features
+
         match value:
             case UpAndDownAirSupplyVectorEnum.UP_AND_DOWN_SWING:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"verticalDirection": 1}
-                else:
-                    desired_state = {"verticalSwitch": 1, "verticalDirection": 1}
+                desired_state = {"verticalDirection": 1}
+                if has_swing_switch:
+                    desired_state["verticalSwitch"] = 1
             case UpAndDownAirSupplyVectorEnum.UPWARDS_SWING:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"verticalDirection": 2}
-                else:
-                    desired_state = {"verticalSwitch": 1, "verticalDirection": 2}
+                desired_state = {"verticalDirection": 2}
+                if has_swing_switch:
+                    desired_state["verticalSwitch"] = 1
             case UpAndDownAirSupplyVectorEnum.DOWNWARDS_SWING:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"verticalDirection": 3}
-                else:
-                    desired_state = {"verticalSwitch": 1, "verticalDirection": 3}
+                desired_state = {"verticalDirection": 3}
+                if has_swing_switch:
+                    desired_state["verticalSwitch"] = 1
             case UpAndDownAirSupplyVectorEnum.TOP_FIX:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"verticalDirection": 9}
-                else:
-                    desired_state = {"verticalSwitch": 0, "verticalDirection": 9}
+                desired_state = {"verticalDirection": 9}
+                if has_swing_switch:
+                    desired_state["verticalSwitch"] = 0
             case UpAndDownAirSupplyVectorEnum.UPPER_FIX:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"verticalDirection": 10}
-                else:
-                    desired_state = {"verticalSwitch": 0, "verticalDirection": 10}
+                desired_state = {"verticalDirection": 10}
+                if has_swing_switch:
+                    desired_state["verticalSwitch"] = 0
             case UpAndDownAirSupplyVectorEnum.MIDDLE_FIX:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"verticalDirection": 11}
-                else:
-                    desired_state = {"verticalSwitch": 0, "verticalDirection": 11}
+                desired_state = {"verticalDirection": 11}
+                if has_swing_switch:
+                    desired_state["verticalSwitch"] = 0
             case UpAndDownAirSupplyVectorEnum.LOWER_FIX:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"verticalDirection": 12}
-                else:
-                    desired_state = {"verticalSwitch": 0, "verticalDirection": 12}
+                desired_state = {"verticalDirection": 12}
+                if has_swing_switch:
+                    desired_state["verticalSwitch"] = 0
             case UpAndDownAirSupplyVectorEnum.BOTTOM_FIX:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"verticalDirection": 13}
-                else:
-                    desired_state = {"verticalSwitch": 0, "verticalDirection": 13}
+                desired_state = {"verticalDirection": 13}
+                if has_swing_switch:
+                    desired_state["verticalSwitch"] = 0
             case UpAndDownAirSupplyVectorEnum.NOT_SET:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"verticalDirection": 8}
-                else:
-                    desired_state = {"verticalSwitch": 0, "verticalDirection": 8}
+                desired_state = {"verticalDirection": 8}
+                if has_swing_switch:
+                    desired_state["verticalSwitch"] = 0
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
         )
 
     async def SELECT_HORIZONTAL_DIRECTION(self, value: LeftAndRightAirSupplyVectorEnum):
         desired_state = {}
+        supported_features = getSupportedFeatures(self.device.device_type)
+        has_swing_switch = DeviceFeature.INTERNAL_HAS_SWING_SWITCH in supported_features
+
         match value:
             case LeftAndRightAirSupplyVectorEnum.LEFT_AND_RIGHT_SWING:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"horizontalDirection": 1}
-                else:
-                    desired_state = {"horizontalDirection": 1, "horizontalSwitch": 1}
+                desired_state = {"horizontalDirection": 1}
+                if has_swing_switch:
+                    desired_state["horizontalSwitch"] = 1
             case LeftAndRightAirSupplyVectorEnum.LEFT_SWING:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"horizontalDirection": 2}
-                else:
-                    desired_state = {"horizontalDirection": 2, "horizontalSwitch": 1}
+                desired_state = {"horizontalDirection": 2}
+                if has_swing_switch:
+                    desired_state["horizontalSwitch"] = 1
             case LeftAndRightAirSupplyVectorEnum.MIDDLE_SWING:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"horizontalDirection": 3}
-                else:
-                    desired_state = {"horizontalDirection": 3, "horizontalSwitch": 1}
+                desired_state = {"horizontalDirection": 3}
+                if has_swing_switch:
+                    desired_state["horizontalSwitch"] = 1
             case LeftAndRightAirSupplyVectorEnum.RIGHT_SWING:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"horizontalDirection": 4}
-                else:
-                    desired_state = {"horizontalDirection": 4, "horizontalSwitch": 1}
+                desired_state = {"horizontalDirection": 4}
+                if has_swing_switch:
+                    desired_state["horizontalSwitch"] = 1
             case LeftAndRightAirSupplyVectorEnum.LEFT_FIX:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"horizontalDirection": 9}
-                else:
-                    desired_state = {"horizontalDirection": 9, "horizontalSwitch": 0}
+                desired_state = {"horizontalDirection": 9}
+                if has_swing_switch:
+                    desired_state["horizontalSwitch"] = 0
             case LeftAndRightAirSupplyVectorEnum.CENTER_LEFT_FIX:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"horizontalDirection": 10}
-                else:
-                    desired_state = {"horizontalDirection": 10, "horizontalSwitch": 0}
+                desired_state = {"horizontalDirection": 10}
+                if has_swing_switch:
+                    desired_state["horizontalSwitch"] = 0
             case LeftAndRightAirSupplyVectorEnum.MIDDLE_FIX:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"horizontalDirection": 11}
-                else:
-                    desired_state = {"horizontalDirection": 11, "horizontalSwitch": 0}
+                desired_state = {"horizontalDirection": 11}
+                if has_swing_switch:
+                    desired_state["horizontalSwitch"] = 0
             case LeftAndRightAirSupplyVectorEnum.CENTER_RIGHT_FIX:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"horizontalDirection": 12}
-                else:
-                    desired_state = {"horizontalDirection": 12, "horizontalSwitch": 0}
+                desired_state = {"horizontalDirection": 12}
+                if has_swing_switch:
+                    desired_state["horizontalSwitch"] = 0
             case LeftAndRightAirSupplyVectorEnum.RIGHT_FIX:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"horizontalDirection": 13}
-                else:
-                    desired_state = {"horizontalDirection": 13, "horizontalSwitch": 0}
+                desired_state = {"horizontalDirection": 13}
+                if has_swing_switch:
+                    desired_state["horizontalSwitch"] = 0
             case LeftAndRightAirSupplyVectorEnum.NOT_SET:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-                    desired_state = {"horizontalDirection": 8}
-                else:
-                    desired_state = {"horizontalDirection": 8, "horizontalSwitch": 0}
+                desired_state = {"horizontalDirection": 8}
+                if has_swing_switch:
+                    desired_state["horizontalSwitch"] = 0
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
         )
@@ -823,6 +836,7 @@ class SelectHandler(TclEntityBase, SelectEntity):
         await self.iot_handler.call_select_option(option)
         await self.coordinator.async_refresh()
 
+
 class DynamicSelectHandler(SelectHandler, SelectEntity):
     def __init__(
         self,
@@ -857,4 +871,3 @@ class DynamicSelectHandler(SelectHandler, SelectEntity):
     @property
     def available(self) -> bool:
         return self.available_fn(self.device)
-

@@ -67,36 +67,45 @@ class TCL_SplitAC_Type2_DeviceData:
         self.current_temperature = int(
             delta.get("currentTemperature", aws_thing_state["currentTemperature"])
         )
-        # self.work_mode = int(delta.get("workMode", aws_thing_state["workMode"]))
-        # self.high_temperature_wind = int(
-        #     delta.get("highTemperatureWind", aws_thing_state["highTemperatureWind"])
-        # )
+        self.work_mode = int(delta.get("workMode", aws_thing_state["workMode"]))
+        self.high_temperature_wind = int(
+            delta.get("highTemperatureWind", aws_thing_state["highTemperatureWind"])
+        )
         # self.turbo = int(delta.get("turbo", aws_thing_state["turbo"]))
         # self.silence_switch = int(
         #     delta.get("silenceSwitch", aws_thing_state["silenceSwitch"])
         # )
-        # self.wind_speed = int(delta.get("windSpeed", aws_thing_state["windSpeed"]))
 
-        # self.vertical_switch = int(
-        #     delta.get("verticalSwitch", aws_thing_state["verticalSwitch"])
-        # )
-        # self.vertical_direction = int(
-        #     delta.get("verticalDirection", aws_thing_state["verticalDirection"])
-        # )
+        self.wind_speed_auto_switch = int(
+            delta.get("windSpeedAutoSwitch", aws_thing_state["windSpeedAutoSwitch"])
+        )
 
-        # self.horizontal_switch = int(
-        #     delta.get("horizontalSwitch", aws_thing_state["horizontalSwitch"])
-        # )
-        # self.horizontal_direction = int(
-        #     delta.get("horizontalDirection", aws_thing_state["horizontalDirection"])
-        # )
+        self.wind_speed_7_gear = int(
+            delta.get("windSpeed7Gear", aws_thing_state["windSpeed7Gear"])
+        )
 
-        # self.sleep = int(delta.get("sleep", aws_thing_state["sleep"]))
-        # self.eco = int(delta.get("ECO", aws_thing_state["ECO"]))
-        # self.healthy = int(delta.get("healthy", aws_thing_state["healthy"]))
-        # self.anti_moldew = int(delta.get("antiMoldew", aws_thing_state["antiMoldew"]))
-        # self.self_clean = int(delta.get("selfClean", aws_thing_state["selfClean"]))
-        # self.screen = int(delta.get("screen", aws_thing_state["screen"]))
+        self.vertical_direction = int(
+            delta.get("verticalDirection", aws_thing_state["verticalDirection"])
+        )
+        self.horizontal_direction = int(
+            delta.get("horizontalDirection", aws_thing_state["horizontalDirection"])
+        )
+
+        self.sleep = int(delta.get("sleep", aws_thing_state["sleep"]))
+        self.soft_wind = int(delta.get("softWind", aws_thing_state["softWind"]))
+        self.ai_eco = int(delta.get("AIECOSwitch", aws_thing_state["AIECOSwitch"]))
+        self.healthy = int(delta.get("healthy", aws_thing_state["healthy"]))
+        self.anti_moldew = int(delta.get("antiMoldew", aws_thing_state["antiMoldew"]))
+        self.self_clean = int(delta.get("selfClean", aws_thing_state["selfClean"]))
+        self.screen = int(delta.get("screen", aws_thing_state["screen"]))
+        self.eight_add_hot = int(
+            delta.get("eightAddHot", aws_thing_state["eightAddHot"])
+        )
+        self.external_unit_temperature = int(
+            delta.get(
+                "externalUnitTemperature", aws_thing_state["externalUnitTemperature"]
+            )
+        )
         self.device_id = device_id
 
     device_id: str
@@ -104,20 +113,19 @@ class TCL_SplitAC_Type2_DeviceData:
     beep_switch: int | bool
     target_temperature: int
     current_temperature: int
-    # high_temperature_wind: int
-    # turbo: int
-    # silence_switch: int
-    # wind_speed: int
-    # vertical_switch: int
-    # vertical_direction: int
-    # horizontal_switch: int
-    # horizontal_direction: int
-    # sleep: int
-    # healthy: int
-    # eco: int
-    # anti_moldew: int
-    # self_clean: int
-    # screen: int
+    high_temperature_wind: int
+    wind_speed: int
+    vertical_direction: int
+    horizontal_direction: int
+    sleep: int
+    healthy: int
+    ai_eco: int
+    anti_moldew: int
+    self_clean: int
+    screen: int
+    eight_add_hot: int
+    soft_wind: int
+    external_unit_temperature: int
 
 
 async def get_stored_spit_ac_type2_data(
@@ -136,7 +144,7 @@ async def get_stored_spit_ac_type2_data(
         stored_data["non_user_config"]["min_celsius_temp"] = 16
         need_save = True
     if stored_data["non_user_config"].get("max_celsius_temp") is None:
-        stored_data["non_user_config"]["max_celsius_temp"] = 36
+        stored_data["non_user_config"]["max_celsius_temp"] = 31
         need_save = True
     if stored_data["non_user_config"].get("native_temp_step") is None:
         stored_data["non_user_config"]["native_temp_step"] = 1
@@ -303,62 +311,7 @@ Mode to cool:
 Set temperature by mode when change mode
 Set Fan speed by mode when change mode
 
-FAN seepd:
-1: {"state":{"desired":{"windSpeedAutoSwitch":0,"windSpeed7Gear":1}},"clientToken":"mobile_1753013593742"}
-6: {"state":{"desired":{"windSpeedAutoSwitch":0,"windSpeed7Gear":6}},"clientToken":"mobile_1753013639226"}
-7: {"state":{"desired":{"windSpeedAutoSwitch":0,"softWind":0,"windSpeed7Gear":7}},"clientToken":"mobile_1753013650563"}
 
 
-Airflow direction:
-left and right swing:
-{"state":{"desired":{"horizontalDirection":2}},"clientToken":"mobile_1753013672235"}
-
-upper fix:
-{"state":{"desired":{"verticalDirection":10}},"clientToken":"mobile_1753013715203"}
-
-beep switch:
-{"state":{"desired":{"beepSwitch":0}},"clientToken":"mobile_1753013332621"}
-
-
-soft wind:
-on:{"state":{"desired":{"softWind":1}},"clientToken":"mobile_1753013757741"}
-off:{"state":{"desired":{"softWind":0}},"clientToken":"mobile_1753013888307"}
-
-AI ECO:
-on: {"state":{"desired":{"eightAddHot":0,"targetTemperature":26,"AIECOSwitch":1}},"clientToken":"mobile_1753013783602"}
-on: {"state":{"desired":{"eightAddHot":0,"AIECOSwitch":1}},"clientToken":"mobile_1753013939736"}
-off:{"state":{"desired":{"eightAddHot":0,"AIECOSwitch":0}},"clientToken":"mobile_1753014006572"}
-
-Sleep elder:
-{"state":{"desired":{"sleep":2}},"clientToken":"mobile_1753013811820"}
-
-
-GEN mode:
-L1: {"state":{"desired":{"generatorMode":1}},"clientToken":"mobile_1753014090761"}
-L2: {"state":{"desired":{"generatorMode":2}},"clientToken":"mobile_1753014090761"}
-L3: {"state":{"desired":{"generatorMode":3}},"clientToken":"mobile_1753014090761"}
-
-Healthy:
-{"state":{"desired":{"healthy":1}},"clientToken":"mobile_1753014177202"}
-{"state":{"desired":{"healthy":0}},"clientToken":"mobile_1753014200934"}
-
-drying:
-{"state":{"desired":{"antiMoldew":1}},"clientToken":"mobile_1753014211729"}
-{"state":{"desired":{"antiMoldew":0}},"clientToken":"mobile_1753014213517"}
-
-8C heating:
-{"state":{"desired":{"eightAddHot":0}},"clientToken":"mobile_1753014310543"}
-{"state":{"desired":{"eightAddHot":1}},"clientToken":"mobile_1753014312826"}
-
-
-8C heating:
-teamperature disabled
-soft wind disabled
-mildewproof disabled
-
-
-
-Mode Heat/ Fan / Auto:
-Mildewproof disabled
 
 """

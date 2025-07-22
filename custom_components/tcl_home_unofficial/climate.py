@@ -58,19 +58,22 @@ def SWITCH_POWER_fn(
 
 
 def get_fan_seepd_feature(device: Device) -> str:
-    if device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+    supported_features = getSupportedFeatures(device.device_type)
+    if DeviceFeature.SELECT_WIND_SPEED_7_GEAR in supported_features:
         return DeviceFeature.SELECT_WIND_SPEED_7_GEAR
     return DeviceFeature.SELECT_WIND_SPEED
 
 
 def get_current_fan_speed_fn(device: Device) -> str:
-    if device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+    supported_features = getSupportedFeatures(device.device_type)
+    if DeviceFeature.SELECT_WIND_SPEED_7_GEAR in supported_features:
         return TCL_SplitAC_Fresh_Air_DeviceData_Helper(device.data).getWindSeed7Gear()
     return TCL_SplitAC_Type1_DeviceData_Helper(device.data).getWindSpeed()
 
 
 def get_options_fan_speed(device: Device) -> list[str]:
-    if device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+    supported_features = getSupportedFeatures(device.device_type)
+    if DeviceFeature.SELECT_WIND_SPEED_7_GEAR in supported_features:
         return [e.value for e in WindSeed7GearEnum]
     return [e.value for e in WindSeedEnum]
 
