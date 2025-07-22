@@ -1,7 +1,7 @@
 """."""
 
 from homeassistant.core import HomeAssistant
-from .device_data_storage import get_stored_data, set_stored_data
+from .device_data_storage import get_stored_data, set_stored_data, safe_set_value
 from dataclasses import dataclass
 from enum import StrEnum
 
@@ -28,8 +28,12 @@ class WindSeedEnum(StrEnum):
     AUTO = "Auto"
 
 
+def get_SplitAC_Type1_capabilities():
+    return [3, 7, 8, 9, 11, 12, 13, 21]
+
+
 @dataclass
-class TCL_SplitAC_DeviceData:
+class TCL_SplitAC_Type1_DeviceData:
     def __init__(self, device_id: str, aws_thing_state: dict, delta: dict) -> None:
         self.beep_switch = int(delta.get("beepSwitch", aws_thing_state["beepSwitch"]))
         self.power_switch = int(
@@ -65,6 +69,9 @@ class TCL_SplitAC_DeviceData:
             delta.get("horizontalDirection", aws_thing_state["horizontalDirection"])
         )
 
+        self.eight_add_hot = int(
+            delta.get("eightAddHot", aws_thing_state["eightAddHot"])
+        )
         self.sleep = int(delta.get("sleep", aws_thing_state["sleep"]))
         self.eco = int(delta.get("ECO", aws_thing_state["ECO"]))
         self.healthy = int(delta.get("healthy", aws_thing_state["healthy"]))
@@ -91,27 +98,46 @@ class TCL_SplitAC_DeviceData:
     eco: int
     anti_moldew: int
     self_clean: int
+    eight_add_hot: int
     screen: int
 
-async def get_stored_spit_ac_data(
+
+async def get_stored_spit_ac_type1_data(
     hass: HomeAssistant, device_id: str
 ) -> dict[str, any]:
+    need_save = False
     stored_data = await get_stored_data(hass, device_id)
     if stored_data is None:
-        stored_data = {
-            "target_temperature": {
-                "Cool": 24,
-                "Heat": 26,
-                "Dehumidification": 24,
-                "Fan": 24,
-                "Auto": 24,
-            }
-        }
+        stored_data = {}
+        need_save = True
+
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.min_celsius_temp", 16)
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.max_celsius_temp", 36)
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.native_temp_step", 1.0)
+
+    stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.memorize_temp_by_mode", False)
+    stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.memorize_fan_speed_by_mode", False)
+    stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.silent_beep_when_turn_on", False)
+
+    stored_data, need_save = safe_set_value(stored_data, "target_temperature.Cool.value", 24)
+    stored_data, need_save = safe_set_value(stored_data, "target_temperature.Heat.value", 36)
+    stored_data, need_save = safe_set_value(stored_data, "target_temperature.Dehumidification.value", 24)
+    stored_data, need_save = safe_set_value(stored_data, "target_temperature.Fan.value", 24)
+    stored_data, need_save = safe_set_value(stored_data, "target_temperature.Auto.value", 24)
+    
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Cool.value", WindSeedEnum.AUTO)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Heat.value", WindSeedEnum.AUTO)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Dehumidification.value", WindSeedEnum.AUTO)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Fan.value", WindSeedEnum.AUTO)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Auto.value", WindSeedEnum.AUTO)
+
+    if need_save:
         await set_stored_data(hass, device_id, stored_data)
     return stored_data
 
-class TCL_SplitAC_DeviceData_Helper:
-    def __init__(self, data: TCL_SplitAC_DeviceData) -> None:
+
+class TCL_SplitAC_Type1_DeviceData_Helper:
+    def __init__(self, data: TCL_SplitAC_Type1_DeviceData) -> None:
         self.data = data
 
     def getMode(self) -> ModeEnum:

@@ -1,7 +1,7 @@
 """."""
 
 from homeassistant.core import HomeAssistant
-from .device_data_storage import get_stored_data, set_stored_data
+from .device_data_storage import get_stored_data, set_stored_data, safe_set_value
 from dataclasses import dataclass
 from enum import StrEnum
 
@@ -14,18 +14,11 @@ from .device_ac_common import (
     getMode,
     SleepModeEnum,
     getSleepMode,
+    WindSeed7GearEnum,
 )
 
 
-class WindSeed7GearEnum(StrEnum):
-    TURBO = "Turbo"
-    AUTO = "Auto"
-    SPEED_1 = "1"
-    SPEED_2 = "2"
-    SPEED_3 = "3"
-    SPEED_4 = "4"
-    SPEED_5 = "5"
-    SPEED_6 = "6"
+
 
 
 class FreshAirEnum(StrEnum):
@@ -159,17 +152,33 @@ class TCL_SplitAC_Fresh_Air_DeviceData:
 async def get_stored_spit_ac_fresh_data(
     hass: HomeAssistant, device_id: str
 ) -> dict[str, any]:
+    need_save = False
     stored_data = await get_stored_data(hass, device_id)
     if stored_data is None:
-        stored_data = {
-            "target_temperature": {
-                "Cool": 24,
-                "Heat": 26,
-                "Dehumidification": 24,
-                "Fan": 24,
-                "Auto": 24,
-            }
-        }
+        stored_data = {}
+        need_save = True
+
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.min_celsius_temp", 16)
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.max_celsius_temp", 31)
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.native_temp_step", 0.5)
+
+    stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.memorize_temp_by_mode", True)
+    stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.memorize_fan_speed_by_mode", True)
+    stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.silent_beep_when_turn_on", False)
+
+    stored_data, need_save = safe_set_value(stored_data, "target_temperature.Cool.value", 24)
+    stored_data, need_save = safe_set_value(stored_data, "target_temperature.Heat.value", 36)
+    stored_data, need_save = safe_set_value(stored_data, "target_temperature.Dehumidification.value", 24)
+    stored_data, need_save = safe_set_value(stored_data, "target_temperature.Fan.value", 24)
+    stored_data, need_save = safe_set_value(stored_data, "target_temperature.Auto.value", 24)
+    
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Cool.value", WindSeed7GearEnum.AUTO)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Heat.value", WindSeed7GearEnum.AUTO)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Dehumidification.value", WindSeed7GearEnum.AUTO)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Fan.value", WindSeed7GearEnum.AUTO)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Auto.value", WindSeed7GearEnum.AUTO)
+
+    if need_save:
         await set_stored_data(hass, device_id, stored_data)
     return stored_data
 
@@ -180,27 +189,6 @@ class TCL_SplitAC_Fresh_Air_DeviceData_Helper:
 
     def getMode(self) -> ModeEnum:
         return getMode(self.data.work_mode)
-
-    def getWindSeed7Gear(self) -> WindSeed7GearEnum:
-        match self.data.wind_speed_7_gear:
-            case 1:
-                return WindSeed7GearEnum.SPEED_1
-            case 2:
-                return WindSeed7GearEnum.SPEED_2
-            case 3:
-                return WindSeed7GearEnum.SPEED_3
-            case 4:
-                return WindSeed7GearEnum.SPEED_4
-            case 5:
-                return WindSeed7GearEnum.SPEED_5
-            case 6:
-                return WindSeed7GearEnum.SPEED_6
-            case 7:
-                return WindSeed7GearEnum.TURBO
-            case 0:
-                return WindSeed7GearEnum.AUTO
-            case _:
-                return WindSeed7GearEnum.AUTO
 
     def getUpAndDownAirSupplyVector(self) -> UpAndDownAirSupplyVectorEnum:
         return getUpAndDownAirSupplyVector(self.data.vertical_direction)

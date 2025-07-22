@@ -16,7 +16,7 @@ from .config_entry import (
     sanitizeConfigData,
 )
 from .coordinator import IotDeviceCoordinator
-from .device import Device, is_implemented_by_integration, init_device_storage
+from .device import Device, is_implemented_by_integration, get_device_storage
 
 _PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
@@ -73,16 +73,16 @@ async def async_setup_entry(
 
         device = Device(
             device_id=thing.device_id,
-            device_type=thing.device_name,
+            device_type_str=thing.device_name,
+            device_type=None,
             name=thing.nick_name,
             firmware_version=thing.firmware_version,
             aws_thing=aws_thing,
         )
-
-        if is_implemented:
+        if device.device_type is not None:
             if configData.verbose_setup_logging:
                 _LOGGER.info("Setup.async_setup_entry found device:%s", device)
-            await init_device_storage(hass, device)
+            device.storage = await get_device_storage(hass, device)
             config_entry.devices.append(device)
         else:
             config_entry.non_implemented_devices.append(device)

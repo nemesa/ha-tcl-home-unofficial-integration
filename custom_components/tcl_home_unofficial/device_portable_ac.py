@@ -1,7 +1,7 @@
 """."""
 
 from homeassistant.core import HomeAssistant
-from .device_data_storage import get_stored_data, set_stored_data
+from .device_data_storage import get_stored_data, set_stored_data, safe_set_value
 
 from dataclasses import dataclass
 from enum import StrEnum
@@ -37,6 +37,9 @@ class TCL_PortableAC_DeviceData:
                 "targetFahrenheitDegree", aws_thing_state["targetFahrenheitDegree"]
             )
         )
+        self.target_temperature = int(
+            delta.get("targetCelsiusDegree", aws_thing_state["targetCelsiusDegree"])
+        )
         self.target_celsius_degree = int(
             delta.get("targetCelsiusDegree", aws_thing_state["targetCelsiusDegree"])
         )
@@ -54,28 +57,32 @@ class TCL_PortableAC_DeviceData:
     temperature_type: int | bool
     sleep: int | bool
 
+    target_temperature: int | bool
+
 
 async def get_stored_portable_ac_data(
     hass: HomeAssistant, device_id: str
 ) -> dict[str, any]:
-    stored_data = await get_stored_data(hass, device_id)
     need_save = False
+    stored_data = await get_stored_data(hass, device_id)
     if stored_data is None:
-        stored_data = {
-            "target_temperature": {
-                "Cool": {"targetCelsiusDegree": 22, "targetFahrenheitDegree": 72},
-            }
-        }
+        stored_data = {}
         need_save = True
-    else:
-        if stored_data["target_temperature"]["Cool"] in None and stored_data["target_temperature"]["targetCelsiusDegree"] is not None:
-            stored_data["target_temperature"]["Cool"] = {
-                "targetCelsiusDegree": stored_data["target_temperature"]["targetCelsiusDegree"],
-                "targetFahrenheitDegree": stored_data["target_temperature"]["targetFahrenheitDegree"],
-            }
-            stored_data["target_temperature"]["targetCelsiusDegree"]=None
-            stored_data["target_temperature"]["targetFahrenheitDegree"]=None
-            need_save = True
+
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.min_celsius_temp", 18)
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.max_celsius_temp", 32)
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.native_temp_step", 1)
+
+    stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.memorize_temp_by_mode", False)
+    stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.memorize_fan_speed_by_mode", False)
+    stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.silent_beep_when_turn_on", False)
+
+    stored_data, need_save = safe_set_value(stored_data, "target_temperature.Cool.value", 22)
+    
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Cool.value", PortableWindSeedEnum.AUTO)    
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Dehumidification.value", PortableWindSeedEnum.AUTO)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Fan.value", PortableWindSeedEnum.AUTO)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Auto.value", PortableWindSeedEnum.AUTO)
     if need_save:
         await set_stored_data(hass, device_id, stored_data)
     return stored_data

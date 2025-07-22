@@ -1,0 +1,79 @@
+{
+  capabilities: [3,  7,  8,  9, 11, 12, 13, 21],
+  acType: 1,
+  beepSwitch: 0,
+  screen: 1,
+  constantTemp: 26,
+  workMode: 1,
+  windSpeed: 0,
+  targetTemperature: 22,
+  horizontalSwitch: 0,
+  horizontalDirection: 8,
+  verticalSwitch: 0,
+  verticalDirection: 8,
+  powerSwitch: 0,
+  currentTemperature: 26,
+  ECO: 0,
+  turbo: 0,
+  PTC: 0,
+  '3DAirSurply': 0,
+  antiMoldew: 0,
+  healthy: 0,
+  selfLearn: 0,
+  infrDirect: 0,
+  temperatureType: 0,
+  sleep: 0,
+  eightAddHot: 0,
+  highTemperatureWind: 0,
+  feelTheWind: 0,
+  LRWideAngleFreeze: 0,
+  advancedECOMode: 0,
+  silenceSwitch: 0,
+  errorCode: [],
+  generatorMode: 0,
+  horizontalWind: 0,
+  verticalWind: 0,
+  lightSense: 0,
+  filterBlockStatus: 0,
+  filterBlockSwitch: 0,
+  selfClean: 0,
+  softWind: 0,
+  targetElectric: 0,
+  rightHorizontalDirection: 9,
+  rightHorizontalSwitch: 0,
+  rightWindSpeed: 0,
+  temperatureHumidityControlling: 0,
+  constTemperatureDehumidification: 0,
+  aiFunction: 0,
+  rightTurbo: 0,
+  rightSilenceSwitch: 0,
+  infrPower: 0,
+  twoTemperature: 0,
+  polarityFreeze: 0,
+  surroundWind: 0,
+  twoTemperatureSkew: 0,
+  otaStatus: 1,
+  leftWindSpeed: 0,
+  authFlag: { alice: true, google: true }
+}
+
+--------------------
+
+
+dehum mode:
+  NO 
+    Wind speed
+    eco
+    sleep  
+
+Fan mode:
+  NO 
+    anti mold
+    eco
+    sleep  
+
+Auto mode:
+  NO 
+    anti mold
+    eco
+    sleep  

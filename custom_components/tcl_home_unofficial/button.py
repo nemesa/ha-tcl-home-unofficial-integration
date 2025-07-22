@@ -16,6 +16,38 @@ from .tcl_entity_base import TclEntityBase
 _LOGGER = logging.getLogger(__name__)
 
 
+class DesiredStateHandlerForButton:
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        coordinator: IotDeviceCoordinator,
+        deviceFeature: DeviceFeature,
+        device: Device,
+    ) -> None:
+        self.hass = hass
+        self.coordinator = coordinator
+        self.deviceFeature = deviceFeature
+        self.device = device
+
+    def refreshDevice(self, device: Device):
+        self.device = device
+
+    async def call_button(self, value: int) -> str:
+        match self.deviceFeature:
+            case DeviceFeature.BUTTON_SELF_CLEAN:
+                return await self.BUTTON_SELF_CLEAN(value=value)
+
+    async def BUTTON_SELF_CLEAN(self, value: int):
+        desired_state = {}
+        if value == 1:
+            desired_state = {"powerSwitch": 0, "selfClean": 1}
+        else:
+            desired_state = {"selfClean": 0}
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: New_NameConfigEntry,
@@ -29,26 +61,59 @@ async def async_setup_entry(
         supported_features = getSupportedFeatures(device.device_type)
 
         buttons.append(Reload_Button(coordinator, device))
+
         if DeviceFeature.BUTTON_SELF_CLEAN in supported_features:
-            buttons.append(SelfCleanButton(coordinator, device))
+            buttons.append(
+                ButtonHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    type="SelfCleanButton",
+                    name="Evaporator Clean",
+                    name_fn=lambda device: "Stop Evaporator Cleaning"
+                    if device.data.self_clean == 1
+                    else "Start Evaporator Cleaning",
+                    deviceFeature=DeviceFeature.BUTTON_SELF_CLEAN,
+                    icon_fn=lambda device: "mdi:cancel"
+                    if device.data.self_clean == 1
+                    else "mdi:broom",
+                    value_fn=lambda device: device.data.self_clean,
+                )
+            )
 
     async_add_entities(buttons)
 
 
-class SelfCleanButton(TclEntityBase, ButtonEntity):
-    def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(
-            self, coordinator, "SelfCleanButton", "Evaporator Clean", device
+class ButtonHandler(TclEntityBase, ButtonEntity):
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        coordinator: IotDeviceCoordinator,
+        device: Device,
+        type: str,
+        name: str,
+        deviceFeature: DeviceFeature,
+        icon_fn: lambda device: str,
+        name_fn: lambda device: str,
+        value_fn: lambda device: int,
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, type, name, device)
+        self.name_fn = name_fn
+        self.icon_fn = icon_fn
+        self.value_fn = value_fn
+        self.iot_handler = DesiredStateHandlerForButton(
+            hass=hass,
+            coordinator=coordinator,
+            deviceFeature=deviceFeature,
+            device=self.device,
         )
-
-        self.aws_iot = coordinator.get_aws_iot()
 
     @property
     def name(self) -> str:
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        if self.device.data.self_clean == 1:
-            return "Stop Evaporator Cleaning"
-        return "Start Evaporator Cleaning"
+        self.iot_handler.refreshDevice(self.device)
+
+        return self.name_fn(self.device)
 
     @property
     def device_class(self) -> str:
@@ -57,20 +122,18 @@ class SelfCleanButton(TclEntityBase, ButtonEntity):
     @property
     def icon(self):
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        if self.device.data.self_clean == 1:
-            return "mdi:cancel"
-        return "mdi:broom"
+        self.iot_handler.refreshDevice(self.device)
+
+        return self.icon_fn(self.device)
 
     async def async_press(self) -> None:
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        if self.device.data.self_clean == 1:
-            await self.aws_iot.async_set_self_clean(
-                self.device.device_id, self.device.device_type, 0
-            )
+        self.iot_handler.refreshDevice(self.device)
+
+        if self.value_fn(self.device) == 1:
+            await self.iot_handler.call_button(0)
         else:
-            await self.aws_iot.async_set_self_clean(
-                self.device.device_id, self.device.device_type, 1
-            )
+            await self.iot_handler.call_button(1)
         await self.coordinator.async_refresh()
 
 
