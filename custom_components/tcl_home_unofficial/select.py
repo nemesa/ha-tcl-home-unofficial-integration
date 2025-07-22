@@ -694,6 +694,17 @@ def get_portable_ac_wind_speed_options(device: Device) -> list[str] | None:
     return [e.value for e in PortableWindSeedEnum]
 
 
+def get_SELECT_SLEEP_MODE_available_fn(device: Device) -> str:
+    mode = getMode(device.data.work_mode)
+    if (
+        mode == ModeEnum.DEHUMIDIFICATION
+        or mode == ModeEnum.FAN
+        or mode == ModeEnum.AUTO
+    ):
+        return False
+    return True
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: New_NameConfigEntry,
@@ -721,7 +732,7 @@ async def async_setup_entry(
 
         if DeviceFeature.SELECT_WIND_SPEED in supported_features:
             switches.append(
-                SelectHandler(
+                DynamicSelectHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
@@ -729,6 +740,9 @@ async def async_setup_entry(
                     type="WindSpeed",
                     name="Wind Speed",
                     icon_fn=lambda device: "mdi:weather-windy",
+                    options_values_fn=lambda device: [e.value for e in WindSeedEnum],
+                    available_fn=lambda device: getMode(device.data.work_mode)
+                    != ModeEnum.DEHUMIDIFICATION,
                 )
             )
 
@@ -829,7 +843,7 @@ async def async_setup_entry(
 
         if DeviceFeature.SELECT_SLEEP_MODE in supported_features:
             switches.append(
-                SelectHandler(
+                DynamicSelectHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
@@ -837,6 +851,10 @@ async def async_setup_entry(
                     type="SleepMode",
                     name="Sleep Mode",
                     icon_fn=lambda device: "mdi:sleep",
+                    options_values_fn=lambda device: [e.value for e in SleepModeEnum],
+                    available_fn=lambda device: get_SELECT_SLEEP_MODE_available_fn(
+                        device
+                    ),
                 )
             )
 

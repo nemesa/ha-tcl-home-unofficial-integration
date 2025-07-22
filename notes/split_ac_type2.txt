@@ -131,3 +131,28 @@ mildewproof disabled
 
 Mode Heat/ Fan / Auto:
 Mildewproof disabled
+
+--------------------
+Fan mode:
+  NO 
+    soft wind
+    ai echo
+    sleep
+HEAT mode:
+  NO 
+    soft wind
+    anti molding
+
+dehum mode:
+  NO 
+    soft wind
+    ai echo
+    sleep    
+
+
+auto mode:
+  NO 
+    soft wind
+    ai echo
+    sleep  
+    anti molding  

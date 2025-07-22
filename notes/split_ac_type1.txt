@@ -56,3 +56,24 @@
   leftWindSpeed: 0,
   authFlag: { alice: true, google: true }
 }
+
+--------------------
+
+
+dehum mode:
+  NO 
+    Wind speed
+    eco
+    sleep  
+
+Fan mode:
+  NO 
+    anti mold
+    eco
+    sleep  
+
+Auto mode:
+  NO 
+    anti mold
+    eco
+    sleep  

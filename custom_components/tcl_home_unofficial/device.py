@@ -134,7 +134,6 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
                 DeviceFeature.SELECT_WIND_SPEED_7_GEAR,
                 DeviceFeature.SELECT_VERTICAL_DIRECTION,
                 DeviceFeature.SELECT_HORIZONTAL_DIRECTION,
-                DeviceFeature.SELECT_WIND_FEELING,
                 DeviceFeature.SELECT_SLEEP_MODE,
                 DeviceFeature.NUMBER_TARGET_TEMPERATURE,
                 DeviceFeature.SELECT_GENERATOR_MODE,

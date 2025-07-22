@@ -88,6 +88,9 @@ class DesiredStateHandlerForSwitch:
                         return False
                 return True
             case DeviceFeature.SWITCH_SOFT_WIND:
+                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_2:
+                    if mode != ModeEnum.COOL:
+                        return False
                 if DeviceFeature.SWITCH_8_C_HEATING in supported_features:
                     if self.device.data.eight_add_hot == 1:
                         return False
@@ -99,6 +102,24 @@ class DesiredStateHandlerForSwitch:
                     return False
             case DeviceFeature.SWITCH_SLEEP:
                 if mode == ModeEnum.FAN:
+                    return False
+                else:
+                    return True
+            case DeviceFeature.SWITCH_ECO:
+                if (
+                    mode == ModeEnum.FAN
+                    or mode == ModeEnum.DEHUMIDIFICATION
+                    or mode == ModeEnum.AUTO
+                ):
+                    return False
+                else:
+                    return True
+            case DeviceFeature.SWITCH_AI_ECO:
+                if (
+                    mode == ModeEnum.FAN
+                    or mode == ModeEnum.DEHUMIDIFICATION
+                    or mode == ModeEnum.AUTO
+                ):
                     return False
                 else:
                     return True
@@ -239,7 +260,7 @@ async def async_setup_entry(
 
         if DeviceFeature.SWITCH_ECO in supported_features:
             switches.append(
-                SwitchHandler(
+                DynamicSwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
@@ -255,7 +276,7 @@ async def async_setup_entry(
 
         if DeviceFeature.SWITCH_AI_ECO in supported_features:
             switches.append(
-                SwitchHandler(
+                DynamicSwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
