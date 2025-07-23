@@ -8,10 +8,10 @@
   "aiFunction": 0,
   "antiMoldew": 0,
   "beepSwitch": 1,
-  "capabilities": [3,5,7,8,9,11,12,13,21,23],
+  "capabilities": [5,7,8,9,11,12,13,23,28],
   "constTemperatureDehumidification": 0,
   "constantTemp": 26,
-  "currentTemperature": 30,
+  "currentTemperature": 25,
   "eightAddHot": 0,
   "errorCode": [],
   "feelTheWind": 0,
@@ -20,17 +20,16 @@
   "generatorMode": 0,
   "healthy": 0,
   "highTemperatureWind": 0,
-  "horizontalDirection": 1,
-  "horizontalSwitch": 1,
+  "horizontalDirection": 8,
+  "horizontalSwitch": 0,
   "horizontalWind": 0,
   "infrDirect": 0,
   "infrPower": 0,
   "lightSense": 0,
-  
   "polarityFreeze": 0,
-  "powerSwitch": 0,
-  "rightHorizontalDirection": 13,
-  "rightHorizontalSwitch": 0,
+  "powerSwitch": 1,
+  "rightHorizontalDirection": 3,
+  "rightHorizontalSwitch": 1,
   "rightSilenceSwitch": 0,
   "rightTurbo": 0,
   "rightWindSpeed": 0,
@@ -42,7 +41,7 @@
   "softWind": 0,
   "surroundWind": 0,
   "targetElectric": 0,
-  "targetTemperature": 25,
+  "targetTemperature": 22,
   "temperatureHumidityControlling": 0,
   "temperatureType": 0,
   "turbo": 0,
@@ -54,6 +53,3 @@
   "windSpeed": 0,
   "workMode": 1
 }
-
-
-no generatorMode compared to type1
