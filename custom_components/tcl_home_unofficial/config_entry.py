@@ -26,8 +26,6 @@ class ConfigData:
     verbose_device_logging: bool
     verbose_session_logging: bool
     verbose_setup_logging: bool
-    behavior_keep_target_temperature_at_cliet_mode_change: bool
-    behavior_mute_beep_on_power_on: bool
 
 
 @dataclass
@@ -55,12 +53,6 @@ def buildConfigData(data: dict, fallback: dict = {}):
         verbose_setup_logging=data.get(
             "verbose_setup_logging", fallback["verbose_setup_logging"]
         ),
-        behavior_keep_target_temperature_at_cliet_mode_change=data.get(
-            "behavior_keep_target_temperature_at_cliet_mode_change", fallback["behavior_keep_target_temperature_at_cliet_mode_change"]
-        ),
-        behavior_mute_beep_on_power_on=data.get(
-            "behavior_mute_beep_on_power_on", fallback["behavior_mute_beep_on_power_on"]
-        ),
     )
     return config
 
@@ -75,8 +67,6 @@ def sanitizeConfigData(config: ConfigData) -> None:
         verbose_device_logging=config.verbose_device_logging,
         verbose_session_logging=config.verbose_session_logging,
         verbose_setup_logging=config.verbose_setup_logging,
-        behavior_keep_target_temperature_at_cliet_mode_change=config.behavior_keep_target_temperature_at_cliet_mode_change,
-        behavior_mute_beep_on_power_on=config.behavior_mute_beep_on_power_on,
     )
 
 

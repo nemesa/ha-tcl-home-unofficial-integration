@@ -27,14 +27,6 @@
           "verbose_session_logging": "Session management logs, access tokens, etc.",
           "verbose_setup_logging": "Setup related logs, configuration flow inital found devices, etc."
         }
-      },
-      "settings_of_behavior": {
-        "title": "Behavior settings",
-        "description": "Change default TCL Home app behaviors. (You can change this settings later in the options of the integration.)",
-        "data": {
-          "behavior_keep_target_temperature_at_cliet_mode_change": "Keep the current target temperature when change the mode from the Climate controll",
-          "behavior_mute_beep_on_power_on": "Auto turn off the beep mode when the device is powered on so it's always silent"
-        }
       }
     },
     "error": {
@@ -76,14 +68,6 @@
           "verbose_device_logging": "Device related logs, raw jsons of device states changes, ect.",
           "verbose_session_logging": "Session management logs, access tokens, etc.",
           "verbose_setup_logging": "Setup related logs, configuration flow inital found devices, etc."
-        }
-      },
-      "option_page_behaviors": {
-        "title": "Behaviors settings",
-        "description": "Change default TCL Home app behaviors.",
-        "data": {
-          "behavior_keep_target_temperature_at_cliet_mode_change": "Keep the current target temperature when change the mode from the Climate controll",
-          "behavior_mute_beep_on_power_on": "Auto turn off the beep mode when the device is powered on so it's always silent"
         }
       }
     }

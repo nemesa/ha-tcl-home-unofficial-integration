@@ -13,7 +13,7 @@ from .device_ac_common import (
 
 
 class PortableWindSeedEnum(StrEnum):
-    HEIGH = "Heigh"
+    HIGH = "High"
     LOW = "Low"
     AUTO = "Auto"
 
@@ -98,7 +98,7 @@ class TCL_PortableAC_DeviceData_Helper:
     def getWindSpeed(self) -> PortableWindSeedEnum:
         match self.data.wind_speed:
             case 2:
-                return PortableWindSeedEnum.HEIGH
+                return PortableWindSeedEnum.HIGH
             case 1:
                 return PortableWindSeedEnum.LOW
             case 0:

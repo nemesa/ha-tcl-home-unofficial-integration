@@ -19,8 +19,8 @@ from .device_ac_common import (
 
 class WindSeedEnum(StrEnum):
     STRONG = "Strong"
-    HEIGH = "Heigh"
-    MID_HEIGH = "Mid-heigh"
+    HIGH = "High"
+    MID_HIGH = "Mid-high"
     MID_LOW = "Mid-low"
     MEDIUM = "Medium"
     LOW = "Low"
@@ -147,10 +147,10 @@ class TCL_SplitAC_Type1_DeviceData_Helper:
         match self.data.wind_speed:
             case 6:
                 return (
-                    WindSeedEnum.STRONG if self.data.turbo == 1 else WindSeedEnum.HEIGH
+                    WindSeedEnum.STRONG if self.data.turbo == 1 else WindSeedEnum.HIGH
                 )
             case 5:
-                return WindSeedEnum.MID_HEIGH
+                return WindSeedEnum.MID_HIGH
             case 4:
                 return WindSeedEnum.MEDIUM
             case 3:

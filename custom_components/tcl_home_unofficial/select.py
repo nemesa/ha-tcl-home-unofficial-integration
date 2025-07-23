@@ -391,14 +391,14 @@ class DesiredStateHandlerForSelect:
                     "silenceSwitch": 0,
                     "windSpeed": 6,
                 }
-            case WindSeedEnum.HEIGH:
+            case WindSeedEnum.HIGH:
                 desired_state = {
                     "highTemperatureWind": 0,
                     "turbo": 0,
                     "silenceSwitch": 0,
                     "windSpeed": 6,
                 }
-            case WindSeedEnum.MID_HEIGH:
+            case WindSeedEnum.MID_HIGH:
                 desired_state = {
                     "highTemperatureWind": 0,
                     "turbo": 0,
@@ -498,7 +498,7 @@ class DesiredStateHandlerForSelect:
                 desired_state = {"windSpeed": 0}
             case PortableWindSeedEnum.LOW:
                 desired_state = {"windSpeed": 1}
-            case PortableWindSeedEnum.HEIGH:
+            case PortableWindSeedEnum.HIGH:
                 desired_state = {"windSpeed": 2}
         return desired_state
 
@@ -689,7 +689,7 @@ def get_portable_ac_wind_speed_options(device: Device) -> list[str] | None:
         return [PortableWindSeedEnum.AUTO]
 
     if current_mode == ModeEnum.FAN:
-        return [PortableWindSeedEnum.LOW, PortableWindSeedEnum.HEIGH]
+        return [PortableWindSeedEnum.LOW, PortableWindSeedEnum.HIGH]
 
     return [e.value for e in PortableWindSeedEnum]
 
