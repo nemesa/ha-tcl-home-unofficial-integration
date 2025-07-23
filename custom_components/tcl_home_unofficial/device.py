@@ -201,8 +201,9 @@ def is_implemented_by_integration(device_type: str) -> bool:
 
 
 def calculateDeviceType(
-    device_type: str, aws_thing: dict | None
+    device_id: str, device_type: str, aws_thing: dict | None
 ) -> DeviceTypeEnum | None:
+    _LOGGER.debug("Calculating device type for %s (%s)", device_id, device_type)
     if device_type == "Portable AC":
         return DeviceTypeEnum.PORTABLE_AC
     elif device_type == "Split AC Fresh air":
@@ -210,6 +211,7 @@ def calculateDeviceType(
     elif device_type == "Split AC":
         if aws_thing is not None:
             capabilities = aws_thing["state"]["reported"].get("capabilities", [])
+            capabilities.sort() 
             if capabilities == get_SplitAC_Type1_capabilities():
                 return DeviceTypeEnum.SPLIT_AC_TYPE_1
             if capabilities == get_SplitAC_Type2_capabilities():
@@ -233,7 +235,7 @@ class Device:
     ) -> None:
         self.device_id = device_id
         if device_type is None:
-            self.device_type = calculateDeviceType(device_type_str, aws_thing)
+            self.device_type = calculateDeviceType(device_id,device_type_str, aws_thing)
         else:
             self.device_type = device_type
         self.name = name
