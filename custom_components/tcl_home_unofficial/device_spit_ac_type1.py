@@ -29,8 +29,7 @@ class WindSeedEnum(StrEnum):
 
 
 def get_SplitAC_Type1_capabilities():
-    # capabilities = [7, 3, 8, 9, 11, 12, 13, 21]
-    capabilities = [1]
+    capabilities = [7, 3, 8, 9, 11, 12, 13, 21]
     capabilities.sort()
     return capabilities
 
