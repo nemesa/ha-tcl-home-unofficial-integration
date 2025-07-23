@@ -10,8 +10,9 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device, Device, getSupportedFeatures, DeviceFeature
-from .tcl_entity_base import TclEntityBase
+from .device import Device, Device, getSupportedFeatures, DeviceFeature, DeviceTypeEnum
+from .tcl_entity_base import TclEntityBase, TclNonPollingEntityBase
+from .self_diagnostics import SelfDiagnostics
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -59,8 +60,14 @@ async def async_setup_entry(
     buttons = []
     for device in config_entry.devices:
         supported_features = getSupportedFeatures(device.device_type)
-
-        buttons.append(Reload_Button(coordinator, device))
+        if device.device_type == DeviceTypeEnum.SPLIT_AC:
+            buttons.append(
+                NotImplementedDevice_Clear_ManualStateDump_Button(
+                    hass, coordinator, device
+                )
+            )
+        else:
+            buttons.append(Reload_Button(coordinator, device))
 
         if DeviceFeature.BUTTON_SELF_CLEAN in supported_features:
             buttons.append(
@@ -80,6 +87,11 @@ async def async_setup_entry(
                     value_fn=lambda device: device.data.self_clean,
                 )
             )
+
+    for device in config_entry.non_implemented_devices:
+        buttons.append(
+            NotImplementedDevice_Clear_ManualStateDump_Button(hass, coordinator, device)
+        )
 
     async_add_entities(buttons)
 
@@ -137,13 +149,11 @@ class ButtonHandler(TclEntityBase, ButtonEntity):
         await self.coordinator.async_refresh()
 
 
-class Reload_Button(TclEntityBase, ButtonEntity):
+class Reload_Button(TclNonPollingEntityBase, ButtonEntity):
     def __init__(self, coordinator: IotDeviceCoordinator, device: Device) -> None:
-        TclEntityBase.__init__(
-            self, coordinator, "ForceReladDevice", "Sync with TCL Home", device
+        TclNonPollingEntityBase.__init__(
+            self, "ForceReladDevice", "Sync with TCL Home", device
         )
-
-        self.aws_iot = coordinator.get_aws_iot()
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
@@ -156,3 +166,30 @@ class Reload_Button(TclEntityBase, ButtonEntity):
 
     async def async_press(self) -> None:
         await self.coordinator.async_refresh()
+
+
+class NotImplementedDevice_Clear_ManualStateDump_Button(
+    TclNonPollingEntityBase, ButtonEntity
+):
+    def __init__(
+        self, hass: HomeAssistant, coordinator: IotDeviceCoordinator, device: Device
+    ) -> None:
+        TclNonPollingEntityBase.__init__(
+            self,
+            "ClearManualStateDump",
+            "Clear Manual State Dump Storage",
+            device,
+        )
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self.selfDiagnostics = SelfDiagnostics(hass=hass, device_id=device.device_id)
+
+    @property
+    def device_class(self) -> str:
+        return ButtonDeviceClass.RESTART
+
+    @property
+    def icon(self):
+        return "mdi:delete"
+
+    async def async_press(self) -> None:
+        await self.selfDiagnostics.clearStorage()
