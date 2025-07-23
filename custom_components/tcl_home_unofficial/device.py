@@ -211,11 +211,13 @@ def calculateDeviceType(
     elif device_type == "Split AC":
         if aws_thing is not None:
             capabilities = aws_thing["state"]["reported"].get("capabilities", [])
-            capabilities.sort() 
-            if capabilities == get_SplitAC_Type1_capabilities():
-                return DeviceTypeEnum.SPLIT_AC_TYPE_1
-            if capabilities == get_SplitAC_Type2_capabilities():
-                return DeviceTypeEnum.SPLIT_AC_TYPE_2
+            capabilities.sort()
+            for type_capabilities in get_SplitAC_Type1_capabilities():
+                if capabilities == type_capabilities:
+                    return DeviceTypeEnum.SPLIT_AC_TYPE_1
+            for type_capabilities in get_SplitAC_Type2_capabilities():
+                if capabilities == type_capabilities:
+                    return DeviceTypeEnum.SPLIT_AC_TYPE_2
             return DeviceTypeEnum.SPLIT_AC
     return None
 
@@ -235,7 +237,9 @@ class Device:
     ) -> None:
         self.device_id = device_id
         if device_type is None:
-            self.device_type = calculateDeviceType(device_id,device_type_str, aws_thing)
+            self.device_type = calculateDeviceType(
+                device_id, device_type_str, aws_thing
+            )
         else:
             self.device_type = device_type
         self.name = name

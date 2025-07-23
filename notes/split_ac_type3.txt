@@ -7,11 +7,11 @@
   "advancedECOMode": 0,
   "aiFunction": 0,
   "antiMoldew": 0,
-  "beepSwitch": 0,
-  "capabilities": [3,7,8,9,11,12,13,21],
+  "beepSwitch": 1,
+  "capabilities": [3,5,7,8,9,11,12,13,21,23],
   "constTemperatureDehumidification": 0,
   "constantTemp": 26,
-  "currentTemperature": 26,
+  "currentTemperature": 30,
   "eightAddHot": 0,
   "errorCode": [],
   "feelTheWind": 0,
@@ -20,18 +20,16 @@
   "generatorMode": 0,
   "healthy": 0,
   "highTemperatureWind": 0,
-  "horizontalDirection": 8,
-  "horizontalSwitch": 0,
+  "horizontalDirection": 1,
+  "horizontalSwitch": 1,
   "horizontalWind": 0,
   "infrDirect": 0,
   "infrPower": 0,
-  "leftWindSpeed": 0,
   "lightSense": 0,
-  "otaStatus": 1,
   
   "polarityFreeze": 0,
   "powerSwitch": 0,
-  "rightHorizontalDirection": 9,
+  "rightHorizontalDirection": 13,
   "rightHorizontalSwitch": 0,
   "rightSilenceSwitch": 0,
   "rightTurbo": 0,
@@ -44,37 +42,15 @@
   "softWind": 0,
   "surroundWind": 0,
   "targetElectric": 0,
-  "targetTemperature": 22,
+  "targetTemperature": 25,
   "temperatureHumidityControlling": 0,
   "temperatureType": 0,
   "turbo": 0,
   "twoTemperature": 0,
   "twoTemperatureSkew": 0,
-  "verticalDirection": 8,
-  "verticalSwitch": 0,
+  "verticalDirection": 1,
+  "verticalSwitch": 1,
   "verticalWind": 0,
   "windSpeed": 0,
   "workMode": 1
 }
-
-
---------------------
-
-
-dehum mode:
-  NO 
-    Wind speed
-    eco
-    sleep  
-
-Fan mode:
-  NO 
-    anti mold
-    eco
-    sleep  
-
-Auto mode:
-  NO 
-    anti mold
-    eco
-    sleep  

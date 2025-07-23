@@ -28,10 +28,14 @@ class WindSeedEnum(StrEnum):
     AUTO = "Auto"
 
 
-def get_SplitAC_Type1_capabilities():
-    capabilities = [7, 3, 8, 9, 11, 12, 13, 21]
-    capabilities.sort()
-    return capabilities
+def get_SplitAC_Type1_capabilities() -> list[list[int]]:
+    capabilities1 = [3, 7, 8, 9, 11, 12, 13, 21]
+    capabilities1.sort()
+
+    capabilities2 = [3, 5, 7, 8, 9, 11, 12, 13, 21, 23]
+    capabilities2.sort()
+
+    return [capabilities1, capabilities2]
 
 
 @dataclass

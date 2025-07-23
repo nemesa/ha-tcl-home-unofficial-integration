@@ -14,7 +14,7 @@ from .device_ac_common import (
     getMode,
     getSleepMode,
     getUpAndDownAirSupplyVector,
-    WindSeed7GearEnum
+    WindSeed7GearEnum,
 )
 
 
@@ -29,10 +29,33 @@ class WindSeedEnum(StrEnum):
     AUTO = "Auto"
 
 
-def get_SplitAC_Type2_capabilities():
-    capabilities = [2,3,7,8,9,11,12,13,21,23,31,33,34,35,36,39,40,41,42,43,48]
-    capabilities.sort()
-    return capabilities
+def get_SplitAC_Type2_capabilities() -> list[list[int]]:
+    capabilities1 = [
+        2,
+        3,
+        7,
+        8,
+        9,
+        11,
+        12,
+        13,
+        21,
+        23,
+        31,
+        33,
+        34,
+        35,
+        36,
+        39,
+        40,
+        41,
+        42,
+        43,
+        48,
+    ]
+    capabilities1.sort()
+
+    return [capabilities1]
 
 
 @dataclass
@@ -122,25 +145,57 @@ async def get_stored_spit_ac_type2_data(
         stored_data = {}
         need_save = True
 
-    stored_data, need_save = safe_set_value(stored_data, "non_user_config.min_celsius_temp", 16)
-    stored_data, need_save = safe_set_value(stored_data, "non_user_config.max_celsius_temp", 31)
-    stored_data, need_save = safe_set_value(stored_data, "non_user_config.native_temp_step", 1.0)
+    stored_data, need_save = safe_set_value(
+        stored_data, "non_user_config.min_celsius_temp", 16
+    )
+    stored_data, need_save = safe_set_value(
+        stored_data, "non_user_config.max_celsius_temp", 31
+    )
+    stored_data, need_save = safe_set_value(
+        stored_data, "non_user_config.native_temp_step", 1.0
+    )
 
-    stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.memorize_temp_by_mode", True)
-    stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.memorize_fan_speed_by_mode", True)
-    stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.silent_beep_when_turn_on", False)
+    stored_data, need_save = safe_set_value(
+        stored_data, "user_config.behavior.memorize_temp_by_mode", True
+    )
+    stored_data, need_save = safe_set_value(
+        stored_data, "user_config.behavior.memorize_fan_speed_by_mode", True
+    )
+    stored_data, need_save = safe_set_value(
+        stored_data, "user_config.behavior.silent_beep_when_turn_on", False
+    )
 
-    stored_data, need_save = safe_set_value(stored_data, "target_temperature.Cool.value", 24)
-    stored_data, need_save = safe_set_value(stored_data, "target_temperature.Heat.value", 36)
-    stored_data, need_save = safe_set_value(stored_data, "target_temperature.Dehumidification.value", 24)
-    stored_data, need_save = safe_set_value(stored_data, "target_temperature.Fan.value", 24)
-    stored_data, need_save = safe_set_value(stored_data, "target_temperature.Auto.value", 24)
-    
-    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Cool.value", WindSeed7GearEnum.AUTO)
-    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Heat.value", WindSeed7GearEnum.AUTO)
-    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Dehumidification.value", WindSeed7GearEnum.AUTO)
-    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Fan.value", WindSeed7GearEnum.AUTO)
-    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Auto.value", WindSeed7GearEnum.AUTO)
+    stored_data, need_save = safe_set_value(
+        stored_data, "target_temperature.Cool.value", 24
+    )
+    stored_data, need_save = safe_set_value(
+        stored_data, "target_temperature.Heat.value", 36
+    )
+    stored_data, need_save = safe_set_value(
+        stored_data, "target_temperature.Dehumidification.value", 24
+    )
+    stored_data, need_save = safe_set_value(
+        stored_data, "target_temperature.Fan.value", 24
+    )
+    stored_data, need_save = safe_set_value(
+        stored_data, "target_temperature.Auto.value", 24
+    )
+
+    stored_data, need_save = safe_set_value(
+        stored_data, "fan_speed.Cool.value", WindSeed7GearEnum.AUTO
+    )
+    stored_data, need_save = safe_set_value(
+        stored_data, "fan_speed.Heat.value", WindSeed7GearEnum.AUTO
+    )
+    stored_data, need_save = safe_set_value(
+        stored_data, "fan_speed.Dehumidification.value", WindSeed7GearEnum.AUTO
+    )
+    stored_data, need_save = safe_set_value(
+        stored_data, "fan_speed.Fan.value", WindSeed7GearEnum.AUTO
+    )
+    stored_data, need_save = safe_set_value(
+        stored_data, "fan_speed.Auto.value", WindSeed7GearEnum.AUTO
+    )
 
     if need_save:
         await set_stored_data(hass, device_id, stored_data)
