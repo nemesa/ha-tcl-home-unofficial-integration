@@ -120,7 +120,7 @@ def is_allowed(device: Device) -> bool:
     if device.device_type == DeviceTypeEnum.PORTABLE_AC:
         return getMode(device.data.work_mode) == ModeEnum.COOL
     else:
-        if DeviceFeature.SWITCH_8_C_HEATING not in supported_features:
+        if DeviceFeature.SWITCH_8_C_HEATING in supported_features:
             if device.data.eight_add_hot == 1:
                 return False
         return True
