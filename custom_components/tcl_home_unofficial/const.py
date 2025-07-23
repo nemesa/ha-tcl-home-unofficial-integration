@@ -6,6 +6,11 @@ def get_device_data_storege_key(device_id: str) -> str:
     return f"{DOMAIN}.device_data_storage.{device_id}"
 
 
+def get_device_self_dignose_storege_key(device_id: str) -> str:
+    """Get the storage key for a device."""
+    return f"{DOMAIN}.device_self_dignose_storage.{device_id}"
+
+
 DOMAIN = "tcl_home_unofficial"
 
 
