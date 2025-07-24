@@ -22,8 +22,6 @@ from .device_ac_common import (
 
 
 class FreshAirEnum(StrEnum):
-    OFF = "Off"
-    ON = "On"
     AUTO = "Auto"
     STRENGTH_1 = "1"
     STRENGTH_2 = "2"
@@ -208,15 +206,9 @@ class TCL_SplitAC_Fresh_Air_DeviceData_Helper:
             case 3:
                 return FreshAirEnum.STRENGTH_3
             case 0:
-                if self.data.new_wind_switch == 0:
-                    return FreshAirEnum.OFF
-                else:
-                    if self.data.new_wind_auto_switch == 1:
-                        return FreshAirEnum.AUTO
-                    else:
-                        return FreshAirEnum.ON
+                return FreshAirEnum.AUTO
             case _:
-                return FreshAirEnum.OFF
+                return FreshAirEnum.AUTO
 
     def getWindFeeling(self) -> WindFeelingEnum:
         match self.data.soft_wind:

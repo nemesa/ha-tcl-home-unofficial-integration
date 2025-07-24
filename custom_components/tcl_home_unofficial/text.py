@@ -35,20 +35,23 @@ async def async_setup_entry(
                 type="ManualStateDump",
                 name="Manual state dump action",
                 device=device,
+                enabled=True,
             )
         )
 
     for device in config_entry.devices:
-        if device.device_type is DeviceTypeEnum.SPLIT_AC:
-            textInputs.append(
-                NotImplementedDeviceTextEntity(
-                    hass=hass,
-                    coordinator=coordinator,
-                    type="ManualStateDump",
-                    name="Manual state dump action",
-                    device=device,
-                )
+        textInputs.append(
+            NotImplementedDeviceTextEntity(
+                hass=hass,
+                coordinator=coordinator,
+                type="ManualStateDump",
+                name="Manual state dump action",
+                device=device,
+                enabled=True
+                if device.device_type is DeviceTypeEnum.SPLIT_AC
+                else False,
             )
+        )
 
     async_add_entities(textInputs)
 
@@ -66,6 +69,7 @@ class NotImplementedDeviceTextEntity(TclNonPollingEntityBase, TextEntity):
         type: str,
         name: str,
         device: Device,
+        enabled: bool,
     ) -> None:
         TclNonPollingEntityBase.__init__(self, type, name, device)
 
@@ -78,6 +82,7 @@ class NotImplementedDeviceTextEntity(TclNonPollingEntityBase, TextEntity):
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self.counter = 0
         self.selfDiagnostics = SelfDiagnostics(hass=hass, device_id=device.device_id)
+        self._attr_entity_registry_enabled_default = enabled
 
     @property
     def native_value(self) -> str | None:

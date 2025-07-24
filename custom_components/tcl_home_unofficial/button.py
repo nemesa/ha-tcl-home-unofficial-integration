@@ -63,10 +63,15 @@ async def async_setup_entry(
         if device.device_type == DeviceTypeEnum.SPLIT_AC:
             buttons.append(
                 NotImplementedDevice_Clear_ManualStateDump_Button(
-                    hass, coordinator, device
+                    hass, coordinator, device, True
                 )
             )
         else:
+            buttons.append(
+                NotImplementedDevice_Clear_ManualStateDump_Button(
+                    hass, coordinator, device, False
+                )
+            )
             buttons.append(Reload_Button(coordinator, device))
 
         if DeviceFeature.BUTTON_SELF_CLEAN in supported_features:
@@ -90,7 +95,9 @@ async def async_setup_entry(
 
     for device in config_entry.non_implemented_devices:
         buttons.append(
-            NotImplementedDevice_Clear_ManualStateDump_Button(hass, coordinator, device)
+            NotImplementedDevice_Clear_ManualStateDump_Button(
+                hass, coordinator, device, True
+            )
         )
 
     async_add_entities(buttons)
@@ -154,6 +161,7 @@ class Reload_Button(TclNonPollingEntityBase, ButtonEntity):
         TclNonPollingEntityBase.__init__(
             self, "ForceReladDevice", "Sync with TCL Home", device
         )
+        self.coordinator = coordinator
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
@@ -172,7 +180,11 @@ class NotImplementedDevice_Clear_ManualStateDump_Button(
     TclNonPollingEntityBase, ButtonEntity
 ):
     def __init__(
-        self, hass: HomeAssistant, coordinator: IotDeviceCoordinator, device: Device
+        self,
+        hass: HomeAssistant,
+        coordinator: IotDeviceCoordinator,
+        device: Device,
+        enabled: bool = True,
     ) -> None:
         TclNonPollingEntityBase.__init__(
             self,
@@ -182,6 +194,7 @@ class NotImplementedDevice_Clear_ManualStateDump_Button(
         )
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
         self.selfDiagnostics = SelfDiagnostics(hass=hass, device_id=device.device_id)
+        self._attr_entity_registry_enabled_default = enabled
 
     @property
     def device_class(self) -> str:

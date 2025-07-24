@@ -152,3 +152,1290 @@ L3 70%
 {"state":{"desired":{"generatorMode":3}},"clientToken":"mobile_1752576508926"}
 Gen mode close
 {"state":{"desired":{"generatorMode":0}},"clientToken":"mobile_1752576527102"}
+
+Dyi:
+ no 
+  fan spped
+  fresh air
+  wind feeling
+  eco
+  sleep
+fan 
+ no
+  wind feeling
+  eco
+  sleep
+  mildewproof
+
+auto 
+ no
+  wind feeling
+  eco
+  sleep
+  mildewproof
+
+heat
+  no
+  mildewproof
+
+
+
+"manual_state_dump_data": {
+      "initState": {
+        "state": {
+          "desired": {
+            "powerSwitch": 0,
+            "targetTemperature": 26,
+            "currentTemperature": 26.4,
+            "temperatureType": 0,
+            "windSpeed7Gear": 0,
+            "horizontalWind": 1,
+            "verticalWind": 1,
+            "horizontalDirection": 1,
+            "verticalDirection": 1,
+            "workMode": 1,
+            "ECO": 1,
+            "healthy": 1,
+            "selfClean": 0,
+            "screen": 1,
+            "lightSense": 1,
+            "sleep": 0,
+            "beepSwitch": 0,
+            "softWind": 0,
+            "antiMoldew": 1,
+            "generatorMode": 0,
+            "filterBlockStatus": 0,
+            "errorCode": [],
+            "externalUnitVoltage": 17,
+            "externalUnitElectricCurrent": 0,
+            "internalUnitCoilTemperature": 26,
+            "internalUnitFanSpeed": 0,
+            "PTCStatus": 0,
+            "externalUnitTemperature": 21,
+            "externalUnitCoilTemperature": 20,
+            "externalUnitExhaustTemperature": 29,
+            "externalUnitFanGear": 0,
+            "externalUnitFanSpeed": 0,
+            "compressorFrequency": 0,
+            "fourWayValveStatus": 0,
+            "expansionValve": 0,
+            "FreshAirStatus": 0,
+            "newWindPercentage": 0,
+            "newWindSwitch": 0,
+            "windSpeedPercentage": 0,
+            "windSpeedAutoSwitch": 1,
+            "selfCleanStatus": 6,
+            "newWindAutoSwitch": 1,
+            "internalUnitFanCurrentGear": 2,
+            "lightSenserStatus": 1,
+            "newWindStrength": 0,
+            "highTemperatureWind": 0,
+            "turbo": 0,
+            "silenceSwitch": 0,
+            "windSpeed": 0
+          },
+          "reported": {
+            "authFlag": {
+              "google": true
+            },
+            "powerSwitch": 0,
+            "targetTemperature": 26,
+            "currentTemperature": 26.4,
+            "temperatureType": 0,
+            "windSpeed7Gear": 0,
+            "horizontalWind": 1,
+            "verticalWind": 1,
+            "horizontalDirection": 1,
+            "verticalDirection": 1,
+            "workMode": 1,
+            "ECO": 1,
+            "healthy": 1,
+            "selfClean": 0,
+            "screen": 1,
+            "lightSense": 1,
+            "sleep": 0,
+            "beepSwitch": 0,
+            "softWind": 0,
+            "antiMoldew": 1,
+            "generatorMode": 0,
+            "filterBlockStatus": 0,
+            "errorCode": [],
+            "externalUnitVoltage": 17,
+            "externalUnitElectricCurrent": 0,
+            "internalUnitCoilTemperature": 26,
+            "internalUnitFanSpeed": 0,
+            "PTCStatus": 0,
+            "externalUnitTemperature": 21,
+            "externalUnitCoilTemperature": 20,
+            "externalUnitExhaustTemperature": 29,
+            "externalUnitFanGear": 0,
+            "externalUnitFanSpeed": 0,
+            "compressorFrequency": 0,
+            "fourWayValveStatus": 0,
+            "expansionValve": 0,
+            "FreshAirStatus": 0,
+            "newWindPercentage": 0,
+            "newWindSwitch": 0,
+            "windSpeedPercentage": 0,
+            "windSpeedAutoSwitch": 1,
+            "selfCleanStatus": 6,
+            "newWindAutoSwitch": 1,
+            "internalUnitFanCurrentGear": 2,
+            "lightSenserStatus": 1,
+            "newWindStrength": 0,
+            "otaStatus": 1,
+            "highTemperatureWind": 0,
+            "turbo": 0,
+            "silenceSwitch": 0,
+            "windSpeed": 0
+          }
+        },
+        "version": 195078,
+        "timestamp": 1753384526
+      },
+      "initDesc": "init"
+      "steps": [
+        {
+          "actionDescription": "power on",
+          "changedDesiredKeys": [],
+          "changedReportedKeys": [],
+          "changedDesiredData": {},
+          "changedReportedData": {}
+        },
+        {
+          "actionDescription": "power on",
+          "changedDesiredKeys": [
+            "powerSwitch"
+          ],
+          "changedReportedKeys": [
+            "powerSwitch"
+          ],
+          "changedDesiredData": {
+            "powerSwitch": {
+              "from": 0,
+              "to": 1
+            }
+          },
+          "changedReportedData": {
+            "powerSwitch": {
+              "from": 0,
+              "to": 1
+            }
+          }
+        },
+        {
+          "actionDescription": "fresh air",
+          "changedDesiredKeys": [
+            "selfClean","externalUnitVoltage","internalUnitFanSpeed","externalUnitTemperature","externalUnitCoilTemperature","externalUnitExhaustTemperature",
+            "expansionValve","newWindSwitch","internalUnitFanCurrentGear"
+          ],
+          "changedReportedKeys": [
+            "externalUnitVoltage","internalUnitFanSpeed","externalUnitTemperature","externalUnitCoilTemperature","externalUnitExhaustTemperature","expansionValve",
+            "newWindSwitch","internalUnitFanCurrentGear"
+          ],
+          "changedDesiredData": {
+            "selfClean": {"from": 0,"to": 0},
+            "externalUnitVoltage": {"from": 17,"to": 218},
+            "internalUnitFanSpeed": {"from": 0,"to": 683},
+            "externalUnitTemperature": {"from": 21,"to": 29},
+            "externalUnitCoilTemperature": {"from": 20,"to": 29},
+            "externalUnitExhaustTemperature": {"from": 29,"to": 30},
+            "expansionValve": {"from": 0,"to": 480},
+            "newWindSwitch": {"from": 0,"to": 1},
+            "internalUnitFanCurrentGear": {"from": 2,"to": 2}
+          },
+          "changedReportedData": {
+            "externalUnitVoltage": {"from": 17,"to": 218},
+            "internalUnitFanSpeed": {"from": 0,"to": 683},
+            "externalUnitTemperature": {"from": 21,"to": 29},
+            "externalUnitCoilTemperature": {"from": 20,"to": 29},
+            "externalUnitExhaustTemperature": {"from": 29,"to": 30},
+            "expansionValve": {"from": 0,"to": 480},
+            "newWindSwitch": {"from": 0,"to": 1},
+            "internalUnitFanCurrentGear": {"from": 2,"to": 2}
+          }
+        },
+        {
+          "actionDescription": "fresh air to 2",
+          "changedDesiredKeys": ["newWindPercentage","newWindAutoSwitch","newWindStrength"],
+          "changedReportedKeys": ["newWindPercentage","newWindAutoSwitch","newWindStrength"],
+          "changedDesiredData": {
+            "newWindPercentage": {"from": 0,"to": 67},
+            "newWindAutoSwitch": {"from": 1,"to": 0},
+            "newWindStrength": {"from": 0,"to": 2}
+          },
+          "changedReportedData": {
+            "newWindPercentage": {"from": 0,"to": 67},
+            "newWindAutoSwitch": {"from": 1,"to": 0},
+            "newWindStrength": {"from": 0,"to": 2}
+          }
+        },
+        {
+          "actionDescription": "fresh air to auto",
+          "changedDesiredKeys": ["internalUnitCoilTemperature","newWindAutoSwitch","newWindStrength"],
+          "changedReportedKeys": ["internalUnitCoilTemperature","newWindAutoSwitch","newWindStrength"],
+          "changedDesiredData": {
+            "internalUnitCoilTemperature": {"from": 26,"to": 25},
+            "newWindAutoSwitch": {"from": 0,"to": 1},
+            "newWindStrength": {"from": 2,"to": 0}
+          },
+          "changedReportedData": {
+            "internalUnitCoilTemperature": {"from": 26,"to": 25},
+            "newWindAutoSwitch": {"from": 0,"to": 1},
+            "newWindStrength": {"from": 2,"to": 0}
+          }
+        },
+        {
+          "actionDescription": "fresh air to 2",
+          "changedDesiredKeys": ["newWindAutoSwitch","newWindStrength"],
+          "changedReportedKeys": ["newWindAutoSwitch","newWindStrength"],
+          "changedDesiredData": {
+            "newWindAutoSwitch": {"from": 1,"to": 0},
+            "newWindStrength": {"from": 0,"to": 2}
+          },
+          "changedReportedData": {
+            "newWindAutoSwitch": {"from": 1,"to": 0},
+            "newWindStrength": {"from": 0,"to": 2}
+          }
+        },
+        {
+          "actionDescription": "fresh air turn off",
+          "changedDesiredKeys": ["newWindSwitch"],
+          "changedReportedKeys": ["newWindSwitch"],
+          "changedDesiredData": {
+            "newWindSwitch": {"from": 1,"to": 0}
+          },
+          "changedReportedData": {
+            "newWindSwitch": {"from": 1,"to": 0}
+          }
+        },
+        {
+          "actionDescription": "fresh air turn on",
+          "changedDesiredKeys": ["selfClean","newWindSwitch"],
+          "changedReportedKeys": ["newWindSwitch"],
+          "changedDesiredData": {
+            "selfClean": {"from": 0,"to": 0},
+            "newWindSwitch": {"from": 0,"to": 1}
+          },
+          "changedReportedData": {"newWindSwitch": {"from": 0,"to": 1
+            }
+          }
+        },
+        {
+          "actionDescription": "to dry",
+          "changedDesiredKeys": ["targetTemperature","currentTemperature","windSpeed7Gear","workMode","ECO","healthy"
+          ,"antiMoldew","newWindSwitch","windSpeedPercentage","windSpeedAutoSwitch"
+          ],
+          "changedReportedKeys": ["currentTemperature","windSpeed7Gear","workMode","ECO","healthy","antiMoldew","newWindSwitch",
+            "windSpeedPercentage","windSpeedAutoSwitch"],
+          "changedDesiredData": {
+            "targetTemperature": {"from": 26,"to": 26},
+            "currentTemperature": {"from": 26.4,"to": 26.3},
+            "windSpeed7Gear": {"from": 0,"to": 2},
+            "workMode": {"from": 1,"to": 2},
+            "ECO": {"from": 1,"to": 0},
+            "healthy": {"from": 1,"to": 0},
+            "antiMoldew": {"from": 1,"to": 0},
+            "newWindSwitch": {"from": 1,"to": 0},
+            "windSpeedPercentage": {"from": 0,"to": 25},
+            "windSpeedAutoSwitch": {"from": 1,"to": 0}
+          },
+          "changedReportedData": {
+            "currentTemperature": {"from": 26.4,"to": 26.3},
+            "windSpeed7Gear": {"from": 0,"to": 2},
+            "workMode": {"from": 1,"to": 2},
+            "ECO": {"from": 1,"to": 0},
+            "healthy": {"from": 1,"to": 0},
+            "antiMoldew": {"from": 1,"to": 0},
+            "newWindSwitch": {"from": 1,"to": 0},
+            "windSpeedPercentage": {"from": 0,"to": 25},
+            "windSpeedAutoSwitch": {"from": 1,"to": 0}
+          }
+        },
+        {
+          "actionDescription": "to fan",
+          "changedDesiredKeys": ["targetTemperature","windSpeed7Gear","workMode","windSpeedPercentage","windSpeedAutoSwitch"],
+          "changedReportedKeys": ["windSpeed7Gear","workMode","windSpeedPercentage","windSpeedAutoSwitch"],
+          "changedDesiredData": {
+            "targetTemperature": {"from": 26,"to": 26},
+            "windSpeed7Gear": {"from": 2,"to": 0},
+            "workMode": {"from": 2,"to": 3},
+            "windSpeedPercentage": {"from": 25,"to": 0},
+            "windSpeedAutoSwitch": {"from": 0,"to": 1}
+          },
+          "changedReportedData": {
+            "windSpeed7Gear": {"from": 2,"to": 0},
+            "workMode": {"from": 2,"to": 3},
+            "windSpeedPercentage": {"from": 25,"to": 0},
+            "windSpeedAutoSwitch": {"from": 0,"to": 1}
+          }
+        },
+        {
+          "actionDescription": "to dry",
+          "changedDesiredKeys": [
+            "targetTemperature",
+            "windSpeed7Gear",
+            "workMode",
+            "windSpeedPercentage",
+            "windSpeedAutoSwitch"
+          ],
+          "changedReportedKeys": [
+            "windSpeed7Gear",
+            "workMode",
+            "windSpeedPercentage",
+            "windSpeedAutoSwitch"
+          ],
+          "changedDesiredData": {
+            "targetTemperature": {
+              "from": 26,
+              "to": 26
+            },
+            "windSpeed7Gear": {
+              "from": 0,
+              "to": 2
+            },
+            "workMode": {
+              "from": 3,
+              "to": 2
+            },
+            "windSpeedPercentage": {
+              "from": 0,
+              "to": 25
+            },
+            "windSpeedAutoSwitch": {
+              "from": 1,
+              "to": 0
+            }
+          },
+          "changedReportedData": {
+            "windSpeed7Gear": {
+              "from": 0,
+              "to": 2
+            },
+            "workMode": {
+              "from": 3,
+              "to": 2
+            },
+            "windSpeedPercentage": {
+              "from": 0,
+              "to": 25
+            },
+            "windSpeedAutoSwitch": {
+              "from": 1,
+              "to": 0
+            }
+          }
+        },
+        {
+          "actionDescription": "to fan",
+          "changedDesiredKeys": [
+            "targetTemperature",
+            "windSpeed7Gear",
+            "workMode",
+            "windSpeedPercentage",
+            "windSpeedAutoSwitch"
+          ],
+          "changedReportedKeys": [
+            "targetTemperature",
+            "windSpeed7Gear",
+            "workMode",
+            "windSpeedPercentage",
+            "windSpeedAutoSwitch"
+          ],
+          "changedDesiredData": {
+            "targetTemperature": {
+              "from": 26,
+              "to": 26
+            },
+            "windSpeed7Gear": {
+              "from": 2,
+              "to": 0
+            },
+            "workMode": {
+              "from": 2,
+              "to": 3
+            },
+            "windSpeedPercentage": {
+              "from": 25,
+              "to": 0
+            },
+            "windSpeedAutoSwitch": {
+              "from": 0,
+              "to": 1
+            }
+          },
+          "changedReportedData": {
+            "targetTemperature": {
+              "from": 26,
+              "to": 26
+            },
+            "windSpeed7Gear": {
+              "from": 2,
+              "to": 0
+            },
+            "workMode": {
+              "from": 2,
+              "to": 3
+            },
+            "windSpeedPercentage": {
+              "from": 25,
+              "to": 0
+            },
+            "windSpeedAutoSwitch": {
+              "from": 0,
+              "to": 1
+            }
+          }
+        },
+        {
+          "actionDescription": "set temp",
+          "changedDesiredKeys": [
+            "targetTemperature"
+          ],
+          "changedReportedKeys": [
+            "targetTemperature"
+          ],
+          "changedDesiredData": {
+            "targetTemperature": {
+              "from": 26,
+              "to": 25
+            }
+          },
+          "changedReportedData": {
+            "targetTemperature": {
+              "from": 26,
+              "to": 25
+            }
+          }
+        },
+        {
+          "actionDescription": "to auto mode",
+          "changedDesiredKeys": [
+            "targetTemperature",
+            "windSpeed7Gear",
+            "workMode",
+            "windSpeedAutoSwitch"
+          ],
+          "changedReportedKeys": [
+            "targetTemperature",
+            "workMode"
+          ],
+          "changedDesiredData": {
+            "targetTemperature": {
+              "from": 25,
+              "to": 26
+            },
+            "windSpeed7Gear": {
+              "from": 0,
+              "to": 0
+            },
+            "workMode": {
+              "from": 3,
+              "to": 0
+            },
+            "windSpeedAutoSwitch": {
+              "from": 1,
+              "to": 1
+            }
+          },
+          "changedReportedData": {
+            "targetTemperature": {
+              "from": 25,
+              "to": 26
+            },
+            "workMode": {
+              "from": 3,
+              "to": 0
+            }
+          }
+        },
+        {
+          "actionDescription": "to heat",
+          "changedDesiredKeys": [
+            "targetTemperature",
+            "windSpeed7Gear",
+            "workMode",
+            "windSpeedAutoSwitch",
+            "internalUnitFanCurrentGear"
+          ],
+          "changedReportedKeys": [
+            "workMode",
+            "internalUnitFanCurrentGear"
+          ],
+          "changedDesiredData": {
+            "targetTemperature": {
+              "from": 26,
+              "to": 26
+            },
+            "windSpeed7Gear": {
+              "from": 0,
+              "to": 0
+            },
+            "workMode": {
+              "from": 0,
+              "to": 4
+            },
+            "windSpeedAutoSwitch": {
+              "from": 1,
+              "to": 1
+            },
+            "internalUnitFanCurrentGear": {
+              "from": 2,
+              "to": 2
+            }
+          },
+          "changedReportedData": {
+            "workMode": {
+              "from": 0,
+              "to": 4
+            },
+            "internalUnitFanCurrentGear": {
+              "from": 2,
+              "to": 2
+            }
+          }
+        },
+        {
+          "actionDescription": "to cold and temp",
+          "changedDesiredKeys": [
+            "targetTemperature",
+            "windSpeed7Gear",
+            "workMode",
+            "externalUnitElectricCurrent",
+            "externalUnitFanSpeed",
+            "compressorFrequency",
+            "fourWayValveStatus",
+            "windSpeedAutoSwitch",
+            "internalUnitFanCurrentGear"
+          ],
+          "changedReportedKeys": [
+            "targetTemperature",
+            "workMode",
+            "externalUnitElectricCurrent",
+            "externalUnitFanSpeed",
+            "compressorFrequency",
+            "fourWayValveStatus",
+            "internalUnitFanCurrentGear"
+          ],
+          "changedDesiredData": {
+            "targetTemperature": {
+              "from": 26,
+              "to": 25
+            },
+            "windSpeed7Gear": {
+              "from": 0,
+              "to": 0
+            },
+            "workMode": {
+              "from": 4,
+              "to": 1
+            },
+            "externalUnitElectricCurrent": {
+              "from": 0,
+              "to": 1
+            },
+            "externalUnitFanSpeed": {
+              "from": 0,
+              "to": 250
+            },
+            "compressorFrequency": {
+              "from": 0,
+              "to": 10
+            },
+            "fourWayValveStatus": {
+              "from": 0,
+              "to": 1
+            },
+            "windSpeedAutoSwitch": {
+              "from": 1,
+              "to": 1
+            },
+            "internalUnitFanCurrentGear": {
+              "from": 2,
+              "to": 2
+            }
+          },
+          "changedReportedData": {
+            "targetTemperature": {
+              "from": 26,
+              "to": 25
+            },
+            "workMode": {
+              "from": 4,
+              "to": 1
+            },
+            "externalUnitElectricCurrent": {
+              "from": 0,
+              "to": 1
+            },
+            "externalUnitFanSpeed": {
+              "from": 0,
+              "to": 250
+            },
+            "compressorFrequency": {
+              "from": 0,
+              "to": 10
+            },
+            "fourWayValveStatus": {
+              "from": 0,
+              "to": 1
+            },
+            "internalUnitFanCurrentGear": {
+              "from": 2,
+              "to": 2
+            }
+          }
+        },
+        {
+          "actionDescription": "wind feel on",
+          "changedDesiredKeys": [
+            "horizontalWind",
+            "horizontalDirection",
+            "softWind"
+          ],
+          "changedReportedKeys": [
+            "horizontalWind",
+            "horizontalDirection",
+            "softWind"
+          ],
+          "changedDesiredData": {
+            "horizontalWind": {
+              "from": 1,
+              "to": 0
+            },
+            "horizontalDirection": {
+              "from": 1,
+              "to": 8
+            },
+            "softWind": {
+              "from": 0,
+              "to": 1
+            }
+          },
+          "changedReportedData": {
+            "horizontalWind": {
+              "from": 1,
+              "to": 0
+            },
+            "horizontalDirection": {
+              "from": 1,
+              "to": 8
+            },
+            "softWind": {
+              "from": 0,
+              "to": 1
+            }
+          }
+        },
+        {
+          "actionDescription": "wind feel shower",
+          "changedDesiredKeys": [
+            "verticalWind",
+            "horizontalDirection",
+            "verticalDirection",
+            "softWind",
+            "internalUnitFanCurrentGear"
+          ],
+          "changedReportedKeys": [
+            "verticalWind",
+            "verticalDirection",
+            "softWind",
+            "internalUnitFanCurrentGear"
+          ],
+          "changedDesiredData": {
+            "verticalWind": {
+              "from": 1,
+              "to": 0
+            },
+            "horizontalDirection": {
+              "from": 8,
+              "to": 8
+            },
+            "verticalDirection": {
+              "from": 1,
+              "to": 9
+            },
+            "softWind": {
+              "from": 1,
+              "to": 2
+            },
+            "internalUnitFanCurrentGear": {
+              "from": 2,
+              "to": 3
+            }
+          },
+          "changedReportedData": {
+            "verticalWind": {
+              "from": 1,
+              "to": 0
+            },
+            "verticalDirection": {
+              "from": 1,
+              "to": 9
+            },
+            "softWind": {
+              "from": 1,
+              "to": 2
+            },
+            "internalUnitFanCurrentGear": {
+              "from": 2,
+              "to": 3
+            }
+          }
+        },
+        {
+          "actionDescription": "wind feel off",
+          "changedDesiredKeys": [
+            "verticalDirection",
+            "softWind",
+            "internalUnitFanCurrentGear"
+          ],
+          "changedReportedKeys": [
+            "verticalDirection",
+            "softWind",
+            "internalUnitFanCurrentGear"
+          ],
+          "changedDesiredData": {
+            "verticalDirection": {
+              "from": 9,
+              "to": 8
+            },
+            "softWind": {
+              "from": 2,
+              "to": 0
+            },
+            "internalUnitFanCurrentGear": {
+              "from": 3,
+              "to": 4
+            }
+          },
+          "changedReportedData": {
+            "verticalDirection": {
+              "from": 9,
+              "to": 8
+            },
+            "softWind": {
+              "from": 2,
+              "to": 0
+            },
+            "internalUnitFanCurrentGear": {
+              "from": 3,
+              "to": 4
+            }
+          }
+        },
+        {
+          "actionDescription": "wind feel on (auto soft)",
+          "changedDesiredKeys": [
+            "horizontalDirection",
+            "softWind"
+          ],
+          "changedReportedKeys": [
+            "softWind"
+          ],
+          "changedDesiredData": {
+            "horizontalDirection": {
+              "from": 8,
+              "to": 8
+            },
+            "softWind": {
+              "from": 0,
+              "to": 1
+            }
+          },
+          "changedReportedData": {
+            "softWind": {
+              "from": 0,
+              "to": 1
+            }
+          }
+        },
+        {
+          "actionDescription": "eco on + wind feel",
+          "changedDesiredKeys": [
+            "targetTemperature",
+            "ECO",
+            "softWind"
+          ],
+          "changedReportedKeys": [
+            "targetTemperature",
+            "ECO",
+            "softWind"
+          ],
+          "changedDesiredData": {
+            "targetTemperature": {
+              "from": 25,
+              "to": 26
+            },
+            "ECO": {
+              "from": 0,
+              "to": 1
+            },
+            "softWind": {
+              "from": 1,
+              "to": 0
+            }
+          },
+          "changedReportedData": {
+            "targetTemperature": {
+              "from": 25,
+              "to": 26
+            },
+            "ECO": {
+              "from": 0,
+              "to": 1
+            },
+            "softWind": {
+              "from": 1,
+              "to": 0
+            }
+          }
+        },
+        {
+          "actionDescription": "eco off",
+          "changedDesiredKeys": [
+            "ECO"
+          ],
+          "changedReportedKeys": [
+            "ECO"
+          ],
+          "changedDesiredData": {
+            "ECO": {
+              "from": 1,
+              "to": 0
+            }
+          },
+          "changedReportedData": {
+            "ECO": {
+              "from": 1,
+              "to": 0
+            }
+          }
+        },
+        {
+          "actionDescription": "eco on",
+          "changedDesiredKeys": [
+            "ECO"
+          ],
+          "changedReportedKeys": [
+            "ECO"
+          ],
+          "changedDesiredData": {
+            "ECO": {
+              "from": 0,
+              "to": 1
+            }
+          },
+          "changedReportedData": {
+            "ECO": {
+              "from": 0,
+              "to": 1
+            }
+          }
+        },
+        {
+          "actionDescription": "eco off",
+          "changedDesiredKeys": [
+            "ECO"
+          ],
+          "changedReportedKeys": [
+            "ECO"
+          ],
+          "changedDesiredData": {
+            "ECO": {
+              "from": 1,
+              "to": 0
+            }
+          },
+          "changedReportedData": {
+            "ECO": {
+              "from": 1,
+              "to": 0
+            }
+          }
+        },
+        {
+          "actionDescription": "seep on",
+          "changedDesiredKeys": [
+            "sleep"
+          ],
+          "changedReportedKeys": [
+            "sleep"
+          ],
+          "changedDesiredData": {
+            "sleep": {
+              "from": 0,
+              "to": 1
+            }
+          },
+          "changedReportedData": {
+            "sleep": {
+              "from": 0,
+              "to": 1
+            }
+          }
+        },
+        {
+          "actionDescription": "seep childer",
+          "changedDesiredKeys": [
+            "sleep"
+          ],
+          "changedReportedKeys": [
+            "sleep"
+          ],
+          "changedDesiredData": {
+            "sleep": {
+              "from": 1,
+              "to": 3
+            }
+          },
+          "changedReportedData": {
+            "sleep": {
+              "from": 1,
+              "to": 3
+            }
+          }
+        },
+        {
+          "actionDescription": "seep off",
+          "changedDesiredKeys": [
+            "sleep"
+          ],
+          "changedReportedKeys": [
+            "sleep"
+          ],
+          "changedDesiredData": {
+            "sleep": {
+              "from": 3,
+              "to": 0
+            }
+          },
+          "changedReportedData": {
+            "sleep": {
+              "from": 3,
+              "to": 0
+            }
+          }
+        },
+        {
+          "actionDescription": "hralth on",
+          "changedDesiredKeys": [
+            "healthy"
+          ],
+          "changedReportedKeys": [
+            "healthy"
+          ],
+          "changedDesiredData": {
+            "healthy": {
+              "from": 0,
+              "to": 1
+            }
+          },
+          "changedReportedData": {
+            "healthy": {
+              "from": 0,
+              "to": 1
+            }
+          }
+        },
+        {
+          "actionDescription": "health off",
+          "changedDesiredKeys": [
+            "healthy",
+            "fourWayValveStatus"
+          ],
+          "changedReportedKeys": [
+            "healthy",
+            "fourWayValveStatus"
+          ],
+          "changedDesiredData": {
+            "healthy": {
+              "from": 1,
+              "to": 0
+            },
+            "fourWayValveStatus": {
+              "from": 1,
+              "to": 0
+            }
+          },
+          "changedReportedData": {
+            "healthy": {
+              "from": 1,
+              "to": 0
+            },
+            "fourWayValveStatus": {
+              "from": 1,
+              "to": 0
+            }
+          }
+        },
+        {
+          "actionDescription": "anti modew on",
+          "changedDesiredKeys": [
+            "antiMoldew"
+          ],
+          "changedReportedKeys": [
+            "antiMoldew"
+          ],
+          "changedDesiredData": {
+            "antiMoldew": {
+              "from": 0,
+              "to": 1
+            }
+          },
+          "changedReportedData": {
+            "antiMoldew": {
+              "from": 0,
+              "to": 1
+            }
+          }
+        },
+        {
+          "actionDescription": "anti modew off",
+          "changedDesiredKeys": [
+            "antiMoldew"
+          ],
+          "changedReportedKeys": [
+            "antiMoldew"
+          ],
+          "changedDesiredData": {
+            "antiMoldew": {
+              "from": 1,
+              "to": 0
+            }
+          },
+          "changedReportedData": {
+            "antiMoldew": {
+              "from": 1,
+              "to": 0
+            }
+          }
+        },
+        {
+          "actionDescription": "light sensor on",
+          "changedDesiredKeys": [
+            "lightSense",
+            "lightSenserStatus"
+          ],
+          "changedReportedKeys": [
+            "lightSense",
+            "lightSenserStatus"
+          ],
+          "changedDesiredData": {
+            "lightSense": {
+              "from": 1,
+              "to": 0
+            },
+            "lightSenserStatus": {
+              "from": 1,
+              "to": 0
+            }
+          },
+          "changedReportedData": {
+            "lightSense": {
+              "from": 1,
+              "to": 0
+            },
+            "lightSenserStatus": {
+              "from": 1,
+              "to": 0
+            }
+          }
+        },
+        {
+          "actionDescription": "light sensor off",
+          "changedDesiredKeys": [
+            "lightSense"
+          ],
+          "changedReportedKeys": [
+            "lightSense"
+          ],
+          "changedDesiredData": {
+            "lightSense": {
+              "from": 0,
+              "to": 1
+            }
+          },
+          "changedReportedData": {
+            "lightSense": {
+              "from": 0,
+              "to": 1
+            }
+          }
+        },
+        {
+          "actionDescription": "start self clean",
+          "changedDesiredKeys": [
+            "powerSwitch",
+            "selfClean",
+            "externalUnitVoltage",
+            "internalUnitFanSpeed",
+            "externalUnitTemperature",
+            "externalUnitCoilTemperature",
+            "externalUnitExhaustTemperature",
+            "expansionValve",
+            "selfCleanStatus",
+            "lightSenserStatus"
+          ],
+          "changedReportedKeys": [
+            "powerSwitch",
+            "selfClean",
+            "externalUnitVoltage",
+            "internalUnitFanSpeed",
+            "externalUnitTemperature",
+            "externalUnitCoilTemperature",
+            "externalUnitExhaustTemperature",
+            "expansionValve",
+            "selfCleanStatus",
+            "lightSenserStatus"
+          ],
+          "changedDesiredData": {
+            "powerSwitch": {
+              "from": 1,
+              "to": 0
+            },
+            "selfClean": {
+              "from": 0,
+              "to": 1
+            },
+            "externalUnitVoltage": {
+              "from": 218,
+              "to": 234
+            },
+            "internalUnitFanSpeed": {
+              "from": 683,
+              "to": 890
+            },
+            "externalUnitTemperature": {
+              "from": 29,
+              "to": 29
+            },
+            "externalUnitCoilTemperature": {
+              "from": 29,
+              "to": 27
+            },
+            "externalUnitExhaustTemperature": {
+              "from": 30,
+              "to": 37
+            },
+            "expansionValve": {
+              "from": 480,
+              "to": 480
+            },
+            "selfCleanStatus": {
+              "from": 6,
+              "to": 0
+            },
+            "lightSenserStatus": {
+              "from": 0,
+              "to": 0
+            }
+          },
+          "changedReportedData": {
+            "powerSwitch": {
+              "from": 1,
+              "to": 0
+            },
+            "selfClean": {
+              "from": 0,
+              "to": 1
+            },
+            "externalUnitVoltage": {
+              "from": 218,
+              "to": 234
+            },
+            "internalUnitFanSpeed": {
+              "from": 683,
+              "to": 890
+            },
+            "externalUnitTemperature": {
+              "from": 29,
+              "to": 29
+            },
+            "externalUnitCoilTemperature": {
+              "from": 29,
+              "to": 27
+            },
+            "externalUnitExhaustTemperature": {
+              "from": 30,
+              "to": 37
+            },
+            "expansionValve": {
+              "from": 480,
+              "to": 480
+            },
+            "selfCleanStatus": {
+              "from": 6,
+              "to": 0
+            },
+            "lightSenserStatus": {
+              "from": 0,
+              "to": 0
+            }
+          }
+        },
+        {
+          "actionDescription": "still runing",
+          "changedDesiredKeys": [
+            "internalUnitCoilTemperature",
+            "internalUnitFanCurrentGear"
+          ],
+          "changedReportedKeys": [
+            "internalUnitCoilTemperature",
+            "internalUnitFanCurrentGear"
+          ],
+          "changedDesiredData": {
+            "internalUnitCoilTemperature": {
+              "from": 25,
+              "to": 26
+            },
+            "internalUnitFanCurrentGear": {
+              "from": 4,
+              "to": 1
+            }
+          },
+          "changedReportedData": {
+            "internalUnitCoilTemperature": {
+              "from": 25,
+              "to": 26
+            },
+            "internalUnitFanCurrentGear": {
+              "from": 4,
+              "to": 1
+            }
+          }
+        },
+        {
+          "actionDescription": "cancel self clean",
+          "changedDesiredKeys": [
+            "selfClean",
+            "selfCleanStatus"
+          ],
+          "changedReportedKeys": [
+            "selfClean",
+            "selfCleanStatus"
+          ],
+          "changedDesiredData": {
+            "selfClean": {
+              "from": 1,
+              "to": 0
+            },
+            "selfCleanStatus": {
+              "from": 0,
+              "to": 6
+            }
+          },
+          "changedReportedData": {
+            "selfClean": {
+              "from": 1,
+              "to": 0
+            },
+            "selfCleanStatus": {
+              "from": 0,
+              "to": 6
+            }
+          }
+        }
+      ]
+    }
+  }  

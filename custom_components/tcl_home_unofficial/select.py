@@ -533,10 +533,6 @@ class DesiredStateHandlerForSelect:
     async def SELECT_FRESH_AIR(self, value: FreshAirEnum):
         desired_state = {}
         match value:
-            case FreshAirEnum.OFF:
-                desired_state = {"newWindSwitch": 0}
-            case FreshAirEnum.ON:
-                desired_state = {"newWindSwitch": 1, "selfClean": 0}
             case FreshAirEnum.AUTO:
                 desired_state = {"newWindAutoSwitch": 1, "newWindStrength": 0}
             case FreshAirEnum.STRENGTH_1:
@@ -705,6 +701,12 @@ def get_SELECT_SLEEP_MODE_available_fn(device: Device) -> str:
     return True
 
 
+def get_SELECT_FRESH_AIR_available_fn(device: Device) -> str:
+    if device.data.new_wind_switch == 1:
+        return True
+    return False
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: New_NameConfigEntry,
@@ -797,8 +799,12 @@ async def async_setup_entry(
                     device=device,
                     deviceFeature=DeviceFeature.SELECT_FRESH_AIR,
                     type="FreshAir",
-                    name="Fresh Air",
+                    name="Fresh Air Strength",
                     icon_fn=lambda device: "mdi:window-open-variant",
+                    options_values_fn=lambda device: [e.value for e in FreshAirEnum],
+                    available_fn=lambda device: get_SELECT_FRESH_AIR_available_fn(
+                        device
+                    ),
                 )
             )
 

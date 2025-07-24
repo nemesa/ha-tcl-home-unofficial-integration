@@ -58,6 +58,7 @@ class DeviceFeature(StrEnum):
     SWITCH_SLEEP = "switch.sleep"
     SWITCH_8_C_HEATING = "switch.8CHeating"
     SWITCH_SOFT_WIND = "switch.softWind"
+    SWITCH_FRESH_AIR = "switch.freshAir"
     SELECT_MODE = "select.mode"
     SELECT_WIND_SPEED = "select.windSpeed"
     SELECT_WIND_SPEED_7_GEAR = "select.windSpeed7Gear"
@@ -159,6 +160,7 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
                 DeviceFeature.SWITCH_DRYING,
                 DeviceFeature.SWITCH_SCREEN,
                 DeviceFeature.SWITCH_LIGHT_SENSE,
+                DeviceFeature.SWITCH_FRESH_AIR,
                 DeviceFeature.SELECT_MODE,
                 DeviceFeature.SELECT_VERTICAL_DIRECTION,
                 DeviceFeature.SELECT_HORIZONTAL_DIRECTION,

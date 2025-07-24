@@ -71,6 +71,8 @@ class DesiredStateHandlerForSwitch:
                 return await self.SWITCH_8_C_HEATING(value=value)
             case DeviceFeature.SWITCH_SOFT_WIND:
                 return await self.SWITCH_SOFT_WIND(value=value)
+            case DeviceFeature.SWITCH_FRESH_AIR:
+                return await self.SWITCH_FRESH_AIR(value=value)
 
     def is_allowed(self) -> bool:
         supported_features = getSupportedFeatures(self.device.device_type)
@@ -111,6 +113,11 @@ class DesiredStateHandlerForSwitch:
                     or mode == ModeEnum.DEHUMIDIFICATION
                     or mode == ModeEnum.AUTO
                 ):
+                    return False
+                else:
+                    return True
+            case DeviceFeature.SWITCH_FRESH_AIR:
+                if mode == ModeEnum.DEHUMIDIFICATION:
                     return False
                 else:
                     return True
@@ -210,6 +217,14 @@ class DesiredStateHandlerForSwitch:
 
     async def SWITCH_SOFT_WIND(self, value: int):
         desired_state = {"softWind": value}
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
+    async def SWITCH_FRESH_AIR(self, value: int):
+        desired_state = {"newWindSwitch": value}
+        if value == 1:
+            desired_state["selfClean"] = 0
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
         )
@@ -408,6 +423,22 @@ async def async_setup_entry(
                 )
             )
 
+        if DeviceFeature.SWITCH_FRESH_AIR in supported_features:
+            switches.append(
+                DynamicSwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeature.SWITCH_FRESH_AIR,
+                    type="FreshAir",
+                    name="Fresh Air",
+                    icon_fn=lambda device: "mdi:window-open-variant"
+                    if device.data.new_wind_switch == 1
+                    else "mdi:window-closed-variant",
+                    is_on_fn=lambda device: device.data.new_wind_switch,
+                )
+            )
+
         if (
             DeviceFeature.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE
             in supported_features
@@ -446,7 +477,7 @@ async def async_setup_entry(
                     coordinator=coordinator,
                     device=device,
                     config_path="user_config.behavior.silent_beep_when_turn_on",
-                    name="Silen beep when turn on",
+                    name="Silent beep when turn on",
                 )
             )
 
