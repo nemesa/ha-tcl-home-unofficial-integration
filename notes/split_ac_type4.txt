@@ -53,3 +53,6 @@
   "windSpeed": 0,
   "workMode": 1
 }
+
+Missing compared to type1
+Soft Wind, Generator Mode and Electricty stats
