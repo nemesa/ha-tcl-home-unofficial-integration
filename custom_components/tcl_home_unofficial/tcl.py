@@ -129,6 +129,8 @@ class GetThingsResponseData:
         self.firmware_version = getValue(data, ["firmware_version", "firmwareVersion"])
         self.is_online = getValue(data, ["is_online", "isOnline"])
         self.room = getValue(data, ["room"])
+        self.type = getValue(data, ["type"])
+        self.device_type = getValue(data, ["device_type", "deviceType"])
         if self.room is None:
             if data["labels"] and len(data["labels"]) > 0:
                 for label in data["labels"]:
@@ -147,6 +149,9 @@ class GetThingsResponseData:
     firmware_version: str
     is_online: str
     room: str
+    type: int
+    device_type: str
+
 
 @dataclass
 class GetThingsResponse:
@@ -342,6 +347,7 @@ async def get_things(
         if response.status_code != 200:
             raise Exception("Error at get_things: " + response.text)
         response_obj = response.json()
+        # _LOGGER.info("TCL-Service.get_things: %s", response_obj)
         if verbose_logging:
             _LOGGER.info("TCL-Service.get_things response: %s", response_obj)
         return GetThingsResponse(response_obj)

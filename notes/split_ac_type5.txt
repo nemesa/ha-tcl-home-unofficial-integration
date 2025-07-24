@@ -54,3 +54,12 @@
   "windSpeed": 0,
   "workMode": 1
 }
+
+compared to type 1:
+
+    8 °C Heating (I checked in "Heat" mode too, in the "...more" menu)
+    Missing:
+    CHILL WIND (in "Cool" mode)
+    HOT WIND (in "Heat" mode)
+    Yes, I also have Generator mode in settings. Options: LV1, LV2, LV3.
+    But the manufacturer's manual shows that this 3 options is not available in my model. I think you don't need to add this functions. Useless in my opinion.

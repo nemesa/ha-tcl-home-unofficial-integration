@@ -25,8 +25,41 @@ async def async_get_device_diagnostics(
         hass=hass,
         config_entry=entry,
     )
-    await aws_iot.async_init()
-    aws_thing = await aws_iot.async_get_thing(device_id)
+
+    aws_iot_init_success = False
+    aws_iot_init_error = None
+
+    try:
+        await aws_iot.async_init()
+        aws_iot_init_success = True
+    except Exception as e:
+        aws_iot_init_error = {"error": str(e)}
+
+    tcl_thing = []
+    try:
+        all_things_response = await aws_iot.get_all_things()
+        for thing in all_things_response.data:
+            if thing.device_id == device_id:
+                tcl_thing.append(
+                    {
+                        "device_id": thing.device_id,
+                        "platform": thing.platform,
+                        "nick_name": thing.nick_name,
+                        "device_name": thing.device_name,
+                        "category": thing.category,
+                        "type": thing.type,
+                        "device_type": thing.device_type,
+                        "firmware_version": thing.firmware_version,
+                    }
+                )
+    except Exception as e:
+        tcl_thing = {"error": str(e)}
+
+    aws_thing = None
+    try:
+        aws_thing = await aws_iot.async_get_thing(device_id)
+    except Exception as e:
+        aws_thing = {"error": str(e)}
 
     self_diagnostics = SelfDiagnostics(hass=hass, device_id=device_id)
     manual_state_dump_data = await self_diagnostics.get_stored_data()
@@ -36,6 +69,9 @@ async def async_get_device_diagnostics(
             "model": device.model,
             "sw_version": device.sw_version,
         },
+        "aws_iot_init_success": aws_iot_init_success,
+        "aws_iot_init_error": aws_iot_init_error,
+        "tcl_thing": tcl_thing,
         "aws_thing": aws_thing,
         "manual_state_dump_data": manual_state_dump_data,
     }
