@@ -38,6 +38,33 @@ async def async_setup_entry(
                 enabled=True,
             )
         )
+        textInputs.append(NotImplementedDeviceTextOutEntity(
+            hass=hass,
+            coordinator=coordinator,
+            type="diag.device_type_str",
+            name="device_type_str",
+            device=device,
+            value_function=lambda device:device.device_type_str,
+            enabled=True
+        ))
+        textInputs.append(NotImplementedDeviceTextOutEntity(
+            hass=hass,
+            coordinator=coordinator,
+            type="diag.has_aws_thing",
+            name="has_aws_thing",
+            device=device,
+            value_function=lambda device: device.has_aws_thing,
+            enabled=True
+        ))
+        textInputs.append(NotImplementedDeviceTextOutEntity(
+            hass=hass,
+            coordinator=coordinator,
+            type="diag.capabilities_str",
+            name="capabilities_str",
+            device=device,
+            value_function=lambda device: device.capabilities_str,
+            enabled=True
+        ))
 
     for device in config_entry.devices:
         textInputs.append(
@@ -52,6 +79,33 @@ async def async_setup_entry(
                 else False,
             )
         )
+        textInputs.append(NotImplementedDeviceTextOutEntity(
+            hass=hass,
+            coordinator=coordinator,
+            type="diag.device_type_str",
+            name="device_type_str",
+            device=device,
+            value_function=lambda device: device.device_type_str,
+            enabled=True if device.device_type is DeviceTypeEnum.SPLIT_AC else False,
+        ))
+        textInputs.append(NotImplementedDeviceTextOutEntity(
+            hass=hass,
+            coordinator=coordinator,
+            type="diag.has_aws_thing",
+            name="has_aws_thing",
+            device=device,
+            value_function=lambda device: device.has_aws_thing,
+            enabled=True if device.device_type is DeviceTypeEnum.SPLIT_AC else False,
+        ))
+        textInputs.append(NotImplementedDeviceTextOutEntity(
+            hass=hass,
+            coordinator=coordinator,
+            type="diag.capabilities_str",
+            name="capabilities_str",
+            device=device,
+            value_function=lambda device: device.capabilities_str,
+            enabled=True if device.device_type is DeviceTypeEnum.SPLIT_AC else False,
+        ))
 
     async_add_entities(textInputs)
 
@@ -98,3 +152,46 @@ class NotImplementedDeviceTextEntity(TclNonPollingEntityBase, TextEntity):
         )
         await self.selfDiagnostics.addState(value, aws_thing)
         await self.async_update_ha_state(force_refresh=True)
+
+
+
+class NotImplementedDeviceTextOutEntity(TclNonPollingEntityBase, TextEntity):
+    _attr_has_entity_name = True
+    _attr_name = None
+    _attr_should_poll = True
+    _attr_force_update = True
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        coordinator: IotDeviceCoordinator,
+        type: str,
+        name: str,
+        device: Device,
+        value_function: lambda device: str,
+        enabled: bool,
+    ) -> None:
+        TclNonPollingEntityBase.__init__(self, type, name, device)
+
+        self.hass = hass
+        self.coordinator = coordinator
+        self.value_function = value_function
+        self._attr_mode = TextMode.TEXT
+        self._attr_native_max = 2000
+        self._attr_native_min = 0
+        self._attr_native_value = value_function(device)
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self.counter = 0
+        self.selfDiagnostics = SelfDiagnostics(hass=hass, device_id=device.device_id)
+        self._attr_entity_registry_enabled_default = enabled
+        
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the value reported by the text."""
+        return self._attr_native_value
+
+   
+    async def async_set_value(self, value: str) -> None:
+        self._attr_native_value = self.value_function(self.device)
+        

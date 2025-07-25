@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from enum import StrEnum
+import json
 import logging
 
 from homeassistant.core import HomeAssistant
@@ -237,6 +238,7 @@ class Device:
         firmware_version: str,
         aws_thing: dict | None,
     ) -> None:
+        self.device_type_str = device_type_str
         self.device_id = device_id
         if device_type is None:
             self.device_type = calculateDeviceType(
@@ -248,7 +250,26 @@ class Device:
         self.storage = {}
         self.firmware_version = firmware_version
         self.is_implemented_by_integration = self.device_type is not None
+        self.has_aws_thing = "false"
+        self.capabilities_str = ""
         if aws_thing is not None:
+            self.has_aws_thing = "true"
+            try:
+                if "state" in aws_thing:
+                    if "reported" in aws_thing["state"]:
+                        if "capabilities" in aws_thing["state"]["reported"]:
+                            capabilities_array = aws_thing["state"]["reported"]["capabilities"]
+                            capabilities_array.sort()
+                            self.capabilities_str =json.dumps(capabilities_array)
+            except Exception as e:
+                _LOGGER.error(
+                    "Error while getting capabilities for device %s: %s",
+                    device_id,
+                    str(e),
+                )
+                self.capabilities_str = str(e)
+                    
+                
             match self.device_type:
                 case DeviceTypeEnum.SPLIT_AC_TYPE_1:
                     self.data = TCL_SplitAC_Type1_DeviceData(
@@ -280,8 +301,11 @@ class Device:
         else:
             self.data = None
 
+    capabilities_str: str
     device_id: int
     device_type: str
+    device_type_str: str
+    has_aws_thing: str
     name: str
     firmware_version: str
     is_implemented_by_integration: bool
