@@ -210,7 +210,7 @@ def calculateDeviceType(
         return DeviceTypeEnum.PORTABLE_AC
     elif device_type == "Split AC Fresh air":
         return DeviceTypeEnum.SPLIT_AC_FRESH_AIR
-    elif device_type == "Split AC":
+    elif device_type == "Split AC" or device_type == "Split AC-1":
         if aws_thing is not None:
             capabilities = aws_thing["state"]["reported"].get("capabilities", [])
             capabilities.sort()
