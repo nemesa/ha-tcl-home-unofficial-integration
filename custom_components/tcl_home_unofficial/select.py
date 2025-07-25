@@ -85,6 +85,8 @@ class DesiredStateHandlerForSelect:
                 return await self.SELECT_HORIZONTAL_DIRECTION(value=value)
             case DeviceFeature.SELECT_TEMPERATURE_TYPE:
                 return await self.SELECT_TEMPERATURE_TYPE(value=value)
+            case DeviceFeature.SELECT_FRESH_AIR:
+                return await self.SELECT_FRESH_AIR(value=value)
 
     def current_state(self) -> str:
         match self.deviceFeature:
