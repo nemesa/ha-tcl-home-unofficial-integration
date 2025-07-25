@@ -793,7 +793,7 @@ async def async_setup_entry(
 
         if DeviceFeature.SELECT_FRESH_AIR in supported_features:
             switches.append(
-                SelectHandler(
+                DynamicSelectHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
