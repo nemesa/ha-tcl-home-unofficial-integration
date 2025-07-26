@@ -9,6 +9,7 @@
   - Type 1: capabilities: [    3,      7,  8,  9, 11, 12, 13, 21]
   - Type 1: capabilities: [    3,      7,  8,  9, 11, 12, 13, 21,     23]
   - Type 1: capabilities: [    3,      7,  8,  9, 11, 12, 13,         23]
+  - Type 1: capabilities: [    3,      7,  8,  9, 11, 12, 13, 21, 22, 23]
   - Type 1: capabilities: [    3,          8,  9, 11, 12, 13,     22, 23]
   - Type 1: capabilities: [        5,  7,  8,  9, 11, 12, 13,         23, 28]
   - Type 1: capabilities: [    3,  5,  7,  8,  9, 11, 12, 13, 21]
