@@ -6,6 +6,7 @@ from homeassistant.components.select import SelectEntity
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from .calculations import celsius_to_fahrenheit
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
 from .device import (
@@ -228,13 +229,9 @@ class DesiredStateHandlerForSelect:
                         "workMode": 1,
                         "windSpeed7Gear": 6,
                     }
-                elif self.device.device_type == DeviceTypeEnum.PORTABLE_AC:
-                    targetCelsiusDegree = stored_data["target_temperature"][
-                        ModeEnum.COOL
-                    ]["targetCelsiusDegree"]
-                    targetFahrenheitDegree = stored_data["target_temperature"][
-                        ModeEnum.COOL
-                    ]["targetFahrenheitDegree"]
+                elif self.device.device_type == DeviceTypeEnum.PORTABLE_AC:                    
+                    targetCelsiusDegree = stored_data["target_temperature"][ModeEnum.COOL]["value"]
+                    targetFahrenheitDegree=celsius_to_fahrenheit(targetCelsiusDegree)                   
 
                     desired_state = {
                         "sleep": 0,

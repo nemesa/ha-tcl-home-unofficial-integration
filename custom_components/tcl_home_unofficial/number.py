@@ -7,6 +7,7 @@ from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from .calculations import celsius_to_fahrenheit
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
 from .device import (
@@ -38,9 +39,6 @@ class DesiredStateHandlerForNumber:
     def refreshDevice(self, device: Device):
         self.device = device
 
-    def celsius_to_fahrenheit(self, celsius: int | float) -> int | float:
-        return round((celsius * (9 / 5)) + 32)
-
     async def call_set_number(self, value: int | float) -> str:
         match self.deviceFeature:
             case DeviceFeature.NUMBER_TARGET_TEMPERATURE:
@@ -52,13 +50,7 @@ class DesiredStateHandlerForNumber:
         stored_data = await get_stored_data(self.hass, self.device.device_id)
         mode = getMode(self.device.data.work_mode)
         # _LOGGER.info("Storing target temperature %s for mode %s in device storage %s",value,mode,self.device.device_id)
-        stored_data["target_temperature"][mode]["value"] = value
-        match self.deviceFeature:
-            case DeviceFeature.NUMBER_TARGET_DEGREE:
-                stored_data["target_temperature"][mode]["targetCelsiusDegree"] = value
-                stored_data["target_temperature"][mode]["targetFahrenheitDegree"] = (
-                    self.celsius_to_fahrenheit(value)
-                )
+        stored_data["target_temperature"][mode]["value"] = value       
         self.device.storage = stored_data
         await set_stored_data(self.hass, self.device.device_id, stored_data)
 
@@ -79,7 +71,7 @@ class DesiredStateHandlerForNumber:
         supported_features = getSupportedFeatures(self.device.device_type)
         desired_state = {"targetTemperature": value}
         if DeviceFeature.INTERNAL_SET_TFT_WITH_TT in supported_features:
-            value_fahrenheit_to_set = self.celsius_to_fahrenheit(value)
+            value_fahrenheit_to_set = celsius_to_fahrenheit(value)
             desired_state["targetFahrenheitTemp"] = value_fahrenheit_to_set
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
@@ -99,7 +91,7 @@ class DesiredStateHandlerForNumber:
             return
 
         value_celsius_to_set = value
-        value_fahrenheit_to_set = self.celsius_to_fahrenheit(value)
+        value_fahrenheit_to_set = celsius_to_fahrenheit(value)
         desired_state = {
             "targetCelsiusDegree": value_celsius_to_set,
             "targetFahrenheitDegree": value_fahrenheit_to_set,
