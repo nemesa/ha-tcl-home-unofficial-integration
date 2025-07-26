@@ -8,7 +8,7 @@
   "aiFunction": 0,
   "antiMoldew": 0,
   "beepSwitch": 1,
-  "capabilities": [3,5,7,8,9,11,12,13,21,23],
+  "capabilities": [3, 5, 7, 8, 9, 11, 12, 13, 21, 23],
   "constTemperatureDehumidification": 0,
   "constantTemp": 26,
   "currentTemperature": 30,

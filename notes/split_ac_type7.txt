@@ -30,7 +30,7 @@
           "generatorMode": 0,
           "horizontalWind": 0,
           "verticalWind": 0,
-          "capabilities": [11,21,23,3,7,9,8,12,13],
+          "capabilities": [3, 7, 8, 9, 11, 12, 13, 21, 23],
           "lightSense": 0,
           "filterBlockStatus": 0,
           "filterBlockSwitch": 0,

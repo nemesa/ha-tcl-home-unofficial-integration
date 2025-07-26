@@ -192,15 +192,15 @@ def getSupportedFeatures(device_type: DeviceTypeEnum) -> list[DeviceFeature]:
 
 
 def is_implemented_by_integration(device_type: str) -> bool:
-    match device_type:
-        case DeviceTypeEnum.SPLIT_AC:
-            return True
-        case DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-            return True
-        case DeviceTypeEnum.PORTABLE_AC:
-            return True
-        case _:
-            return False
+    known_device_types = [
+        "Split AC",
+        "Split AC-1",
+        "Split AC Fresh air",
+        "Portable AC"
+    ]
+    if device_type.lower() in list(map(str.lower,known_device_types)):
+        return True
+    return False
 
 
 def calculateDeviceType(
@@ -258,9 +258,11 @@ class Device:
                 if "state" in aws_thing:
                     if "reported" in aws_thing["state"]:
                         if "capabilities" in aws_thing["state"]["reported"]:
-                            capabilities_array = aws_thing["state"]["reported"]["capabilities"]
+                            capabilities_array = aws_thing["state"]["reported"][
+                                "capabilities"
+                            ]
                             capabilities_array.sort()
-                            self.capabilities_str =json.dumps(capabilities_array)
+                            self.capabilities_str = json.dumps(capabilities_array)
             except Exception as e:
                 _LOGGER.error(
                     "Error while getting capabilities for device %s: %s",
@@ -268,8 +270,7 @@ class Device:
                     str(e),
                 )
                 self.capabilities_str = str(e)
-                    
-                
+
             match self.device_type:
                 case DeviceTypeEnum.SPLIT_AC_TYPE_1:
                     self.data = TCL_SplitAC_Type1_DeviceData(

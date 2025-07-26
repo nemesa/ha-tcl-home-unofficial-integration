@@ -46,8 +46,11 @@ def get_SplitAC_Type1_capabilities() -> list[list[int]]:
 
     capabilities6 = [3, 5, 7, 8, 9, 11, 12, 13, 21]
     capabilities6.sort()
+
+    capabilities7 = [3, 7, 8, 9, 11, 12, 13, 23]
+    capabilities7.sort()
     
-    return [capabilities1, capabilities2, capabilities3, capabilities4, capabilities5 ,capabilities6]
+    return [capabilities1, capabilities2, capabilities3, capabilities4, capabilities5 ,capabilities6, capabilities7]
 
 
 @dataclass
