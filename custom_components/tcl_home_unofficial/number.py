@@ -13,7 +13,7 @@ from .coordinator import IotDeviceCoordinator
 from .device import Device
 from .device_features import DeviceFeatureEnum
 from .device_types import DeviceTypeEnum
-from .device_ac_common import ModeEnum, getMode
+from .device_enums import ModeEnum, getMode
 from .device_data_storage import set_stored_data,get_stored_data
 from .tcl_entity_base import TclEntityBase
 
@@ -53,8 +53,8 @@ class DesiredStateHandlerForNumber:
 
     async def NUMBER_TARGET_TEMPERATURE(self, value: int | float):
         # _LOGGER.info("Setting target temperature to %s %s", value, self.device)
-        min_temp = self.device.storage["non_user_config"]["min_celsius_temp"]
-        max_temp = self.device.storage["non_user_config"]["max_celsius_temp"]
+        min_temp = self.device.data.lower_temperature_limit
+        max_temp = self.device.data.upper_temperature_limit
 
         if value < min_temp or value > max_temp:
             _LOGGER.error(
@@ -74,8 +74,8 @@ class DesiredStateHandlerForNumber:
         )
 
     async def NUMBER_TARGET_DEGREE(self, value: int | float):
-        min_temp = self.device.storage["non_user_config"]["min_celsius_temp"]
-        max_temp = self.device.storage["non_user_config"]["max_celsius_temp"]
+        min_temp = self.device.data.lower_temperature_limit
+        max_temp = self.device.data.upper_temperature_limit
 
         if value < min_temp or value > max_temp:
             _LOGGER.error(
@@ -188,15 +188,9 @@ class TemperatureHandler(TclEntityBase, NumberEntity):
         self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
         self._attr_native_value = self.current_value_fn(self.device)
 
-        self._attr_native_min_value = self.device.storage["non_user_config"][
-            "min_celsius_temp"
-        ]
-        self._attr_native_max_value = self.device.storage["non_user_config"][
-            "max_celsius_temp"
-        ]
-        self._attr_native_step = self.device.storage["non_user_config"][
-            "native_temp_step"
-        ]
+        self._attr_native_min_value = self.device.data.lower_temperature_limit
+        self._attr_native_max_value = self.device.data.upper_temperature_limit        
+        self._attr_native_step = self.device.storage["non_user_config"]["native_temp_step"]
 
     @property
     def available(self) -> bool:

@@ -28,7 +28,7 @@ async def async_setup_entry(
 
     sensors = []
     # for device in config_entry.devices:
-    #     if device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_1:
+    #     if device.device_type == DeviceTypeEnum.SPLIT_AC:
     #         sensors.append(
     #             BinarySensor(
     #                 coordinator=coordinator,

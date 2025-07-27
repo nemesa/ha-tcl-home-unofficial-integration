@@ -19,7 +19,7 @@ from .device_data_storage import (
     safe_set_value,
     set_stored_data,
 )
-from .device_ac_common import getMode, ModeEnum
+from .device_enums import getMode, ModeEnum
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -86,17 +86,16 @@ class DesiredStateHandlerForSwitch:
                     or mode == ModeEnum.FAN
                 ):
                     return False
-                if DeviceFeatureEnum.SWITCH_8_C_HEATING in self.device.supported_features:
+                if (
+                    DeviceFeatureEnum.SWITCH_8_C_HEATING
+                    in self.device.supported_features
+                ):
                     if self.device.data.eight_add_hot == 1:
                         return False
                 return True
             case DeviceFeatureEnum.SWITCH_SOFT_WIND:
-                if self.device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_2:
-                    if mode != ModeEnum.COOL:
-                        return False
-                if DeviceFeatureEnum.SWITCH_8_C_HEATING in self.device.supported_features:
-                    if self.device.data.eight_add_hot == 1:
-                        return False
+                if mode != ModeEnum.COOL:
+                    return False
                 return True
             case DeviceFeatureEnum.SWITCH_8_C_HEATING:
                 if mode == ModeEnum.HEAT:
@@ -154,9 +153,13 @@ class DesiredStateHandlerForSwitch:
 
     async def SWITCH_ECO(self, value: int):
         desired_state = {"ECO": value}
-        if self.device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_1:
+
+        if (DeviceFeatureEnum.INTERNAL_HAS_TURBO_PROPERTY in self.device.supported_features
+            and DeviceFeatureEnum.INTERNAL_HAS_HIGHTEMPERATUREWIND_PROPERTY in self.device.supported_features
+            and DeviceFeatureEnum.INTERNAL_HAS_SILENCESWITCH_PROPERTY in self.device.supported_features
+        ):
             desired_state["highTemperatureWind"] = 0
-            desired_state["turbo"] = 0
+            desired_state["highTemperatureWind"] = 0
             desired_state["silenceSwitch"] = 0
             desired_state["windSpeed"] = 0
 
@@ -240,7 +243,6 @@ async def async_setup_entry(
     coordinator = config_entry.runtime_data.coordinator
     switches = []
     for device in config_entry.devices:
-
         if DeviceFeatureEnum.SWITCH_POWER in device.supported_features:
             switches.append(
                 SwitchHandler(

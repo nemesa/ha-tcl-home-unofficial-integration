@@ -152,3 +152,127 @@ def getWindSeed7Gear(wind_speed_7_gear: int) -> WindSeed7GearEnum:
             return WindSeed7GearEnum.AUTO
         case _:
             return WindSeed7GearEnum.AUTO
+
+
+class WindSeedEnum(StrEnum):
+    STRONG = "Strong"
+    HIGH = "High"
+    MID_HIGH = "Mid-high"
+    MID_LOW = "Mid-low"
+    MEDIUM = "Medium"
+    LOW = "Low"
+    MUTE = "Mute"
+    AUTO = "Auto"
+
+
+def getWindSpeed(wind_speed: int, turbo: int, silence_switch: int) -> WindSeedEnum:
+    match wind_speed:
+        case 6:
+            return WindSeedEnum.STRONG if turbo == 1 else WindSeedEnum.HIGH
+        case 5:
+            return WindSeedEnum.MID_HIGH
+        case 4:
+            return WindSeedEnum.MEDIUM
+        case 3:
+            return WindSeedEnum.MID_LOW
+        case 2:
+            return WindSeedEnum.MUTE if silence_switch == 1 else WindSeedEnum.LOW
+        case 0:
+            return WindSeedEnum.AUTO
+        case _:
+            return WindSeedEnum.AUTO
+
+
+class PortableWindSeedEnum(StrEnum):
+    HIGH = "High"
+    LOW = "Low"
+    AUTO = "Auto"
+
+
+def getPortableWindSeed(wind_speed: int) -> PortableWindSeedEnum:
+    match wind_speed:
+        case 2:
+            return PortableWindSeedEnum.HIGH
+        case 1:
+            return PortableWindSeedEnum.LOW
+        case 0:
+            return PortableWindSeedEnum.AUTO
+        case _:
+            return PortableWindSeedEnum.AUTO
+
+
+class TemperatureTypeEnum(StrEnum):
+    FAHRENHEIT = "Fahrenheit"
+    CELSIUS = "Celsius"
+
+
+def getTemperatureType(temperature_type: int) -> TemperatureTypeEnum:
+    match temperature_type:
+        case 1:
+            return TemperatureTypeEnum.FAHRENHEIT
+        case 0:
+            return TemperatureTypeEnum.CELSIUS
+        case _:
+            return TemperatureTypeEnum.CELSIUS
+
+
+class FreshAirEnum(StrEnum):
+    AUTO = "Auto"
+    STRENGTH_1 = "1"
+    STRENGTH_2 = "2"
+    STRENGTH_3 = "3"
+
+
+def getFreshAir(new_wind_strength: int) -> FreshAirEnum:
+    match new_wind_strength:
+        case 1:
+            return FreshAirEnum.STRENGTH_1
+        case 2:
+            return FreshAirEnum.STRENGTH_2
+        case 3:
+            return FreshAirEnum.STRENGTH_3
+        case 0:
+            return FreshAirEnum.AUTO
+        case _:
+            return FreshAirEnum.AUTO
+
+
+class WindFeelingEnum(StrEnum):
+    NONE = "Not set"
+    SOFT = "Soft"
+    SHOWER = "Shower"
+    CARPET = "Carpet"
+    SURROUND = "Surround"
+
+
+def getWindFeeling(soft_wind: int) -> WindFeelingEnum:
+    match soft_wind:
+        case 1:
+            return WindFeelingEnum.SOFT
+        case 2:
+            return WindFeelingEnum.SHOWER
+        case 3:
+            return WindFeelingEnum.CARPET
+        case 3:
+            return WindFeelingEnum.SURROUND
+        case 0:
+            return WindFeelingEnum.NONE
+        case _:
+            return WindFeelingEnum.NONE
+
+class GeneratorModeEnum(StrEnum):
+    NONE = "Not set"
+    L1 = "L1 30%"
+    L2 = "L1 50%"
+    L3 = "L1 70%"
+
+def getGeneratorMode(generator_mode:int) -> GeneratorModeEnum:
+    match generator_mode:
+        case 1:
+            return GeneratorModeEnum.L1
+        case 2:
+            return GeneratorModeEnum.L2
+        case 3:
+            return GeneratorModeEnum.L3
+        case 0:
+            return GeneratorModeEnum.NONE

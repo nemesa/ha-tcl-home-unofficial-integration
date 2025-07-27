@@ -60,20 +60,8 @@ async def async_setup_entry(
 
     buttons = []
     for device in config_entry.devices:
-        if device.device_type == DeviceTypeEnum.SPLIT_AC:
-            buttons.append(
-                NotImplementedDevice_Clear_ManualStateDump_Button(
-                    hass, coordinator, device, True
-                )
-            )
-        else:
-            buttons.append(
-                NotImplementedDevice_Clear_ManualStateDump_Button(
-                    hass, coordinator, device, False
-                )
-            )
-            buttons.append(Reload_Button(coordinator, device))
-
+        buttons.append(NotImplementedDevice_Clear_ManualStateDump_Button(hass, coordinator, device, False))
+        buttons.append(Reload_Button(coordinator, device))
         if DeviceFeatureEnum.BUTTON_SELF_CLEAN in device.supported_features:
             buttons.append(
                 ButtonHandler(
