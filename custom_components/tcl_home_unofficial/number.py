@@ -10,12 +10,9 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .calculations import celsius_to_fahrenheit
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import (
-    Device,
-    DeviceFeature,
-    DeviceTypeEnum,
-    getSupportedFeatures,
-)
+from .device import Device
+from .device_features import DeviceFeatureEnum
+from .device_types import DeviceTypeEnum
 from .device_ac_common import ModeEnum, getMode
 from .device_data_storage import set_stored_data,get_stored_data
 from .tcl_entity_base import TclEntityBase
@@ -28,7 +25,7 @@ class DesiredStateHandlerForNumber:
         self,
         hass: HomeAssistant,
         coordinator: IotDeviceCoordinator,
-        deviceFeature: DeviceFeature,
+        deviceFeature: DeviceFeatureEnum,
         device: Device,
     ) -> None:
         self.hass = hass
@@ -41,9 +38,9 @@ class DesiredStateHandlerForNumber:
 
     async def call_set_number(self, value: int | float) -> str:
         match self.deviceFeature:
-            case DeviceFeature.NUMBER_TARGET_TEMPERATURE:
+            case DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE:
                 return await self.NUMBER_TARGET_TEMPERATURE(value=value)
-            case DeviceFeature.NUMBER_TARGET_DEGREE:
+            case DeviceFeatureEnum.NUMBER_TARGET_DEGREE:
                 return await self.NUMBER_TARGET_DEGREE(value=value)
 
     async def store_target_temp(self, value: int | float):
@@ -67,10 +64,9 @@ class DesiredStateHandlerForNumber:
                 max_temp,
             )
             return
-
-        supported_features = getSupportedFeatures(self.device.device_type)
+        
         desired_state = {"targetTemperature": value}
-        if DeviceFeature.INTERNAL_SET_TFT_WITH_TT in supported_features:
+        if DeviceFeatureEnum.INTERNAL_SET_TFT_WITH_TT in self.device.supported_features:
             value_fahrenheit_to_set = celsius_to_fahrenheit(value)
             desired_state["targetFahrenheitTemp"] = value_fahrenheit_to_set
         return await self.coordinator.get_aws_iot().async_set_desired_state(
@@ -100,19 +96,11 @@ class DesiredStateHandlerForNumber:
             self.device.device_id, desired_state
         )
 
-
-def allow_float(supported_features: list[DeviceFeature]) -> bool:
-    return (
-        DeviceFeature.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS in supported_features
-    )
-
-
 def is_allowed(device: Device) -> bool:
-    supported_features = getSupportedFeatures(device.device_type)
     if device.device_type == DeviceTypeEnum.PORTABLE_AC:
         return getMode(device.data.work_mode) == ModeEnum.COOL
     else:
-        if DeviceFeature.SWITCH_8_C_HEATING in supported_features:
+        if DeviceFeatureEnum.SWITCH_8_C_HEATING in device.supported_features:
             if device.data.eight_add_hot == 1:
                 return False
         return True
@@ -128,40 +116,39 @@ async def async_setup_entry(
 
     customEntities = []
     for device in config_entry.devices:
-        supported_features = getSupportedFeatures(device.device_type)
 
-        if DeviceFeature.NUMBER_TARGET_TEMPERATURE in supported_features:
+        if DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE in device.supported_features:
             customEntities.append(
                 TemperatureHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
-                    deviceFeature=DeviceFeature.NUMBER_TARGET_TEMPERATURE,
+                    deviceFeature=DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE,
                     name="Set Target Temperature",
                     type="SetTargetTemperature",
                     available_fn=lambda device: is_allowed(device),
                     current_value_fn=lambda device: float(
                         device.data.target_temperature
                     )
-                    if allow_float(supported_features)
+                    if DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS in device.supported_features
                     else int(device.data.target_temperature),
                 )
             )
 
-        if DeviceFeature.NUMBER_TARGET_DEGREE in supported_features:
+        if DeviceFeatureEnum.NUMBER_TARGET_DEGREE in device.supported_features:
             customEntities.append(
                 TemperatureHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
-                    deviceFeature=DeviceFeature.NUMBER_TARGET_DEGREE,
+                    deviceFeature=DeviceFeatureEnum.NUMBER_TARGET_DEGREE,
                     name="Set Target Temperature",
                     type="SetTargetDegree",
                     available_fn=lambda device: is_allowed(device),
                     current_value_fn=lambda device: float(
                         device.data.target_temperature
                     )
-                    if allow_float(supported_features)
+                    if DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS in device.supported_features
                     else int(device.data.target_temperature),
                 )
             )
@@ -177,7 +164,7 @@ class TemperatureHandler(TclEntityBase, NumberEntity):
         device: Device,
         type: str,
         name: str,
-        deviceFeature: DeviceFeature,
+        deviceFeature: DeviceFeatureEnum,
         current_value_fn: lambda device: bool | None,
         available_fn: lambda device: bool,
     ) -> None:

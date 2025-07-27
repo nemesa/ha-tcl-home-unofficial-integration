@@ -1,0 +1,8 @@
+[3, 7, 8, 9, 11, 12, 13, 23]
+
+
+
+    I really don't have 8C Heating
+    There is no turning on of the generator
+    Switching the flow rate is not entirely clear, in terms of the fact that I clearly do not see the Turbo mode
+    There is no Gentle Wind mode

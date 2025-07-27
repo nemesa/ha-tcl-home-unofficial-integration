@@ -10,7 +10,8 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device, Device, getSupportedFeatures, DeviceFeature, DeviceTypeEnum
+from .device import Device, Device, DeviceTypeEnum
+from .device_features import DeviceFeatureEnum
 from .tcl_entity_base import TclEntityBase, TclNonPollingEntityBase
 from .self_diagnostics import SelfDiagnostics
 
@@ -22,7 +23,7 @@ class DesiredStateHandlerForButton:
         self,
         hass: HomeAssistant,
         coordinator: IotDeviceCoordinator,
-        deviceFeature: DeviceFeature,
+        deviceFeature: DeviceFeatureEnum,
         device: Device,
     ) -> None:
         self.hass = hass
@@ -35,7 +36,7 @@ class DesiredStateHandlerForButton:
 
     async def call_button(self, value: int) -> str:
         match self.deviceFeature:
-            case DeviceFeature.BUTTON_SELF_CLEAN:
+            case DeviceFeatureEnum.BUTTON_SELF_CLEAN:
                 return await self.BUTTON_SELF_CLEAN(value=value)
 
     async def BUTTON_SELF_CLEAN(self, value: int):
@@ -59,7 +60,6 @@ async def async_setup_entry(
 
     buttons = []
     for device in config_entry.devices:
-        supported_features = getSupportedFeatures(device.device_type)
         if device.device_type == DeviceTypeEnum.SPLIT_AC:
             buttons.append(
                 NotImplementedDevice_Clear_ManualStateDump_Button(
@@ -74,7 +74,7 @@ async def async_setup_entry(
             )
             buttons.append(Reload_Button(coordinator, device))
 
-        if DeviceFeature.BUTTON_SELF_CLEAN in supported_features:
+        if DeviceFeatureEnum.BUTTON_SELF_CLEAN in device.supported_features:
             buttons.append(
                 ButtonHandler(
                     hass=hass,
@@ -85,7 +85,7 @@ async def async_setup_entry(
                     name_fn=lambda device: "Stop Evaporator Cleaning"
                     if device.data.self_clean == 1
                     else "Start Evaporator Cleaning",
-                    deviceFeature=DeviceFeature.BUTTON_SELF_CLEAN,
+                    deviceFeature=DeviceFeatureEnum.BUTTON_SELF_CLEAN,
                     icon_fn=lambda device: "mdi:cancel"
                     if device.data.self_clean == 1
                     else "mdi:broom",
@@ -111,7 +111,7 @@ class ButtonHandler(TclEntityBase, ButtonEntity):
         device: Device,
         type: str,
         name: str,
-        deviceFeature: DeviceFeature,
+        deviceFeature: DeviceFeatureEnum,
         icon_fn: lambda device: str,
         name_fn: lambda device: str,
         value_fn: lambda device: int,
@@ -123,7 +123,7 @@ class ButtonHandler(TclEntityBase, ButtonEntity):
         self.iot_handler = DesiredStateHandlerForButton(
             hass=hass,
             coordinator=coordinator,
-            deviceFeature=deviceFeature,
+            deviceFeature=DeviceFeatureEnum,
             device=self.device,
         )
 

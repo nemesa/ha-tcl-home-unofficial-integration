@@ -10,7 +10,9 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device, getSupportedFeatures, DeviceFeature, DeviceTypeEnum
+from .device import Device
+from .device_features import DeviceFeatureEnum
+from .device_types import DeviceTypeEnum
 from .device_data_storage import (
     get_stored_data,
     safe_get_value,
@@ -34,7 +36,7 @@ class DesiredStateHandlerForSwitch:
         self,
         hass: HomeAssistant,
         coordinator: IotDeviceCoordinator,
-        deviceFeature: DeviceFeature,
+        deviceFeature: DeviceFeatureEnum,
         device: Device,
     ) -> None:
         self.hass = hass
@@ -47,67 +49,66 @@ class DesiredStateHandlerForSwitch:
 
     async def call_switch(self, value: int) -> str:
         match self.deviceFeature:
-            case DeviceFeature.SWITCH_POWER:
+            case DeviceFeatureEnum.SWITCH_POWER:
                 return await self.SWITCH_POWER(value=value)
-            case DeviceFeature.SWITCH_HEALTHY:
+            case DeviceFeatureEnum.SWITCH_HEALTHY:
                 return await self.SWITCH_HEALTHY(value=value)
-            case DeviceFeature.SWITCH_BEEP:
+            case DeviceFeatureEnum.SWITCH_BEEP:
                 return await self.SWITCH_BEEP(value=value)
-            case DeviceFeature.SWITCH_ECO:
+            case DeviceFeatureEnum.SWITCH_ECO:
                 return await self.SWITCH_ECO(value=value)
-            case DeviceFeature.SWITCH_DRYING:
+            case DeviceFeatureEnum.SWITCH_DRYING:
                 return await self.SWITCH_DRYING(value=value)
-            case DeviceFeature.SWITCH_SCREEN:
+            case DeviceFeatureEnum.SWITCH_SCREEN:
                 return await self.SWITCH_SCREEN(value=value)
-            case DeviceFeature.SWITCH_LIGHT_SENSE:
+            case DeviceFeatureEnum.SWITCH_LIGHT_SENSE:
                 return await self.SWITCH_LIGHT_SENSE(value=value)
-            case DeviceFeature.SWITCH_SWING_WIND:
+            case DeviceFeatureEnum.SWITCH_SWING_WIND:
                 return await self.SWITCH_SWING_WIND(value=value)
-            case DeviceFeature.SWITCH_SLEEP:
+            case DeviceFeatureEnum.SWITCH_SLEEP:
                 return await self.SWITCH_SLEEP(value=value)
-            case DeviceFeature.SWITCH_AI_ECO:
+            case DeviceFeatureEnum.SWITCH_AI_ECO:
                 return await self.SWITCH_AI_ECO(value=value)
-            case DeviceFeature.SWITCH_8_C_HEATING:
+            case DeviceFeatureEnum.SWITCH_8_C_HEATING:
                 return await self.SWITCH_8_C_HEATING(value=value)
-            case DeviceFeature.SWITCH_SOFT_WIND:
+            case DeviceFeatureEnum.SWITCH_SOFT_WIND:
                 return await self.SWITCH_SOFT_WIND(value=value)
-            case DeviceFeature.SWITCH_FRESH_AIR:
+            case DeviceFeatureEnum.SWITCH_FRESH_AIR:
                 return await self.SWITCH_FRESH_AIR(value=value)
 
     def is_allowed(self) -> bool:
-        supported_features = getSupportedFeatures(self.device.device_type)
         mode = getMode(self.device.data.work_mode)
         match self.deviceFeature:
-            case DeviceFeature.SWITCH_DRYING:
+            case DeviceFeatureEnum.SWITCH_DRYING:
                 if (
                     mode == ModeEnum.HEAT
                     or mode == ModeEnum.AUTO
                     or mode == ModeEnum.FAN
                 ):
                     return False
-                if DeviceFeature.SWITCH_8_C_HEATING in supported_features:
+                if DeviceFeatureEnum.SWITCH_8_C_HEATING in self.device.supported_features:
                     if self.device.data.eight_add_hot == 1:
                         return False
                 return True
-            case DeviceFeature.SWITCH_SOFT_WIND:
+            case DeviceFeatureEnum.SWITCH_SOFT_WIND:
                 if self.device.device_type == DeviceTypeEnum.SPLIT_AC_TYPE_2:
                     if mode != ModeEnum.COOL:
                         return False
-                if DeviceFeature.SWITCH_8_C_HEATING in supported_features:
+                if DeviceFeatureEnum.SWITCH_8_C_HEATING in self.device.supported_features:
                     if self.device.data.eight_add_hot == 1:
                         return False
                 return True
-            case DeviceFeature.SWITCH_8_C_HEATING:
+            case DeviceFeatureEnum.SWITCH_8_C_HEATING:
                 if mode == ModeEnum.HEAT:
                     return True
                 else:
                     return False
-            case DeviceFeature.SWITCH_SLEEP:
+            case DeviceFeatureEnum.SWITCH_SLEEP:
                 if mode == ModeEnum.FAN:
                     return False
                 else:
                     return True
-            case DeviceFeature.SWITCH_ECO:
+            case DeviceFeatureEnum.SWITCH_ECO:
                 if (
                     mode == ModeEnum.FAN
                     or mode == ModeEnum.DEHUMIDIFICATION
@@ -116,12 +117,12 @@ class DesiredStateHandlerForSwitch:
                     return False
                 else:
                     return True
-            case DeviceFeature.SWITCH_FRESH_AIR:
+            case DeviceFeatureEnum.SWITCH_FRESH_AIR:
                 if mode == ModeEnum.DEHUMIDIFICATION:
                     return False
                 else:
                     return True
-            case DeviceFeature.SWITCH_AI_ECO:
+            case DeviceFeatureEnum.SWITCH_AI_ECO:
                 if (
                     mode == ModeEnum.FAN
                     or mode == ModeEnum.DEHUMIDIFICATION
@@ -239,15 +240,14 @@ async def async_setup_entry(
     coordinator = config_entry.runtime_data.coordinator
     switches = []
     for device in config_entry.devices:
-        supported_features = getSupportedFeatures(device.device_type)
 
-        if DeviceFeature.SWITCH_POWER in supported_features:
+        if DeviceFeatureEnum.SWITCH_POWER in device.supported_features:
             switches.append(
                 SwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
-                    deviceFeature=DeviceFeature.SWITCH_POWER,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_POWER,
                     type="Power",
                     name="Power Switch",
                     icon_fn=lambda device: "mdi:power-plug"
@@ -257,13 +257,13 @@ async def async_setup_entry(
                 )
             )
 
-        if DeviceFeature.SWITCH_BEEP in supported_features:
+        if DeviceFeatureEnum.SWITCH_BEEP in device.supported_features:
             switches.append(
                 SwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
-                    deviceFeature=DeviceFeature.SWITCH_BEEP,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_BEEP,
                     type="BeepMode",
                     name="Beep Mode Switch",
                     icon_fn=lambda device: "mdi:volume-high"
@@ -273,13 +273,13 @@ async def async_setup_entry(
                 )
             )
 
-        if DeviceFeature.SWITCH_ECO in supported_features:
+        if DeviceFeatureEnum.SWITCH_ECO in device.supported_features:
             switches.append(
                 DynamicSwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
-                    deviceFeature=DeviceFeature.SWITCH_ECO,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_ECO,
                     type="ECO",
                     name="ECO Switch",
                     icon_fn=lambda device: "mdi:leaf"
@@ -289,13 +289,13 @@ async def async_setup_entry(
                 )
             )
 
-        if DeviceFeature.SWITCH_AI_ECO in supported_features:
+        if DeviceFeatureEnum.SWITCH_AI_ECO in device.supported_features:
             switches.append(
                 DynamicSwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
-                    deviceFeature=DeviceFeature.SWITCH_AI_ECO,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_AI_ECO,
                     type="aiECO",
                     name="AI ECO Switch",
                     icon_fn=lambda device: "mdi:leaf"
@@ -305,13 +305,13 @@ async def async_setup_entry(
                 )
             )
 
-        if DeviceFeature.SWITCH_8_C_HEATING in supported_features:
+        if DeviceFeatureEnum.SWITCH_8_C_HEATING in device.supported_features:
             switches.append(
                 DynamicSwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
-                    deviceFeature=DeviceFeature.SWITCH_8_C_HEATING,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_8_C_HEATING,
                     type="8CHeating",
                     name="8 °C Heating",
                     icon_fn=lambda device: "mdi:numeric-8-circle-outline",
@@ -319,13 +319,13 @@ async def async_setup_entry(
                 )
             )
 
-        if DeviceFeature.SWITCH_HEALTHY in supported_features:
+        if DeviceFeatureEnum.SWITCH_HEALTHY in device.supported_features:
             switches.append(
                 SwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
-                    deviceFeature=DeviceFeature.SWITCH_HEALTHY,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_HEALTHY,
                     type="Healthy",
                     name="Healthy Switch",
                     icon_fn=lambda device: "mdi:heart"
@@ -335,13 +335,13 @@ async def async_setup_entry(
                 )
             )
 
-        if DeviceFeature.SWITCH_DRYING in supported_features:
+        if DeviceFeatureEnum.SWITCH_DRYING in device.supported_features:
             switches.append(
                 DynamicSwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
-                    deviceFeature=DeviceFeature.SWITCH_DRYING,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_DRYING,
                     type="Drying",
                     name="Drying Switch",
                     icon_fn=lambda device: "mdi:opacity"
@@ -351,13 +351,13 @@ async def async_setup_entry(
                 )
             )
 
-        if DeviceFeature.SWITCH_SCREEN in supported_features:
+        if DeviceFeatureEnum.SWITCH_SCREEN in device.supported_features:
             switches.append(
                 SwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
-                    deviceFeature=DeviceFeature.SWITCH_SCREEN,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_SCREEN,
                     type="DiplayLight",
                     name="Diplay Light Switch",
                     icon_fn=lambda device: "mdi:lightbulb-outline"
@@ -367,13 +367,13 @@ async def async_setup_entry(
                 )
             )
 
-        if DeviceFeature.SWITCH_LIGHT_SENSE in supported_features:
+        if DeviceFeatureEnum.SWITCH_LIGHT_SENSE in device.supported_features:
             switches.append(
                 SwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
-                    deviceFeature=DeviceFeature.SWITCH_LIGHT_SENSE,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_LIGHT_SENSE,
                     type="LightSense",
                     name="Light Sense",
                     icon_fn=lambda device: "mdi:theme-light-dark",
@@ -381,13 +381,13 @@ async def async_setup_entry(
                 )
             )
 
-        if DeviceFeature.SWITCH_SWING_WIND in supported_features:
+        if DeviceFeatureEnum.SWITCH_SWING_WIND in device.supported_features:
             switches.append(
                 SwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
-                    deviceFeature=DeviceFeature.SWITCH_SWING_WIND,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_SWING_WIND,
                     type="SwingWind",
                     name="Up and down wind",
                     icon_fn=lambda device: "mdi:swap-vertical",
@@ -395,13 +395,13 @@ async def async_setup_entry(
                 )
             )
 
-        if DeviceFeature.SWITCH_SLEEP in supported_features:
+        if DeviceFeatureEnum.SWITCH_SLEEP in device.supported_features:
             switches.append(
                 DynamicSwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
-                    deviceFeature=DeviceFeature.SWITCH_SLEEP,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_SLEEP,
                     type="Sleep",
                     name="Sleep",
                     icon_fn=lambda device: "mdi:sleep",
@@ -409,13 +409,13 @@ async def async_setup_entry(
                 )
             )
 
-        if DeviceFeature.SWITCH_SOFT_WIND in supported_features:
+        if DeviceFeatureEnum.SWITCH_SOFT_WIND in device.supported_features:
             switches.append(
                 DynamicSwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
-                    deviceFeature=DeviceFeature.SWITCH_SOFT_WIND,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_SOFT_WIND,
                     type="SoftWind",
                     name="Soft Wind",
                     icon_fn=lambda device: "mdi:weather-dust",
@@ -423,13 +423,13 @@ async def async_setup_entry(
                 )
             )
 
-        if DeviceFeature.SWITCH_FRESH_AIR in supported_features:
+        if DeviceFeatureEnum.SWITCH_FRESH_AIR in device.supported_features:
             switches.append(
                 DynamicSwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
-                    deviceFeature=DeviceFeature.SWITCH_FRESH_AIR,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_FRESH_AIR,
                     type="FreshAir",
                     name="Fresh Air",
                     icon_fn=lambda device: "mdi:window-open-variant"
@@ -440,8 +440,8 @@ async def async_setup_entry(
             )
 
         if (
-            DeviceFeature.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE
-            in supported_features
+            DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE
+            in device.supported_features
         ):
             switches.append(
                 ConfigSwitchHandler(
@@ -454,8 +454,8 @@ async def async_setup_entry(
             )
 
         if (
-            DeviceFeature.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE
-            in supported_features
+            DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE
+            in device.supported_features
         ):
             switches.append(
                 ConfigSwitchHandler(
@@ -468,8 +468,8 @@ async def async_setup_entry(
             )
 
         if (
-            DeviceFeature.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON
-            in supported_features
+            DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON
+            in device.supported_features
         ):
             switches.append(
                 ConfigSwitchHandler(
@@ -492,7 +492,7 @@ class SwitchHandler(TclEntityBase, SwitchEntity):
         device: Device,
         type: str,
         name: str,
-        deviceFeature: DeviceFeature,
+        deviceFeature: DeviceFeatureEnum,
         icon_fn: lambda device: str,
         is_on_fn: lambda device: bool | None,
     ) -> None:
@@ -587,7 +587,7 @@ class DynamicSwitchHandler(SwitchHandler, SwitchEntity):
         device: Device,
         type: str,
         name: str,
-        deviceFeature: DeviceFeature,
+        deviceFeature: DeviceFeatureEnum,
         icon_fn: lambda device: str,
         is_on_fn: lambda device: bool | None,
     ) -> None:

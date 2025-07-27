@@ -15,13 +15,9 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import (
-    Device,
-    DeviceFeature,
-    DeviceTypeEnum,
-    getSupportedFeatures,
-    get_supported_modes,
-)
+from .device import (Device)
+from .device_features import DeviceFeatureEnum
+from .device_types import DeviceTypeEnum
 from .device_ac_common import (
     LeftAndRightAirSupplyVectorEnum,
     ModeEnum,
@@ -42,22 +38,19 @@ from .number import DesiredStateHandlerForNumber
 _LOGGER = logging.getLogger(__name__)
 
 def get_fan_seepd_feature(device: Device) -> str:
-    supported_features = getSupportedFeatures(device.device_type)
-    if DeviceFeature.SELECT_WIND_SPEED_7_GEAR in supported_features:
-        return DeviceFeature.SELECT_WIND_SPEED_7_GEAR
-    return DeviceFeature.SELECT_WIND_SPEED
+    if DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in device.supported_features:
+        return DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR
+    return DeviceFeatureEnum.SELECT_WIND_SPEED
 
 
 def get_current_fan_speed_fn(device: Device) -> str:
-    supported_features = getSupportedFeatures(device.device_type)
-    if DeviceFeature.SELECT_WIND_SPEED_7_GEAR in supported_features:
+    if DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in device.supported_features:
         return getWindSeed7Gear(device.data.wind_speed_7_gear)
     return TCL_SplitAC_Type1_DeviceData_Helper(device.data).getWindSpeed()
 
 
 def get_options_fan_speed(device: Device) -> list[str]:
-    supported_features = getSupportedFeatures(device.device_type)
-    if DeviceFeature.SELECT_WIND_SPEED_7_GEAR in supported_features:
+    if DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in device.supported_features:
         return [e.value for e in WindSeed7GearEnum]
     return [e.value for e in WindSeedEnum]
 
@@ -78,9 +71,8 @@ async def async_setup_entry(
 
     climates = []
     for device in config_entry.devices:
-        supported_features = getSupportedFeatures(device.device_type)
 
-        if DeviceFeature.CLIMATE in supported_features:
+        if DeviceFeatureEnum.CLIMATE in device.supported_features:
             climates.append(
                 ClimateHandler(
                     hass=hass,
@@ -90,11 +82,11 @@ async def async_setup_entry(
                     if device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR
                     else "SplitAc",
                     name="Climate",
-                    power_switch_feature=DeviceFeature.SWITCH_POWER,
-                    mode_select_feature=DeviceFeature.SELECT_MODE,
-                    temperature_set_feature=DeviceFeature.NUMBER_TARGET_TEMPERATURE,
-                    vertical_air_direction_select_feature=DeviceFeature.SELECT_VERTICAL_DIRECTION,
-                    horizontal_air_direction_select_feature=DeviceFeature.SELECT_HORIZONTAL_DIRECTION,
+                    power_switch_feature=DeviceFeatureEnum.SWITCH_POWER,
+                    mode_select_feature=DeviceFeatureEnum.SELECT_MODE,
+                    temperature_set_feature=DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE,
+                    vertical_air_direction_select_feature=DeviceFeatureEnum.SELECT_VERTICAL_DIRECTION,
+                    horizontal_air_direction_select_feature=DeviceFeatureEnum.SELECT_HORIZONTAL_DIRECTION,
                     fan_speed_select_feature=get_fan_seepd_feature(device),
                     current_fan_speed_fn=lambda device: get_current_fan_speed_fn(
                         device
@@ -110,7 +102,7 @@ async def async_setup_entry(
                     ).getLeftAndRightAirSupplyVector(),
                     options_fan_speed=get_options_fan_speed(device),
                     options_mode=[
-                        map_mode_to_hvac_mode(e) for e in get_supported_modes(device)
+                        map_mode_to_hvac_mode(e) for e in device.get_supported_modes()
                     ],
                     options_vertical_air_direction=[
                         e.value for e in UpAndDownAirSupplyVectorEnum
