@@ -88,9 +88,4 @@ def is_all_capabilities_implemented(capabilities: list[DeviceCapabilityEnum]) ->
         DeviceCapabilityEnum.CAPABILITY_43,
         DeviceCapabilityEnum.CAPABILITY_48,
     ]
-    _LOGGER.info(
-        "************************ is_all_capabilities_implemented %s in %s",
-        capabilities,
-        implemented_capabilities,
-    )
     return all(capability in capabilities for capability in implemented_capabilities)
