@@ -60,8 +60,13 @@ async def async_setup_entry(
 
     buttons = []
     for device in config_entry.devices:
-        buttons.append(NotImplementedDevice_Clear_ManualStateDump_Button(hass, coordinator, device, False))
+        buttons.append(
+            NotImplementedDevice_Clear_ManualStateDump_Button(
+                hass, coordinator, device, False
+            )
+        )
         buttons.append(Reload_Button(coordinator, device))
+
         if DeviceFeatureEnum.BUTTON_SELF_CLEAN in device.supported_features:
             buttons.append(
                 ButtonHandler(
@@ -111,7 +116,7 @@ class ButtonHandler(TclEntityBase, ButtonEntity):
         self.iot_handler = DesiredStateHandlerForButton(
             hass=hass,
             coordinator=coordinator,
-            deviceFeature=DeviceFeatureEnum,
+            deviceFeature=deviceFeature,
             device=self.device,
         )
 

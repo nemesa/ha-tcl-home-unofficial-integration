@@ -99,7 +99,7 @@ class DesiredStateHandlerForSelect:
                 return getWindSpeed(
                     wind_speed=self.device.data.wind_speed,
                     turbo=self.device.data.turbo,
-                    silence_switch=self.evice.data.silence_switch,
+                    silence_switch=self.device.data.silence_switch,
                 )
             case DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR:
                 return getWindSeed7Gear(self.device.data.wind_speed_7_gear)

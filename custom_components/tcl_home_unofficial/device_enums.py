@@ -158,8 +158,8 @@ class WindSeedEnum(StrEnum):
     STRONG = "Strong"
     HIGH = "High"
     MID_HIGH = "Mid-high"
-    MID_LOW = "Mid-low"
     MEDIUM = "Medium"
+    MID_LOW = "Mid-low"
     LOW = "Low"
     MUTE = "Mute"
     AUTO = "Auto"
@@ -260,13 +260,15 @@ def getWindFeeling(soft_wind: int) -> WindFeelingEnum:
         case _:
             return WindFeelingEnum.NONE
 
+
 class GeneratorModeEnum(StrEnum):
     NONE = "Not set"
     L1 = "L1 30%"
     L2 = "L1 50%"
     L3 = "L1 70%"
 
-def getGeneratorMode(generator_mode:int) -> GeneratorModeEnum:
+
+def getGeneratorMode(generator_mode: int) -> GeneratorModeEnum:
     match generator_mode:
         case 1:
             return GeneratorModeEnum.L1

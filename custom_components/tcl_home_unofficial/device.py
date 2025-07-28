@@ -39,9 +39,7 @@ class Device:
         self.device_type_str = device_type_str
         self.device_id = device_id
         if device_type is None:
-            self.device_type = calculateDeviceType(
-                device_id, device_type_str, aws_thing
-            )
+            self.device_type = calculateDeviceType(device_type_str)
         else:
             self.device_type = device_type
         self.name = name
