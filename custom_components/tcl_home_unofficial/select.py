@@ -686,17 +686,24 @@ def get_SELECT_HORIZONTAL_DIRECTION_name(device: Device) -> str:
     return "Left and Right air supply"
 
 
-def get_portable_ac_wind_speed_options(device: Device) -> list[str] | None:
+def get_SELECT_PORTABLE_WIND_SEED_options(device: Device) -> list[str] | None:
+    all = [PortableWindSeedEnum.LOW, PortableWindSeedEnum.HIGH]
+    if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
+        all.append(PortableWindSeedEnum.AUTO)  
+        
     current_mode = device.mode_value_to_enum_mapp.get(
-        device.data.work_mode, ModeEnum.AUTO
+        device.data.work_mode, ModeEnum.COOL
     )
     if current_mode == ModeEnum.DEHUMIDIFICATION:
-        return [PortableWindSeedEnum.AUTO]
+         if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
+            return [PortableWindSeedEnum.AUTO]
+        else:
+            return []
 
     if current_mode == ModeEnum.FAN:
         return [PortableWindSeedEnum.LOW, PortableWindSeedEnum.HIGH]
 
-    return [e.value for e in PortableWindSeedEnum]
+    return all
 
 
 def get_SELECT_SLEEP_MODE_available_fn(device: Device) -> str:
@@ -719,6 +726,16 @@ def get_SELECT_FRESH_AIR_available_fn(device: Device) -> str:
 def get_SELECT_WIND_SPEED_available_fn(device: Device) -> str:
     mode = device.mode_value_to_enum_mapp.get(device.data.work_mode, ModeEnum.AUTO)
     return mode != ModeEnum.DEHUMIDIFICATION
+
+def get_SELECT_PORTABLE_WIND_SEED_available_fn(device: Device) -> str:
+    if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
+        return device.data.sleep != 1
+    else:
+        current_mode = device.mode_value_to_enum_mapp.get(device.data.work_mode, ModeEnum.COOL)
+        if current_mode == ModeEnum.DEHUMIDIFICATION:
+            return False
+        return device.data.sleep != 1
+
 
 
 async def async_setup_entry(
@@ -784,10 +801,10 @@ async def async_setup_entry(
                     type="PortableWindSpeed",
                     name="Wind Speed",
                     icon_fn=lambda device: "mdi:weather-windy",
-                    options_values_fn=lambda device: get_portable_ac_wind_speed_options(
+                    options_values_fn=lambda device: get_SELECT_PORTABLE_WIND_SEED_options(
                         device
                     ),
-                    available_fn=lambda device: device.data.sleep != 1,
+                    available_fn=lambda device: get_SELECT_PORTABLE_WIND_SEED_available_fn(device),
                 )
             )
 
