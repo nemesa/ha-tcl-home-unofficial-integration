@@ -689,16 +689,15 @@ def get_SELECT_HORIZONTAL_DIRECTION_name(device: Device) -> str:
 def get_SELECT_PORTABLE_WIND_SEED_options(device: Device) -> list[str] | None:
     all = [PortableWindSeedEnum.LOW, PortableWindSeedEnum.HIGH]
     if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
-        all.append(PortableWindSeedEnum.AUTO)  
-        
+        all.append(PortableWindSeedEnum.AUTO)
+
     current_mode = device.mode_value_to_enum_mapp.get(
         device.data.work_mode, ModeEnum.COOL
     )
     if current_mode == ModeEnum.DEHUMIDIFICATION:
-         if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
+        if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
             return [PortableWindSeedEnum.AUTO]
-        else:
-            return []
+        return []
 
     if current_mode == ModeEnum.FAN:
         return [PortableWindSeedEnum.LOW, PortableWindSeedEnum.HIGH]
@@ -727,6 +726,7 @@ def get_SELECT_WIND_SPEED_available_fn(device: Device) -> str:
     mode = device.mode_value_to_enum_mapp.get(device.data.work_mode, ModeEnum.AUTO)
     return mode != ModeEnum.DEHUMIDIFICATION
 
+
 def get_SELECT_PORTABLE_WIND_SEED_available_fn(device: Device) -> str:
     if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
         return device.data.sleep != 1
@@ -735,7 +735,6 @@ def get_SELECT_PORTABLE_WIND_SEED_available_fn(device: Device) -> str:
         if current_mode == ModeEnum.DEHUMIDIFICATION:
             return False
         return device.data.sleep != 1
-
 
 
 async def async_setup_entry(
