@@ -10,6 +10,10 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class DeviceFeatureEnum(StrEnum):
+    MODE_AUTO = "mode.auto"
+    MODE_COOL = "mode.cool"
+    MODE_DEHUMIDIFICATION = "mode.dehumidification"
+    MODE_FAN = "mode.fan"
     MODE_HEAT = "mode.heat"
     SENSOR_CURRENT_TEMPERATURE = "sensor.current_temperature"
     SENSOR_INTERNAL_UNIT_COIL_TEMPERATURE = "sensor.internal_unit_coil_temperature"
@@ -67,6 +71,10 @@ def getSupportedFeatures(
     match device_type:
         case DeviceTypeEnum.SPLIT_AC:
             features = [
+                DeviceFeatureEnum.MODE_AUTO,
+                DeviceFeatureEnum.MODE_COOL,
+                DeviceFeatureEnum.MODE_DEHUMIDIFICATION,
+                DeviceFeatureEnum.MODE_FAN,
                 DeviceFeatureEnum.MODE_HEAT,
                 DeviceFeatureEnum.SENSOR_CURRENT_TEMPERATURE,
                 DeviceFeatureEnum.SWITCH_POWER,
@@ -129,6 +137,10 @@ def getSupportedFeatures(
             return features
         case DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
             return [
+                DeviceFeatureEnum.MODE_AUTO,
+                DeviceFeatureEnum.MODE_COOL,
+                DeviceFeatureEnum.MODE_DEHUMIDIFICATION,
+                DeviceFeatureEnum.MODE_FAN,
                 DeviceFeatureEnum.MODE_HEAT,
                 DeviceFeatureEnum.SENSOR_CURRENT_TEMPERATURE,
                 DeviceFeatureEnum.SENSOR_INTERNAL_UNIT_COIL_TEMPERATURE,
@@ -160,13 +172,21 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON,
             ]
         case DeviceTypeEnum.PORTABLE_AC:
-            return [
+            features = [
+                DeviceFeatureEnum.MODE_DEHUMIDIFICATION,
+                DeviceFeatureEnum.MODE_FAN,
+                DeviceFeatureEnum.MODE_COOL,
                 DeviceFeatureEnum.SWITCH_POWER,
-                DeviceFeatureEnum.SWITCH_SWING_WIND,
                 DeviceFeatureEnum.SWITCH_SLEEP,
                 DeviceFeatureEnum.SELECT_MODE,
                 DeviceFeatureEnum.SELECT_PORTABLE_WIND_SEED,
                 DeviceFeatureEnum.NUMBER_TARGET_DEGREE,
             ]
+            
+            if has_property(aws_thing_state_reported, "swingWind"):
+                features.append(DeviceFeatureEnum.SWITCH_SWING_WIND)
+                features.append(DeviceFeatureEnum.MODE_AUTO)
+                
+            return features
         case _:
             return []

@@ -24,7 +24,6 @@ from .device_enums import (
     ModeEnum,
     UpAndDownAirSupplyVectorEnum,
     getLeftAndRightAirSupplyVector,
-    getMode,
     WindSeedEnum,
     getWindSpeed,
     WindSeed7GearEnum,
@@ -63,7 +62,7 @@ def get_options_fan_speed(device: Device) -> list[str]:
 def get_current_mode_fn(device: Device) -> str:
     if device.data.power_switch == 0:
         return "OFF"
-    return getMode(device.data.work_mode)
+    return device.mode_value_to_enum_mapp.get(device.data.work_mode,ModeEnum.AUTO)
 
 
 async def async_setup_entry(

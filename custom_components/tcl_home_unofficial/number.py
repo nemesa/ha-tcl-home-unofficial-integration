@@ -13,7 +13,7 @@ from .coordinator import IotDeviceCoordinator
 from .device import Device
 from .device_features import DeviceFeatureEnum
 from .device_types import DeviceTypeEnum
-from .device_enums import ModeEnum, getMode
+from .device_enums import ModeEnum
 from .device_data_storage import set_stored_data,get_stored_data
 from .tcl_entity_base import TclEntityBase
 
@@ -45,7 +45,7 @@ class DesiredStateHandlerForNumber:
 
     async def store_target_temp(self, value: int | float):
         stored_data = await get_stored_data(self.hass, self.device.device_id)
-        mode = getMode(self.device.data.work_mode)
+        mode = self.device.mode_value_to_enum_mapp.get(self.device.data.work_mode,ModeEnum.AUTO)
         # _LOGGER.info("Storing target temperature %s for mode %s in device storage %s",value,mode,self.device.device_id)
         stored_data["target_temperature"][mode]["value"] = value       
         self.device.storage = stored_data
@@ -98,7 +98,7 @@ class DesiredStateHandlerForNumber:
 
 def is_allowed(device: Device) -> bool:
     if device.device_type == DeviceTypeEnum.PORTABLE_AC:
-        return getMode(device.data.work_mode) == ModeEnum.COOL
+        return device.mode_value_to_enum_mapp.get(device.data.work_mode,ModeEnum.AUTO) == ModeEnum.COOL
     else:
         if DeviceFeatureEnum.SWITCH_8_C_HEATING in device.supported_features:
             if device.data.eight_add_hot == 1:

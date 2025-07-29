@@ -11,22 +11,6 @@ class ModeEnum(StrEnum):
     AUTO = "Auto"
 
 
-def getMode(work_mode: int | float) -> ModeEnum:
-    match work_mode:
-        case 0:
-            return ModeEnum.AUTO
-        case 1:
-            return ModeEnum.COOL
-        case 2:
-            return ModeEnum.DEHUMIDIFICATION
-        case 3:
-            return ModeEnum.FAN
-        case 4:
-            return ModeEnum.HEAT
-        case _:
-            return ModeEnum.AUTO
-
-
 class UpAndDownAirSupplyVectorEnum(StrEnum):
     UP_AND_DOWN_SWING = "Up and down swing"
     UPWARDS_SWING = "Upwards swing"
@@ -189,16 +173,26 @@ class PortableWindSeedEnum(StrEnum):
     AUTO = "Auto"
 
 
-def getPortableWindSeed(wind_speed: int) -> PortableWindSeedEnum:
-    match wind_speed:
-        case 2:
-            return PortableWindSeedEnum.HIGH
-        case 1:
-            return PortableWindSeedEnum.LOW
-        case 0:
-            return PortableWindSeedEnum.AUTO
-        case _:
-            return PortableWindSeedEnum.AUTO
+def getPortableWindSeed(wind_speed: int, has_auto_mode:bool) -> PortableWindSeedEnum:
+    if has_auto_mode:    
+        match wind_speed:
+            case 2:
+                return PortableWindSeedEnum.HIGH
+            case 1:
+                return PortableWindSeedEnum.LOW
+            case 0:
+                return PortableWindSeedEnum.AUTO
+            case _:
+                return PortableWindSeedEnum.AUTO
+    else:
+        match wind_speed:
+            case 1:
+                return PortableWindSeedEnum.HIGH
+            case 0:
+                return PortableWindSeedEnum.LOW
+            case _:
+                return PortableWindSeedEnum.LOW
+        
 
 
 class TemperatureTypeEnum(StrEnum):

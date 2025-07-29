@@ -19,7 +19,7 @@ from .device_data_storage import (
     safe_set_value,
     set_stored_data,
 )
-from .device_enums import getMode, ModeEnum
+from .device_enums import ModeEnum
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -77,7 +77,7 @@ class DesiredStateHandlerForSwitch:
                 return await self.SWITCH_FRESH_AIR(value=value)
 
     def is_allowed(self) -> bool:
-        mode = getMode(self.device.data.work_mode)
+        mode = self.device.mode_value_to_enum_mapp.get(self.device.data.work_mode,ModeEnum.AUTO)
         match self.deviceFeature:
             case DeviceFeatureEnum.SWITCH_DRYING:
                 if (

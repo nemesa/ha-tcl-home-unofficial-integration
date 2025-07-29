@@ -24,6 +24,7 @@ from .device_types import DeviceTypeEnum, calculateDeviceType
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class Device:
     """Device."""
 
@@ -50,14 +51,18 @@ class Device:
         self.capabilities_str = ""
         self.capabilities = []
         self.supported_features = []
+        self.mode_enum_to_value_mapp = {}
+        self.mode_value_to_enum_mapp = {}
 
         if aws_thing is not None:
             self.has_aws_thing = "true"
             try:
                 if "state" in aws_thing:
                     if "reported" in aws_thing["state"]:
-                        self.supported_features = getSupportedFeatures(self.device_type, aws_thing["state"]["reported"])
-                                                
+                        self.supported_features = getSupportedFeatures(
+                            self.device_type, aws_thing["state"]["reported"]
+                        )
+                        self.create_mode_mapps()
                         if "capabilities" in aws_thing["state"]["reported"]:
                             capabilities_array = aws_thing["state"]["reported"][
                                 "capabilities"
@@ -72,8 +77,6 @@ class Device:
                     str(e),
                 )
                 self.capabilities_str = str(e)
-
-            
 
             match self.device_type:
                 case DeviceTypeEnum.SPLIT_AC:
@@ -111,12 +114,67 @@ class Device:
     firmware_version: str
     is_implemented_by_integration: bool
     storage: dict[str, any]
-    data: (TCL_SplitAC_DeviceData| TCL_SplitAC_Fresh_Air_DeviceData| TCL_PortableAC_DeviceData| None) = None
+    mode_enum_to_value_mapp: dict[str, int]
+    mode_value_to_enum_mapp: dict[int, str]
+    data: (
+        TCL_SplitAC_DeviceData
+        | TCL_SplitAC_Fresh_Air_DeviceData
+        | TCL_PortableAC_DeviceData
+        | None
+    ) = None
 
     def get_supported_modes(self) -> list[ModeEnum]:
-        if DeviceFeatureEnum.MODE_HEAT not in self.supported_features:
-            return [e.value for e in ModeEnum if e != ModeEnum.HEAT]
-        return [e.value for e in ModeEnum]
+        modes: list[ModeEnum] = []
+        if DeviceFeatureEnum.MODE_COOL in self.supported_features:
+            modes.append(ModeEnum.COOL)
+        if DeviceFeatureEnum.MODE_HEAT in self.supported_features:
+            modes.append(ModeEnum.HEAT)
+        if DeviceFeatureEnum.MODE_DEHUMIDIFICATION in self.supported_features:
+            modes.append(ModeEnum.DEHUMIDIFICATION)
+        if DeviceFeatureEnum.MODE_FAN in self.supported_features:
+            modes.append(ModeEnum.FAN)
+        if DeviceFeatureEnum.MODE_AUTO in self.supported_features:
+            modes.append(ModeEnum.AUTO)
+        return modes
+
+    def create_mode_mapps(self) -> None:
+        self.mode_enum_to_value_mapp: dict[str, int] = {}
+        self.mode_value_to_enum_mapp: dict[int,str] = {}
+        work_mode = 0
+        if DeviceFeatureEnum.MODE_AUTO in self.supported_features:
+            self.mode_enum_to_value_mapp[ModeEnum.AUTO] = work_mode
+            self.mode_value_to_enum_mapp[work_mode] = ModeEnum.AUTO
+            work_mode += 1
+        else:
+            self.mode_enum_to_value_mapp[ModeEnum.AUTO] = 0
+            
+        if DeviceFeatureEnum.MODE_COOL in self.supported_features:
+            self.mode_enum_to_value_mapp[ModeEnum.COOL] = work_mode
+            self.mode_value_to_enum_mapp[work_mode] = ModeEnum.COOL
+            work_mode += 1
+        else:
+            self.mode_enum_to_value_mapp[ModeEnum.COOL] = 0
+            
+        if DeviceFeatureEnum.MODE_DEHUMIDIFICATION in self.supported_features:
+            self.mode_enum_to_value_mapp[ModeEnum.DEHUMIDIFICATION] = work_mode
+            self.mode_value_to_enum_mapp[work_mode] = ModeEnum.DEHUMIDIFICATION
+            work_mode += 1
+        else:
+            self.mode_enum_to_value_mapp[ModeEnum.DEHUMIDIFICATION] = 0
+            
+        if DeviceFeatureEnum.MODE_FAN in self.supported_features:
+            self.mode_enum_to_value_mapp[ModeEnum.FAN] = work_mode
+            self.mode_value_to_enum_mapp[work_mode] = ModeEnum.FAN
+            work_mode += 1
+        else:
+            self.mode_enum_to_value_mapp[ModeEnum.FAN] = 0
+            
+        if DeviceFeatureEnum.MODE_HEAT in self.supported_features:
+            self.mode_enum_to_value_mapp[ModeEnum.HEAT] = work_mode
+            self.mode_value_to_enum_mapp[work_mode] = ModeEnum.HEAT
+            work_mode += 1
+        else:
+            self.mode_enum_to_value_mapp[ModeEnum.HEAT] = 0
 
 
 def toDeviceInfo(device: Device) -> DeviceInfo:
@@ -139,6 +197,6 @@ async def get_device_storage(hass: HomeAssistant, device: Device) -> None:
     if device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
         return await get_stored_spit_ac_fresh_data(hass, device.device_id)
     elif device.device_type == DeviceTypeEnum.SPLIT_AC:
-        return await get_stored_spit_ac_data(hass, device.device_id)    
+        return await get_stored_spit_ac_data(hass, device.device_id)
     elif device.device_type == DeviceTypeEnum.PORTABLE_AC:
         return await get_stored_portable_ac_data(hass, device.device_id)
