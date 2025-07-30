@@ -94,7 +94,12 @@ class DesiredStateHandlerForSelect:
                 return getSleepMode(self.device.data.sleep)
             case DeviceFeatureEnum.SELECT_MODE:
                 return self.device.mode_value_to_enum_mapp.get(
-                    self.device.data.work_mode, ModeEnum.AUTO
+                    self.device.data.work_mode,
+                    (
+                        ModeEnum.AUTO
+                        if DeviceFeatureEnum.MODE_AUTO in self.device.supported_features
+                        else ModeEnum.COOL
+                    ),
                 )
             case DeviceFeatureEnum.SELECT_WIND_SPEED:
                 return getWindSpeed(
@@ -494,19 +499,32 @@ class DesiredStateHandlerForSelect:
 
     def desired_state_SELECT_PORTABLE_WIND_SEED(self, value: PortableWindSeedEnum):
         desired_state = {}
-        match value:
-            case PortableWindSeedEnum.AUTO:
-                desired_state = {"windSpeed": 0}
-            case PortableWindSeedEnum.LOW:
-                desired_state = {"windSpeed": 1}
-            case PortableWindSeedEnum.HIGH:
-                desired_state = {"windSpeed": 2}
+        if DeviceFeatureEnum.MODE_AUTO in self.device.supported_features:
+            match value:
+                case PortableWindSeedEnum.AUTO:
+                    desired_state = {"windSpeed": 0}
+                case PortableWindSeedEnum.LOW:
+                    desired_state = {"windSpeed": 1}
+                case PortableWindSeedEnum.HIGH:
+                    desired_state = {"windSpeed": 2}
+        else:
+            match value:
+                case PortableWindSeedEnum.LOW:
+                    desired_state = {"windSpeed": 0}
+                case PortableWindSeedEnum.HIGH:
+                    desired_state = {"windSpeed": 1}
+
         return desired_state
 
     async def SELECT_PORTABLE_WIND_SEED(self, value: PortableWindSeedEnum):
         stored_data = await get_stored_data(self.hass, self.device.device_id)
         mode = self.device.mode_value_to_enum_mapp.get(
-            self.device.data.work_mode, ModeEnum.AUTO
+            self.device.data.work_mode,
+            (
+                ModeEnum.AUTO
+                if DeviceFeatureEnum.MODE_AUTO in self.device.supported_features
+                else ModeEnum.COOL
+            ),
         )
         stored_data, need_save = safe_set_value(
             stored_data, "fan_speed." + mode + ".value", value, overwrite_if_exists=True
@@ -706,7 +724,14 @@ def get_SELECT_PORTABLE_WIND_SEED_options(device: Device) -> list[str] | None:
 
 
 def get_SELECT_SLEEP_MODE_available_fn(device: Device) -> str:
-    mode = device.mode_value_to_enum_mapp.get(device.data.work_mode, ModeEnum.AUTO)
+    mode = device.mode_value_to_enum_mapp.get(
+        device.data.work_mode,
+        (
+            ModeEnum.AUTO
+            if DeviceFeatureEnum.MODE_AUTO in device.supported_features
+            else ModeEnum.COOL
+        ),
+    )
     if (
         mode == ModeEnum.DEHUMIDIFICATION
         or mode == ModeEnum.FAN
@@ -731,7 +756,9 @@ def get_SELECT_PORTABLE_WIND_SEED_available_fn(device: Device) -> str:
     if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
         return device.data.sleep != 1
     else:
-        current_mode = device.mode_value_to_enum_mapp.get(device.data.work_mode, ModeEnum.COOL)
+        current_mode = device.mode_value_to_enum_mapp.get(
+            device.data.work_mode, ModeEnum.COOL
+        )
         if current_mode == ModeEnum.DEHUMIDIFICATION:
             return False
         return device.data.sleep != 1
@@ -803,7 +830,9 @@ async def async_setup_entry(
                     options_values_fn=lambda device: get_SELECT_PORTABLE_WIND_SEED_options(
                         device
                     ),
-                    available_fn=lambda device: get_SELECT_PORTABLE_WIND_SEED_available_fn(device),
+                    available_fn=lambda device: get_SELECT_PORTABLE_WIND_SEED_available_fn(
+                        device
+                    ),
                 )
             )
 
