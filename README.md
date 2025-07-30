@@ -68,6 +68,17 @@ For info logs extend the `configuration.yaml` with
         custom_components.tcl_home_unofficial: info
    ```  
 
+## Functions map
+
+| Code reference | Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+| :--------------| :------: | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| SWITCH_POWER   | Off      | <img src="./function-map-images/ha_power_off.jpg" width="400"/> | <img src="./function-map-images/app_power_off.jpg" width="400"/> ||
+| SWITCH_POWER   | On       | <img src="./function-map-images/ha_power_on.jpg" width="400"/> | <img src="./function-map-images/app_power_on.jpg" width="400"/> ||
+| SELECT_WIND_SPEED   |       | <img src="./function-map-images/ha_windSpeed.jpg" width="400"/> | <img src="./function-map-images/app_windSpeed.jpg" width="400"/> ||
+| SELECT_WIND_SPEED   | AUTO      | <img src="./function-map-images/ha_windSpeed_options.jpg" width="400"/> | <img src="./function-map-images/app_windSpeed_options.jpg" width="400"/> ||
+
+
+
 ## How the integration looks
 
 Climate contoll implementaion:
@@ -79,3 +90,4 @@ Dashboard example:
 
 Integration mapping to the app (out dated picture, now less redundant sensors and +climate type controll):  
 ![Integration mapping to the app](./integration_map_to_app.jpg "Integration mapping to the app")
+
