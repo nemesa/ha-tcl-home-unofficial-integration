@@ -13,7 +13,8 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device, getSupportedFeatures, DeviceFeature
+from .device import Device
+from .device_features import DeviceFeatureEnum
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -30,9 +31,8 @@ async def async_setup_entry(
 
     sensors = []
     for device in config_entry.devices:
-        supported_features = getSupportedFeatures(device.device_type)
 
-        if DeviceFeature.SENSOR_CURRENT_TEMPERATURE in supported_features:
+        if DeviceFeatureEnum.SENSOR_CURRENT_TEMPERATURE in device.supported_features:
             sensors.append(
                 TemperatureSensor(
                     coordinator=coordinator,
@@ -43,7 +43,7 @@ async def async_setup_entry(
                 )
             )
 
-        if DeviceFeature.SENSOR_INTERNAL_UNIT_COIL_TEMPERATURE in supported_features:
+        if DeviceFeatureEnum.SENSOR_INTERNAL_UNIT_COIL_TEMPERATURE in device.supported_features:
             sensors.append(
                 TemperatureSensor(
                     coordinator=coordinator,
@@ -54,7 +54,7 @@ async def async_setup_entry(
                 )
             )
 
-        if DeviceFeature.SENSOR_EXTERNAL_UNIT_COIL_TEMPERATURE in supported_features:
+        if DeviceFeatureEnum.SENSOR_EXTERNAL_UNIT_COIL_TEMPERATURE in device.supported_features:
             sensors.append(
                 TemperatureSensor(
                     coordinator=coordinator,
@@ -65,7 +65,7 @@ async def async_setup_entry(
                 )
             )
 
-        if DeviceFeature.SENSOR_EXTERNAL_UNIT_TEMPERATURE in supported_features:
+        if DeviceFeatureEnum.SENSOR_EXTERNAL_UNIT_TEMPERATURE in device.supported_features:
             sensors.append(
                 TemperatureSensor(
                     coordinator=coordinator,
@@ -76,7 +76,7 @@ async def async_setup_entry(
                 )
             )
 
-        if DeviceFeature.SENSOR_EXTERNAL_UNIT_EXHAUST_TEMPERATURE in supported_features:
+        if DeviceFeatureEnum.SENSOR_EXTERNAL_UNIT_EXHAUST_TEMPERATURE in device.supported_features:
             sensors.append(
                 TemperatureSensor(
                     coordinator=coordinator,

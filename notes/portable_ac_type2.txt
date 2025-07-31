@@ -1,0 +1,39 @@
+"tcl_thing": [
+      {
+        "device_id": "0000001",
+        "platform": "TCLIOT",
+        "nick_name": "Room",
+        "device_name": "Portable AC",
+        "category": "AC",
+        "type": 1,
+        "device_type": "",
+        "firmware_version": "V8-R82CT08-WFMV025.3.0.3",
+        "net_type": 1,
+        "is_online": "1"
+      }
+    ],
+    "aws_thing": {
+      "state": {
+        "desired": {
+          "powerSwitch": 1,
+          "windSpeed": 0,
+          "workMode": 0,
+          "targetFahrenheitDegree": 75,
+          "targetCelsiusDegree": 24,
+          "currentTemperature": 27,
+          "temperatureType": 0,
+          "sleep": 0,
+          "errorCode": []
+        },
+        "reported": {
+          "powerSwitch": 1,
+          "windSpeed": 0,
+          "workMode": 0,
+          "targetFahrenheitDegree": 75,
+          "targetCelsiusDegree": 24,
+          "currentTemperature": 27,
+          "temperatureType": 0,
+          "sleep": 0,
+          "errorCode": []
+        }
+      },

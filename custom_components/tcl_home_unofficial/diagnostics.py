@@ -50,6 +50,8 @@ async def async_get_device_diagnostics(
                         "type": thing.type,
                         "device_type": thing.device_type,
                         "firmware_version": thing.firmware_version,
+                        "net_type": thing.net_type,
+                        "is_online": thing.is_online,
                     }
                 )
     except Exception as e:

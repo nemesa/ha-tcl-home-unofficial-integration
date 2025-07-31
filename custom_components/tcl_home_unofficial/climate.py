@@ -15,24 +15,19 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import (
-    Device,
-    DeviceFeature,
-    DeviceTypeEnum,
-    getSupportedFeatures,
-    get_supported_modes,
-)
-from .device_ac_common import (
+from .device import Device
+from .device_features import DeviceFeatureEnum
+from .device_types import DeviceTypeEnum
+from .device_enums import (
     LeftAndRightAirSupplyVectorEnum,
+    getUpAndDownAirSupplyVector,
     ModeEnum,
     UpAndDownAirSupplyVectorEnum,
-    getMode,
-    getWindSeed7Gear
-)
-from .device_spit_ac_type1 import TCL_SplitAC_Type1_DeviceData_Helper, WindSeedEnum
-from .device_spit_ac_fresh_air import (
-    TCL_SplitAC_Fresh_Air_DeviceData_Helper,
+    getLeftAndRightAirSupplyVector,
+    WindSeedEnum,
+    getWindSpeed,
     WindSeed7GearEnum,
+    getWindSeed7Gear,
 )
 from .tcl_entity_base import TclEntityBase
 from .switch import DesiredStateHandlerForSwitch
@@ -41,23 +36,25 @@ from .number import DesiredStateHandlerForNumber
 
 _LOGGER = logging.getLogger(__name__)
 
+
 def get_fan_seepd_feature(device: Device) -> str:
-    supported_features = getSupportedFeatures(device.device_type)
-    if DeviceFeature.SELECT_WIND_SPEED_7_GEAR in supported_features:
-        return DeviceFeature.SELECT_WIND_SPEED_7_GEAR
-    return DeviceFeature.SELECT_WIND_SPEED
+    if DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in device.supported_features:
+        return DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR
+    return DeviceFeatureEnum.SELECT_WIND_SPEED
 
 
 def get_current_fan_speed_fn(device: Device) -> str:
-    supported_features = getSupportedFeatures(device.device_type)
-    if DeviceFeature.SELECT_WIND_SPEED_7_GEAR in supported_features:
+    if DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in device.supported_features:
         return getWindSeed7Gear(device.data.wind_speed_7_gear)
-    return TCL_SplitAC_Type1_DeviceData_Helper(device.data).getWindSpeed()
+    return getWindSpeed(
+        wind_speed=device.data.wind_speed,
+        turbo=device.data.turbo,
+        silence_switch=device.data.silence_switch,
+    )
 
 
 def get_options_fan_speed(device: Device) -> list[str]:
-    supported_features = getSupportedFeatures(device.device_type)
-    if DeviceFeature.SELECT_WIND_SPEED_7_GEAR in supported_features:
+    if DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in device.supported_features:
         return [e.value for e in WindSeed7GearEnum]
     return [e.value for e in WindSeedEnum]
 
@@ -65,7 +62,7 @@ def get_options_fan_speed(device: Device) -> list[str]:
 def get_current_mode_fn(device: Device) -> str:
     if device.data.power_switch == 0:
         return "OFF"
-    return getMode(device.data.work_mode)
+    return device.mode_value_to_enum_mapp.get(device.data.work_mode,ModeEnum.AUTO)
 
 
 async def async_setup_entry(
@@ -78,9 +75,7 @@ async def async_setup_entry(
 
     climates = []
     for device in config_entry.devices:
-        supported_features = getSupportedFeatures(device.device_type)
-
-        if DeviceFeature.CLIMATE in supported_features:
+        if DeviceFeatureEnum.CLIMATE in device.supported_features:
             climates.append(
                 ClimateHandler(
                     hass=hass,
@@ -90,11 +85,11 @@ async def async_setup_entry(
                     if device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR
                     else "SplitAc",
                     name="Climate",
-                    power_switch_feature=DeviceFeature.SWITCH_POWER,
-                    mode_select_feature=DeviceFeature.SELECT_MODE,
-                    temperature_set_feature=DeviceFeature.NUMBER_TARGET_TEMPERATURE,
-                    vertical_air_direction_select_feature=DeviceFeature.SELECT_VERTICAL_DIRECTION,
-                    horizontal_air_direction_select_feature=DeviceFeature.SELECT_HORIZONTAL_DIRECTION,
+                    power_switch_feature=DeviceFeatureEnum.SWITCH_POWER,
+                    mode_select_feature=DeviceFeatureEnum.SELECT_MODE,
+                    temperature_set_feature=DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE,
+                    vertical_air_direction_select_feature=DeviceFeatureEnum.SELECT_VERTICAL_DIRECTION,
+                    horizontal_air_direction_select_feature=DeviceFeatureEnum.SELECT_HORIZONTAL_DIRECTION,
                     fan_speed_select_feature=get_fan_seepd_feature(device),
                     current_fan_speed_fn=lambda device: get_current_fan_speed_fn(
                         device
@@ -102,15 +97,11 @@ async def async_setup_entry(
                     current_mode_fn=lambda device: map_mode_to_hvac_mode(
                         get_current_mode_fn(device)
                     ),
-                    current_vertical_air_direction_fn=lambda device: TCL_SplitAC_Fresh_Air_DeviceData_Helper(
-                        device.data
-                    ).getUpAndDownAirSupplyVector(),
-                    current_horizontal_air_direction_fn=lambda device: TCL_SplitAC_Fresh_Air_DeviceData_Helper(
-                        device.data
-                    ).getLeftAndRightAirSupplyVector(),
+                    current_vertical_air_direction_fn=lambda device: getUpAndDownAirSupplyVector(device.data.vertical_direction),
+                    current_horizontal_air_direction_fn=lambda device: getLeftAndRightAirSupplyVector(device.data.horizontal_direction),
                     options_fan_speed=get_options_fan_speed(device),
                     options_mode=[
-                        map_mode_to_hvac_mode(e) for e in get_supported_modes(device)
+                        map_mode_to_hvac_mode(e) for e in device.get_supported_modes()
                     ],
                     options_vertical_air_direction=[
                         e.value for e in UpAndDownAirSupplyVectorEnum
@@ -269,8 +260,8 @@ class ClimateHandler(TclEntityBase, ClimateEntity):
         self._attr_temperature_unit = UnitOfTemperature.CELSIUS
 
         self._target_temperature = self.current_target_temp_fn(device)
-        self._attr_min_temp = self.device.storage["non_user_config"]["min_celsius_temp"]
-        self._attr_max_temp = self.device.storage["non_user_config"]["max_celsius_temp"]
+        self._attr_min_temp = self.device.data.lower_temperature_limit
+        self._attr_max_temp = self.device.data.upper_temperature_limit
         self._attr_target_temperature_step = self.device.storage["non_user_config"][
             "native_temp_step"
         ]

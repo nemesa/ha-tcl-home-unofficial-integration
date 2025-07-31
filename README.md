@@ -6,15 +6,6 @@
 
 ## Supported device types
 - Split AC
-  - Type 1: capabilities: [    3,      7,  8,  9, 11, 12, 13, 21]
-  - Type 1: capabilities: [    3,      7,  8,  9, 11, 12, 13, 21,     23]
-  - Type 1: capabilities: [    3,      7,  8,  9, 11, 12, 13,         23]
-  - Type 1: capabilities: [    3,      7,  8,  9, 11, 12, 13, 21, 22, 23]
-  - Type 1: capabilities: [    3,          8,  9, 11, 12, 13,     22, 23]
-  - Type 1: capabilities: [        5,  7,  8,  9, 11, 12, 13,         23, 28]
-  - Type 1: capabilities: [    3,  5,  7,  8,  9, 11, 12, 13, 21]
-  - Type 1: capabilities: [    3,  5,  7,  8,  9, 11, 12, 13, 21,     23]
-  - Type 2: capabilities: [2,  3,  7,  8,  9, 11, 12, 13, 21,     23, 31, 33, 34, 35, 36, 39, 40, 41, 42, 43, 48],
 - Split AC Fresh air
 - Portable AC
 
@@ -77,6 +68,316 @@ For info logs extend the `configuration.yaml` with
         custom_components.tcl_home_unofficial: info
    ```  
 
+## Functions map
+
+### SELECT_MODE
+SELECT_MODE
+| Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+| :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| <img src="./function-map-images/ha_mode_all.jpg" width="400"/> | <img src="./function-map-images/app_mode_auto.jpg" width="400"/> ||
+
+#### MODE_AUTO
+#### MODE_COOL
+#### MODE_DEHUMIDIFICATION
+#### MODE_FAN
+#### MODE_HEAT
+
+### SWITCH_POWER
+
+SWITCH_POWER - Powers on or powers off the device
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+|  Off      | <img src="./function-map-images/ha_power_off.jpg" width="400"/> | <img src="./function-map-images/app_power_off.jpg" width="400"/> ||
+|  On       | <img src="./function-map-images/ha_power_on.jpg" width="400"/> | <img src="./function-map-images/app_power_on.jpg" width="400"/> ||
+
+
+### SELECT_WIND_SPEED
+
+SELECT_WIND_SPEED - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+|            | <img src="./function-map-images/ha_windSpeed.jpg" width="400"/> | <img src="./function-map-images/app_windSpeed.jpg" width="400"/> ||
+|  AUTO      | <img src="./function-map-images/ha_windSpeed_options.jpg" width="400"/> | <img src="./function-map-images/app_windSpeed_options.jpg" width="400"/> ||
+
+
+### SWITCH_BEEP
+
+SWITCH_BEEP - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+|  Off      | <img src="./function-map-images/ha_beep_off.jpg" width="400"/> | <img src="./function-map-images/app_beep_off.jpg" width="400"/> ||
+|  On       | <img src="./function-map-images/ha_beep_on.jpg" width="400"/> | <img src="./function-map-images/app_beep_on.jpg" width="400"/> ||
+
+### SWITCH_ECO
+
+SWITCH_ECO - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+|  Off      | <img src="./function-map-images/ha_eco_off.jpg" width="400"/> | <img src="./function-map-images/app_power_on.jpg" width="400"/> ||
+|  On       | <img src="./function-map-images/ha_eco_on.jpg" width="400"/> | <img src="./function-map-images/app_eco_on.jpg" width="400"/> ||
+
+
+### SWITCH_AI_ECO
+
+SWITCH_AI_ECO - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+|            | | ||
+
+
+### SWITCH_HEALTHY
+
+SWITCH_HEALTHY - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+|  Off      | <img src="./function-map-images/ha_health_off.jpg" width="400"/> | <img src="./function-map-images/app_more_page.jpg" width="400"/> ||
+|  On       | <img src="./function-map-images/ha_health_on.jpg" width="400"/> | <img src="./function-map-images/app_health_on.jpg" width="400"/> ||
+
+
+### SWITCH_DRYING
+
+SWITCH_DRYING - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+|  Off      | <img src="./function-map-images/ha_drying_off.jpg" width="400"/> | (in "... More") <img src="./function-map-images/app_dying_off.jpg" width="400"/> | (in Settings) <img src="./function-map-images/app_dying_off_alter1.jpg" width="400"/>|
+|  On       | <img src="./function-map-images/ha_drying_off.jpg" width="400"/> | <img src="./function-map-images/app_dying_on.jpg" width="400"/> ||
+
+### SWITCH_SCREEN
+
+SWITCH_SCREEN - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+|  Off      | <img src="./function-map-images/ha_light_off.jpg" width="400"/> | <img src="./function-map-images/app_light_off.jpg" width="400"/> ||
+|  On       | <img src="./function-map-images/ha_light_on.jpg" width="400"/> | <img src="./function-map-images/app_light_on.jpg" width="400"/> ||
+
+
+### SWITCH_LIGHT_SENSE
+
+SWITCH_LIGHT_SENSE - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+|  Off      | TODO:add pic | (in Settings) <img src="./function-map-images/app_light_sensor_on.jpg" width="400"/> ||
+|  On       | TODO:add pic |TODO:add pic ||
+
+
+### SWITCH_SWING_WIND
+
+SWITCH_SWING_WIND - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+|  On       | TODO:add pic |TODO:add pic ||
+|  Off       | TODO:add pic |TODO:add pic ||
+
+### SWITCH_SLEEP
+
+SWITCH_SLEEP - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+|  On       | TODO:add pic |TODO:add pic ||
+|  Off      | TODO:add pic |TODO:add pic ||
+
+### SWITCH_8_C_HEATING
+
+SWITCH_8_C_HEATING - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+|  Off      | <img src="./function-map-images/ha_8Cheat_off.jpg" width="400"/> | <img src="./function-map-images/app_8Cheat_off.jpg" width="400"/> ||
+|  On       | <img src="./function-map-images/ha_8Cheat_on.jpg" width="400"/> | <img src="./function-map-images/app_8Cheat_on.jpg" width="400"/> ||
+
+### SWITCH_SOFT_WIND
+
+SWITCH_SOFT_WIND - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+|  On       | TODO:add pic |TODO:add pic ||
+|  Off      | TODO:add pic |TODO:add pic ||
+
+### SWITCH_FRESH_AIR
+
+SWITCH_FRESH_AIR - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+|  On       | TODO:add pic |TODO:add pic ||
+|  Off      | TODO:add pic |TODO:add pic ||
+
+### SELECT_WIND_SPEED_7_GEAR
+
+SELECT_WIND_SPEED_7_GEAR - 
+
+| Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+| :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| TODO:add pic |TODO:add pic ||
+
+### SELECT_WIND_FEELING
+
+SELECT_WIND_FEELING - 
+
+| Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+| :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| TODO:add pic |TODO:add pic ||
+
+### SELECT_VERTICAL_DIRECTION
+
+SELECT_VERTICAL_DIRECTION - 
+
+| Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+| :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| <img src="./function-map-images/ha_wind_vector_upDown_all.jpg" width="400"/> | <img src="./function-map-images/app_air_suply_upDown_all.jpg" width="400"/> ||
+
+### SELECT_HORIZONTAL_DIRECTION
+
+SELECT_HORIZONTAL_DIRECTION - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| <img src="./function-map-images/ha_air_suply_leftRight_all.jpg" width="400"/> | <img src="./function-map-images/app_air_suply_leftRight_all.jpg" width="400"/> ||
+
+### SELECT_SLEEP_MODE
+
+SELECT_SLEEP_MODE - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| <img src="./function-map-images/ha_sleep_all.jpg" width="400"/> | <img src="./function-map-images/app_sleep_all.jpg" width="400"/> ||
+
+### SELECT_FRESH_AIR
+
+SELECT_FRESH_AIR - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| TODO:add pic |TODO:add pic ||
+
+### SELECT_GENERATOR_MODE
+
+SELECT_GENERATOR_MODE - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| TODO:add pic |TODO:add pic ||
+
+### SELECT_TEMPERATURE_TYPE
+
+SELECT_TEMPERATURE_TYPE - not enabled to any devices as integrations is using °C and the Home Assistant will convert the user's System Temperature Unit.
+
+### SELECT_PORTABLE_WIND_SEED
+
+SELECT_PORTABLE_WIND_SEED - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| TODO:add pic |TODO:add pic ||
+
+### BUTTON_SELF_CLEAN
+
+BUTTON_SELF_CLEAN - 
+
+|  Value               | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------------------ | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+|  press to start      | <img src="./function-map-images/ha_evap_off.jpg" width="400"/> | <img src="./function-map-images/app_evap_off.jpg" width="400"/> ||
+|  press to stop       | TODO:Fix text ("start" should be "stop") <img src="./function-map-images/ha_evap_on.jpg" width="400"/> | <img src="./function-map-images/app_evap_on.jpg" width="400"/> ||
+
+### NUMBER_TARGET_TEMPERATURE
+
+NUMBER_TARGET_TEMPERATURE - 
+NUMBER_TARGET_DEGREE
+NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS
+
+| Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+| :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| TODO:add pic |TODO:add pic ||
+
+### CLIMATE
+
+CLIMATE
+
+| Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+| :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| TODO:add pic |TODO:add pic ||
+
+### SENSOR_CURRENT_TEMPERATURE
+
+SENSOR_CURRENT_TEMPERATURE
+
+| Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+| :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| TODO:add pic |TODO:add pic ||
+
+### SENSOR_INTERNAL_UNIT_COIL_TEMPERATURE
+
+SENSOR_INTERNAL_UNIT_COIL_TEMPERATURE
+
+| Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+| :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| TODO:add pic |TODO:add pic ||
+
+### SENSOR_EXTERNAL_UNIT_COIL_TEMPERATURE
+
+SENSOR_EXTERNAL_UNIT_COIL_TEMPERATURE
+
+| Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+| :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| TODO:add pic |TODO:add pic ||
+
+### SENSOR_EXTERNAL_UNIT_TEMPERATURE
+
+SENSOR_EXTERNAL_UNIT_TEMPERATURE
+
+| Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+| :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| TODO:add pic |TODO:add pic ||
+
+### SENSOR_EXTERNAL_UNIT_EXHAUST_TEMPERATURE
+
+SENSOR_EXTERNAL_UNIT_EXHAUST_TEMPERATURE
+
+| Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+| :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| TODO:add pic |TODO:add pic ||
+
+### USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE
+
+USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE
+
+| Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+| :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| TODO:add pic |TODO:add pic ||
+  
+
+### USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE
+
+USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE
+
+| Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+| :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| TODO:add pic |TODO:add pic ||
+  
+
+### USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON
+
+USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON
+
+| Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+| :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| TODO:add pic |TODO:add pic ||
+  
+    
+
+
 ## How the integration looks
 
 Climate contoll implementaion:
@@ -86,5 +387,4 @@ Climate contoll implementaion:
 Dashboard example:  
 ![Dashboard example](./dashboard_example.jpg "Dashboard example")
 
-Integration mapping to the app (out dated picture, now less redundant sensors and +climate type controll):  
-![Integration mapping to the app](./integration_map_to_app.jpg "Integration mapping to the app")
+

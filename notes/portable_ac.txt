@@ -11,6 +11,8 @@ thing {
   sleep: 0,
   errorCode: []
 }
+
+
 set temp
 {"state":{"desired":{"targetCelsiusDegree":24,"targetFahrenheitDegree":75}},"clientToken":"mobile_1752833975985"}
 {"state":{"desired":{"targetCelsiusDegree":18,"targetFahrenheitDegree":64}},"clientToken":"mobile_1752833988734"}

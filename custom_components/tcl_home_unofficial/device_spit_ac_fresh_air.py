@@ -1,124 +1,44 @@
 """."""
 
-from homeassistant.core import HomeAssistant
-from .device_data_storage import get_stored_data, set_stored_data, safe_set_value
 from dataclasses import dataclass
-from enum import StrEnum
 
-from .device_ac_common import (
-    LeftAndRightAirSupplyVectorEnum,
-    getLeftAndRightAirSupplyVector,
-    UpAndDownAirSupplyVectorEnum,
-    getUpAndDownAirSupplyVector,
-    ModeEnum,
-    getMode,
-    SleepModeEnum,
-    getSleepMode,
-    WindSeed7GearEnum,
-)
+from homeassistant.core import HomeAssistant
 
-
-
-
-
-class FreshAirEnum(StrEnum):
-    AUTO = "Auto"
-    STRENGTH_1 = "1"
-    STRENGTH_2 = "2"
-    STRENGTH_3 = "3"
-
-
-class WindFeelingEnum(StrEnum):
-    NONE = "Not set"
-    SOFT = "Soft"
-    SHOWER = "Shower"
-    CARPET = "Carpet"
-    SURROUND = "Surround"
-
-
-class GeneratorModeEnum(StrEnum):
-    NONE = "Not set"
-    L1 = "L1 30%"
-    L2 = "L1 50%"
-    L3 = "L1 70%"
+from .calculations import try_get_value
+from .device_data_storage import get_stored_data, safe_set_value, set_stored_data
 
 
 @dataclass
 class TCL_SplitAC_Fresh_Air_DeviceData:
     def __init__(self, device_id: str, aws_thing_state: dict, delta: dict) -> None:
-        self.beep_switch = int(delta.get("beepSwitch", aws_thing_state["beepSwitch"]))
-        self.power_switch = int(
-            delta.get("powerSwitch", aws_thing_state["powerSwitch"])
-        )
-        self.target_temperature = float(
-            delta.get("targetTemperature", aws_thing_state["targetTemperature"])
-        )
-        self.current_temperature = float(
-            delta.get("currentTemperature", aws_thing_state["currentTemperature"])
-        )
-        self.internal_unit_coil_temperature = float(
-            delta.get(
-                "internalUnitCoilTemperature",
-                aws_thing_state["internalUnitCoilTemperature"],
-            )
-        )
-        self.work_mode = int(delta.get("workMode", aws_thing_state["workMode"]))
-
-        self.vertical_direction = int(
-            delta.get("verticalDirection", aws_thing_state["verticalDirection"])
-        )
-
-        self.horizontal_direction = int(
-            delta.get("horizontalDirection", aws_thing_state["horizontalDirection"])
-        )
-
-        self.wind_speed_auto_switch = int(
-            delta.get("windSpeedAutoSwitch", aws_thing_state["windSpeedAutoSwitch"])
-        )
-
-        self.wind_speed_7_gear = int(
-            delta.get("windSpeed7Gear", aws_thing_state["windSpeed7Gear"])
-        )
-
-        self.new_wind_switch = int(
-            delta.get("newWindSwitch", aws_thing_state["newWindSwitch"])
-        )
-        self.new_wind_auto_switch = int(
-            delta.get("newWindAutoSwitch", aws_thing_state["newWindAutoSwitch"])
-        )
-        self.new_wind_strength = int(
-            delta.get("newWindStrength", aws_thing_state["newWindStrength"])
-        )
-        self.soft_wind = int(delta.get("softWind", aws_thing_state["softWind"]))
-        self.generator_mode = int(
-            delta.get("generatorMode", aws_thing_state["generatorMode"])
-        )
-
-        self.sleep = int(delta.get("sleep", aws_thing_state["sleep"]))
-        self.eco = int(delta.get("ECO", aws_thing_state["ECO"]))
-        self.healthy = int(delta.get("healthy", aws_thing_state["healthy"]))
-        self.anti_moldew = int(delta.get("antiMoldew", aws_thing_state["antiMoldew"]))
-        self.self_clean = int(delta.get("selfClean", aws_thing_state["selfClean"]))
-        self.screen = int(delta.get("screen", aws_thing_state["screen"]))
-        self.light_sense = int(delta.get("lightSense", aws_thing_state["lightSense"]))
-        self.external_unit_coil_temperature = int(
-            delta.get(
-                "externalUnitCoilTemperature",
-                aws_thing_state["externalUnitCoilTemperature"],
-            )
-        )
-        self.external_unit_temperature = int(
-            delta.get(
-                "externalUnitTemperature", aws_thing_state["externalUnitTemperature"]
-            )
-        )
-        self.external_unit_exhaust_temperature = int(
-            delta.get(
-                "externalUnitExhaustTemperature",
-                aws_thing_state["externalUnitExhaustTemperature"],
-            )
-        )
         self.device_id = device_id
+        self.power_switch                       = int(try_get_value(delta, aws_thing_state, "powerSwitch", -1))
+        self.beep_switch                        = int(try_get_value(delta, aws_thing_state, "beepSwitch", -1))
+        self.target_temperature                 = int(try_get_value(delta, aws_thing_state, "targetTemperature", -1))
+        self.current_temperature                = int(try_get_value(delta, aws_thing_state, "currentTemperature", -1))
+        self.internal_unit_coil_temperature     = int(try_get_value(delta, aws_thing_state, "internalUnitCoilTemperature", -1))
+        self.work_mode                          = int(try_get_value(delta, aws_thing_state, "workMode", -1))
+        self.vertical_direction                 = int(try_get_value(delta, aws_thing_state, "verticalDirection", -1))
+        self.horizontal_direction               = int(try_get_value(delta, aws_thing_state, "horizontalDirection", -1))
+        self.wind_speed_auto_switch             = int(try_get_value(delta, aws_thing_state, "windSpeedAutoSwitch", -1))
+        self.wind_speed_7_gear                  = int(try_get_value(delta, aws_thing_state, "windSpeed7Gear", -1))
+        self.new_wind_switch                    = int(try_get_value(delta, aws_thing_state, "newWindSwitch", -1))
+        self.new_wind_auto_switch               = int(try_get_value(delta, aws_thing_state, "newWindAutoSwitch", -1))
+        self.new_wind_strength                  = int(try_get_value(delta, aws_thing_state, "newWindStrength", -1))
+        self.soft_wind                          = int(try_get_value(delta, aws_thing_state, "softWind", -1))
+        self.generator_mode                     = int(try_get_value(delta, aws_thing_state, "generatorMode", -1))
+        self.sleep                              = int(try_get_value(delta, aws_thing_state, "sleep", -1))
+        self.eco                                = int(try_get_value(delta, aws_thing_state, "ECO", -1))
+        self.healthy                            = int(try_get_value(delta, aws_thing_state, "healthy", -1))
+        self.anti_moldew                        = int(try_get_value(delta, aws_thing_state, "antiMoldew", -1))
+        self.self_clean                         = int(try_get_value(delta, aws_thing_state, "selfClean", -1))
+        self.screen                             = int(try_get_value(delta, aws_thing_state, "screen", -1))
+        self.light_sense                        = int(try_get_value(delta, aws_thing_state, "lightSense", -1))
+        self.external_unit_coil_temperature     = int(try_get_value(delta, aws_thing_state, "externalUnitCoilTemperature", -1))
+        self.external_unit_temperature          = int(try_get_value(delta, aws_thing_state, "externalUnitTemperature", -1))
+        self.external_unit_exhaust_temperature  = int(try_get_value(delta, aws_thing_state, "externalUnitExhaustTemperature", -1))
+        self.lower_temperature_limit            = int(try_get_value(delta, aws_thing_state, "lowerTemperatureLimit", 16))
+        self.upper_temperature_limit            = int(try_get_value(delta, aws_thing_state, "upperTemperatureLimit", 31))
 
     device_id: str
     power_switch: int | bool
@@ -145,6 +65,8 @@ class TCL_SplitAC_Fresh_Air_DeviceData:
     soft_wind: int
     generator_mode: int
     light_sense: int
+    upper_temperature_limit: int
+    lower_temperature_limit: int
 
 
 async def get_stored_spit_ac_fresh_data(
@@ -156,8 +78,6 @@ async def get_stored_spit_ac_fresh_data(
         stored_data = {}
         need_save = True
 
-    stored_data, need_save = safe_set_value(stored_data, "non_user_config.min_celsius_temp", 16)
-    stored_data, need_save = safe_set_value(stored_data, "non_user_config.max_celsius_temp", 31)
     stored_data, need_save = safe_set_value(stored_data, "non_user_config.native_temp_step", 0.5)
 
     stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.memorize_temp_by_mode", True)
@@ -169,69 +89,14 @@ async def get_stored_spit_ac_fresh_data(
     stored_data, need_save = safe_set_value(stored_data, "target_temperature.Dehumidification.value", 24)
     stored_data, need_save = safe_set_value(stored_data, "target_temperature.Fan.value", 24)
     stored_data, need_save = safe_set_value(stored_data, "target_temperature.Auto.value", 24)
-    
-    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Cool.value", WindSeed7GearEnum.AUTO)
-    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Heat.value", WindSeed7GearEnum.AUTO)
-    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Dehumidification.value", WindSeed7GearEnum.AUTO)
-    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Fan.value", WindSeed7GearEnum.AUTO)
-    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Auto.value", WindSeed7GearEnum.AUTO)
+
+    default_wind_speed = "Auto"
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Cool.value", default_wind_speed)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Heat.value", default_wind_speed)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Dehumidification.value", default_wind_speed)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Fan.value", default_wind_speed)
+    stored_data, need_save = safe_set_value(stored_data, "fan_speed.Auto.value", default_wind_speed)
 
     if need_save:
         await set_stored_data(hass, device_id, stored_data)
     return stored_data
-
-
-class TCL_SplitAC_Fresh_Air_DeviceData_Helper:
-    def __init__(self, data: TCL_SplitAC_Fresh_Air_DeviceData) -> None:
-        self.data = data
-
-    def getMode(self) -> ModeEnum:
-        return getMode(self.data.work_mode)
-
-    def getUpAndDownAirSupplyVector(self) -> UpAndDownAirSupplyVectorEnum:
-        return getUpAndDownAirSupplyVector(self.data.vertical_direction)
-
-    def getLeftAndRightAirSupplyVector(self) -> LeftAndRightAirSupplyVectorEnum:
-        return getLeftAndRightAirSupplyVector(self.data.horizontal_direction)
-
-    def getSleepMode(self) -> SleepModeEnum:
-        return getSleepMode(self.data.sleep)
-
-    def getFreshAir(self) -> FreshAirEnum:
-        match self.data.new_wind_strength:
-            case 1:
-                return FreshAirEnum.STRENGTH_1
-            case 2:
-                return FreshAirEnum.STRENGTH_2
-            case 3:
-                return FreshAirEnum.STRENGTH_3
-            case 0:
-                return FreshAirEnum.AUTO
-            case _:
-                return FreshAirEnum.AUTO
-
-    def getWindFeeling(self) -> WindFeelingEnum:
-        match self.data.soft_wind:
-            case 1:
-                return WindFeelingEnum.SOFT
-            case 2:
-                return WindFeelingEnum.SHOWER
-            case 3:
-                return WindFeelingEnum.CARPET
-            case 3:
-                return WindFeelingEnum.SURROUND
-            case 0:
-                return WindFeelingEnum.NONE
-            case _:
-                return WindFeelingEnum.NONE
-
-    def getGeneratorMode(self) -> GeneratorModeEnum:
-        match self.data.generator_mode:
-            case 1:
-                return GeneratorModeEnum.L1
-            case 2:
-                return GeneratorModeEnum.L2
-            case 3:
-                return GeneratorModeEnum.L3
-            case 0:
-                return GeneratorModeEnum.NONE

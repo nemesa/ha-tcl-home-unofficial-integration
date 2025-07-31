@@ -1,0 +1,25 @@
+"data": {
+    "device": {
+      "model": null,
+      "sw_version": "V8-R75PT01-LF1V269"
+    },
+    "aws_iot_init_success": true,
+    "aws_iot_init_error": null,
+    "tcl_thing": [
+      {
+        "device_id": "trorRxGZAxy",
+        "platform": "TCLIOT",
+        "nick_name": "Smart TV Pro",
+        "device_name": "Smart TV",
+        "category": "TV",
+        "type": 1,
+        "device_type": "TCL-EU-RTD75P-S1",
+        "firmware_version": "V8-R75PT01-LF1V269",
+        "netType":2,
+      }
+    ],
+    "aws_thing": {
+      "error": "An error occurred (ForbiddenException) when calling the GetThingShadow operation: None"
+    },
+    "manual_state_dump_data": null
+  }

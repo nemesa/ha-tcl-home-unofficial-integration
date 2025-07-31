@@ -130,6 +130,7 @@ class GetThingsResponseData:
         self.is_online = getValue(data, ["is_online", "isOnline"])
         self.room = getValue(data, ["room"])
         self.type = getValue(data, ["type"])
+        self.net_type = getValue(data, ["net_type", "netType"])
         self.device_type = getValue(data, ["device_type", "deviceType"])
         if self.room is None:
             if data["labels"] and len(data["labels"]) > 0:
@@ -151,6 +152,7 @@ class GetThingsResponseData:
     room: str
     type: int
     device_type: str
+    net_type: int
 
 
 @dataclass

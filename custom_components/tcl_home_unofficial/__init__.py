@@ -16,7 +16,8 @@ from .config_entry import (
     sanitizeConfigData,
 )
 from .coordinator import IotDeviceCoordinator
-from .device import Device, is_implemented_by_integration, get_device_storage
+from .device import Device, get_device_storage
+from .device_types import is_implemented_by_integration
 
 _PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,

@@ -74,9 +74,7 @@ async def async_setup_entry(
                 type="ManualStateDump",
                 name="Manual state dump action",
                 device=device,
-                enabled=True
-                if device.device_type is DeviceTypeEnum.SPLIT_AC
-                else False,
+                enabled=False,
             )
         )
         textInputs.append(NotImplementedDeviceTextOutEntity(
@@ -86,7 +84,7 @@ async def async_setup_entry(
             name="device_type_str",
             device=device,
             value_function=lambda device: device.device_type_str,
-            enabled=True if device.device_type is DeviceTypeEnum.SPLIT_AC else False,
+            enabled=False,
         ))
         textInputs.append(NotImplementedDeviceTextOutEntity(
             hass=hass,
@@ -95,7 +93,7 @@ async def async_setup_entry(
             name="has_aws_thing",
             device=device,
             value_function=lambda device: device.has_aws_thing,
-            enabled=True if device.device_type is DeviceTypeEnum.SPLIT_AC else False,
+            enabled=False,
         ))
         textInputs.append(NotImplementedDeviceTextOutEntity(
             hass=hass,
@@ -104,7 +102,7 @@ async def async_setup_entry(
             name="capabilities_str",
             device=device,
             value_function=lambda device: device.capabilities_str,
-            enabled=True if device.device_type is DeviceTypeEnum.SPLIT_AC else False,
+            enabled=False,
         ))
 
     async_add_entities(textInputs)
