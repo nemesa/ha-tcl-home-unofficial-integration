@@ -41,10 +41,7 @@ async def async_setup_entry(
     configData = convertToConfigData(config_entry)
 
     if configData.verbose_setup_logging:
-        _LOGGER.info(
-            "Setup.async_setup_entry %s",
-            sanitizeConfigData(configData),
-        )
+        _LOGGER.info("Setup.async_setup_entry %s",sanitizeConfigData(configData),)
 
     config_entry.devices = []
     config_entry.non_implemented_devices = []
@@ -53,25 +50,32 @@ async def async_setup_entry(
         hass=hass,
         config_entry=config_entry,
     )
+    if configData.verbose_setup_logging:
+        _LOGGER.info("Setup.async_setup_entry session_manager.clear_storage")
     await aws_iot.get_session_manager().clear_storage()
+    
+    if configData.verbose_setup_logging:
+        _LOGGER.info("Setup.async_setup_entry aws_iot.async_init")
     await aws_iot.async_init()
 
     if configData.verbose_setup_logging:
-        _LOGGER.info("Setup.async_setup_entry clear session storage")
+        _LOGGER.info("Setup.async_setup_entry aws_iot.get_all_things")
 
     things = await aws_iot.get_all_things()
+    
+    if configData.verbose_setup_logging:
+        _LOGGER.info("Setup.async_setup_entry aws_iot.get_all_things result %s", things)
 
     for thing in things.data:
         is_implemented = is_implemented_by_integration(thing.device_name)
 
         if is_implemented:
+            if configData.verbose_setup_logging:
+                _LOGGER.info("Setup.async_setup_entry aws_iot.async_get_thing deviceName:%s id:%s", thing.device_name, thing.device_id)
             aws_thing = await aws_iot.async_get_thing(thing.device_id)
         else:
             aws_thing = None
-            _LOGGER.warning(
-                "Setup.async_setup_entry device is not implemented by this integration: %s",
-                thing,
-            )
+            _LOGGER.warning("Setup.async_setup_entry device is not implemented by this integration: %s",thing)
 
         device = Device(
             device_id=thing.device_id,
