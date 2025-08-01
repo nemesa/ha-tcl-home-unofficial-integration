@@ -67,6 +67,18 @@ For info logs extend the `configuration.yaml` with
       logs:
         custom_components.tcl_home_unofficial: info
    ```  
+Logs can be found in Home Assistant at Settings->System->Logs menu:
+then "Show full logs" in the "..." menu
+<img src="./ha_log1.jpg" width="800"/>
+
+Then the integration related logs will start with
+[custom_components.tcl_home_unofficial...
+<img src="./ha_log2.jpg" width="800"/>
+
+
+
+
+
 
 ## Functions map
 
