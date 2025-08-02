@@ -127,7 +127,7 @@ class GetThingsResponseData:
         self.device_name = getValue(data, ["device_name", "deviceName"])
         self.category = getValue(data, ["category"])
         self.firmware_version = getValue(data, ["firmware_version", "firmwareVersion"])
-        self.is_online = getValue(data, ["is_online", "isOnline"])
+        self.is_online = int(getValue(data, ["is_online", "isOnline"]))
         self.room = getValue(data, ["room"])
         self.type = getValue(data, ["type"])
         self.net_type = getValue(data, ["net_type", "netType"])
@@ -148,7 +148,7 @@ class GetThingsResponseData:
     device_name: str
     category: str
     firmware_version: str
-    is_online: str
+    is_online: int
     room: str
     type: int
     device_type: str

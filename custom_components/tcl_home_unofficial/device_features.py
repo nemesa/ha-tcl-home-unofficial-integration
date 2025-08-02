@@ -15,6 +15,7 @@ class DeviceFeatureEnum(StrEnum):
     MODE_DEHUMIDIFICATION = "mode.dehumidification"
     MODE_FAN = "mode.fan"
     MODE_HEAT = "mode.heat"
+    SENSOR_IS_ONLINE = "sensor.is_online"
     SENSOR_CURRENT_TEMPERATURE = "sensor.current_temperature"
     SENSOR_INTERNAL_UNIT_COIL_TEMPERATURE = "sensor.internal_unit_coil_temperature"
     SENSOR_EXTERNAL_UNIT_COIL_TEMPERATURE = "sensor.external_unit_coil_temperature"
@@ -77,6 +78,7 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.MODE_FAN,
                 DeviceFeatureEnum.MODE_HEAT,
                 DeviceFeatureEnum.SENSOR_CURRENT_TEMPERATURE,
+                DeviceFeatureEnum.SENSOR_IS_ONLINE,
                 DeviceFeatureEnum.SWITCH_POWER,
                 DeviceFeatureEnum.SWITCH_BEEP,
                 DeviceFeatureEnum.SWITCH_HEALTHY,
@@ -147,6 +149,7 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.SENSOR_EXTERNAL_UNIT_COIL_TEMPERATURE,
                 DeviceFeatureEnum.SENSOR_EXTERNAL_UNIT_TEMPERATURE,
                 DeviceFeatureEnum.SENSOR_EXTERNAL_UNIT_EXHAUST_TEMPERATURE,
+                DeviceFeatureEnum.SENSOR_IS_ONLINE,
                 DeviceFeatureEnum.SWITCH_POWER,
                 DeviceFeatureEnum.SWITCH_BEEP,
                 DeviceFeatureEnum.SWITCH_ECO,
@@ -181,6 +184,7 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.SELECT_MODE,
                 DeviceFeatureEnum.SELECT_PORTABLE_WIND_SEED,
                 DeviceFeatureEnum.NUMBER_TARGET_DEGREE,
+                DeviceFeatureEnum.SENSOR_IS_ONLINE,
             ]
             
             if has_property(aws_thing_state_reported, "swingWind"):

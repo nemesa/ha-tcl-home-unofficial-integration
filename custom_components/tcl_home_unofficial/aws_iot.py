@@ -1,6 +1,7 @@
 """."""
 
 import datetime
+from functools import partial
 import json
 import logging
 
@@ -46,7 +47,10 @@ class AwsIot:
             aws_session_token=awsCred.Credentials.session_token,
         )
 
-        self.client = boto3Session.client(service_name="iot-data")
+        self.client = await self.hass.async_add_executor_job(
+            partial(boto3Session.client, service_name="iot-data")
+        )
+        # self.client = boto3Session.client(service_name="iot-data")
 
     async def async_init(self) -> None:
         await self.session_manager.async_load()
@@ -145,7 +149,7 @@ class AwsIot:
     def get_thing(self, device_id: str) -> dict:
         """List all things in AWS IoT."""
         response = self.client.get_thing_shadow(thingName=device_id)
-        payload = response["payload"].read().decode("utf-8")        
+        payload = response["payload"].read().decode("utf-8")
         if self.session_manager.is_verbose_device_logging():
             _LOGGER.info("AwsIot.get_thing (%s): %s", device_id, payload)
         return json.loads(payload)

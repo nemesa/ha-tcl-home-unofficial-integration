@@ -69,7 +69,7 @@ async def async_setup_entry(
     for thing in things.data:
         is_implemented = is_implemented_by_integration(thing.device_name)
 
-        if is_implemented:
+        if thing.is_online and is_implemented:
             if configData.verbose_setup_logging:
                 _LOGGER.info("Setup.async_setup_entry aws_iot.async_get_thing deviceName:%s id:%s", thing.device_name, thing.device_id)
             aws_thing = await aws_iot.async_get_thing(thing.device_id)
@@ -78,11 +78,7 @@ async def async_setup_entry(
             _LOGGER.warning("Setup.async_setup_entry device is not implemented by this integration: %s",thing)
 
         device = Device(
-            device_id=thing.device_id,
-            device_type_str=thing.device_name,
-            device_type=None,
-            name=thing.nick_name,
-            firmware_version=thing.firmware_version,
+            tcl_thing=thing,
             aws_thing=aws_thing,
         )
         if device.device_type is not None:

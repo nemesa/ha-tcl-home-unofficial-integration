@@ -27,25 +27,25 @@ async def async_setup_entry(
     coordinator = config_entry.runtime_data.coordinator
 
     sensors = []
-    # for device in config_entry.devices:
-    #     if device.device_type == DeviceTypeEnum.SPLIT_AC:
-    #         sensors.append(
-    #             BinarySensor(
-    #                 coordinator=coordinator,
-    #                 device=device,
-    #                 type="BeepMode",
-    #                 name="Beep Mode",
-    #                 icon_fn=lambda device: "mdi:volume-high"
-    #                 if device.data.beep_switch == 1
-    #                 else "mdi:volume-off",
-    #                 is_on_fn=lambda device: device.data.beep_switch,
-    #             )
-    #         )
+    for device in config_entry.devices:
+        sensors.append(
+            DynamicBinarySensorHandlerNoAutoIsOnlineCheck(
+                coordinator=coordinator,
+                device=device,
+                type="IsOnline",
+                name="Is Online",
+                icon_fn=lambda device: "mdi:cloud-check-outline"
+                if device.is_online == 1
+                else "mdi:cloud-cancel-outline",
+                is_on_fn=lambda device: device.is_online,
+                is_available_fn=lambda device: True,
+            )
+        )
 
     async_add_entities(sensors)
 
 
-class BinarySensor(TclEntityBase, BinarySensorEntity):
+class BinarySensorHandler(TclEntityBase, BinarySensorEntity):
     def __init__(
         self,
         coordinator: IotDeviceCoordinator,
@@ -71,3 +71,32 @@ class BinarySensor(TclEntityBase, BinarySensorEntity):
     def is_on(self) -> bool | None:
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
         return self.is_on_fn(self.device)
+
+
+class DynamicBinarySensorHandlerNoAutoIsOnlineCheck(
+    BinarySensorHandler, BinarySensorEntity
+):
+    def __init__(
+        self,
+        coordinator: IotDeviceCoordinator,
+        device: Device,
+        type: str,
+        name: str,
+        icon_fn: lambda device: str,
+        is_on_fn: lambda device: bool,
+        is_available_fn: lambda device: bool,
+    ) -> None:
+        BinarySensorHandler.__init__(
+            self,
+            coordinator=coordinator,
+            device=device,
+            type=type,
+            name=name,
+            icon_fn=icon_fn,
+            is_on_fn=is_on_fn,
+        )
+        self.is_available_fn = is_available_fn
+
+    @property
+    def available(self) -> bool:
+        return self.is_available_fn(self.device)

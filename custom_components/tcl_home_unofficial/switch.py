@@ -607,6 +607,8 @@ class DynamicSwitchHandler(SwitchHandler, SwitchEntity):
 
     @property
     def available(self) -> bool:
-        self.device = self.coordinator.get_device_by_id(self.device.device_id)
-        self.iot_handler.refreshDevice(self.device)
-        return self.iot_handler.is_allowed()
+        if self.device.is_online:            
+            self.device = self.coordinator.get_device_by_id(self.device.device_id)
+            self.iot_handler.refreshDevice(self.device)
+            return self.iot_handler.is_allowed()
+        return False

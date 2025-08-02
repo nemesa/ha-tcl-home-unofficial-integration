@@ -14,7 +14,7 @@ from .device import Device
 from .device_features import DeviceFeatureEnum
 from .device_types import DeviceTypeEnum
 from .device_enums import ModeEnum
-from .device_data_storage import set_stored_data,get_stored_data
+from .device_data_storage import set_stored_data, get_stored_data
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -45,9 +45,11 @@ class DesiredStateHandlerForNumber:
 
     async def store_target_temp(self, value: int | float):
         stored_data = await get_stored_data(self.hass, self.device.device_id)
-        mode = self.device.mode_value_to_enum_mapp.get(self.device.data.work_mode,ModeEnum.AUTO)
+        mode = self.device.mode_value_to_enum_mapp.get(
+            self.device.data.work_mode, ModeEnum.AUTO
+        )
         # _LOGGER.info("Storing target temperature %s for mode %s in device storage %s",value,mode,self.device.device_id)
-        stored_data["target_temperature"][mode]["value"] = value       
+        stored_data["target_temperature"][mode]["value"] = value
         self.device.storage = stored_data
         await set_stored_data(self.hass, self.device.device_id, stored_data)
 
@@ -64,7 +66,7 @@ class DesiredStateHandlerForNumber:
                 max_temp,
             )
             return
-        
+
         desired_state = {"targetTemperature": value}
         if DeviceFeatureEnum.INTERNAL_SET_TFT_WITH_TT in self.device.supported_features:
             value_fahrenheit_to_set = celsius_to_fahrenheit(value)
@@ -96,9 +98,13 @@ class DesiredStateHandlerForNumber:
             self.device.device_id, desired_state
         )
 
+
 def is_allowed(device: Device) -> bool:
     if device.device_type == DeviceTypeEnum.PORTABLE_AC:
-        return device.mode_value_to_enum_mapp.get(device.data.work_mode,ModeEnum.AUTO) == ModeEnum.COOL
+        return (
+            device.mode_value_to_enum_mapp.get(device.data.work_mode, ModeEnum.AUTO)
+            == ModeEnum.COOL
+        )
     else:
         if DeviceFeatureEnum.SWITCH_8_C_HEATING in device.supported_features:
             if device.data.eight_add_hot == 1:
@@ -116,7 +122,6 @@ async def async_setup_entry(
 
     customEntities = []
     for device in config_entry.devices:
-
         if DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE in device.supported_features:
             customEntities.append(
                 TemperatureHandler(
@@ -130,7 +135,8 @@ async def async_setup_entry(
                     current_value_fn=lambda device: float(
                         device.data.target_temperature
                     )
-                    if DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS in device.supported_features
+                    if DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS
+                    in device.supported_features
                     else int(device.data.target_temperature),
                 )
             )
@@ -148,7 +154,8 @@ async def async_setup_entry(
                     current_value_fn=lambda device: float(
                         device.data.target_temperature
                     )
-                    if DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS in device.supported_features
+                    if DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS
+                    in device.supported_features
                     else int(device.data.target_temperature),
                 )
             )
@@ -170,7 +177,6 @@ class TemperatureHandler(TclEntityBase, NumberEntity):
     ) -> None:
         TclEntityBase.__init__(self, coordinator, type, name, device)
         self.hass = hass
-
         self.iot_handler = DesiredStateHandlerForNumber(
             hass=hass,
             coordinator=coordinator,
@@ -189,12 +195,16 @@ class TemperatureHandler(TclEntityBase, NumberEntity):
         self._attr_native_value = self.current_value_fn(self.device)
 
         self._attr_native_min_value = self.device.data.lower_temperature_limit
-        self._attr_native_max_value = self.device.data.upper_temperature_limit        
-        self._attr_native_step = self.device.storage["non_user_config"]["native_temp_step"]
+        self._attr_native_max_value = self.device.data.upper_temperature_limit
+        self._attr_native_step = self.device.storage["non_user_config"][
+            "native_temp_step"
+        ]
 
     @property
     def available(self) -> bool:
-        return self.available_fn(self.device)
+        if self.device.is_online:
+            return self.available_fn(self.device)
+        return False
 
     @property
     def device_class(self) -> str:

@@ -59,7 +59,7 @@ def buildConfigData(data: dict, fallback: dict = {}):
 
 def sanitizeConfigData(config: ConfigData) -> None:
     return ConfigData(
-        username=config.username,
+        username="*****",
         password="*****",
         app_login_url=config.app_login_url,
         cloud_urls=config.cloud_urls,
@@ -69,6 +69,18 @@ def sanitizeConfigData(config: ConfigData) -> None:
         verbose_setup_logging=config.verbose_setup_logging,
     )
 
+def asDict(config: ConfigData) -> dict:
+    """Convert ConfigData to a dictionary."""
+    return {
+        "username": config.username,
+        "password": config.password,
+        "app_login_url": config.app_login_url,
+        "cloud_urls": config.cloud_urls,
+        "app_id": config.app_id,
+        "verbose_device_logging": config.verbose_device_logging,
+        "verbose_session_logging": config.verbose_session_logging,
+        "verbose_setup_logging": config.verbose_setup_logging,
+    }
 
 def convertToConfigData(
     config_entry: ConfigEntry,

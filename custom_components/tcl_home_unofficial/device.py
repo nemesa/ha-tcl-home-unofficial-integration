@@ -21,6 +21,7 @@ from .device_spit_ac import (
 )
 
 from .device_types import DeviceTypeEnum, calculateDeviceType
+from .tcl import GetThingsResponseData
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,30 +31,30 @@ class Device:
 
     def __init__(
         self,
-        device_id: str,
-        device_type_str: str | None,
-        device_type: DeviceTypeEnum | None,
-        name: str,
-        firmware_version: str,
         aws_thing: dict | None,
+        tcl_thing: GetThingsResponseData | None = None,
     ) -> None:
-        self.device_type_str = device_type_str
-        self.device_id = device_id
-        if device_type is None:
-            self.device_type = calculateDeviceType(device_type_str)
-        else:
-            self.device_type = device_type
-        self.name = name
+        self.device_id = "noId"
+        self.device_type_str = ""
+        self.name = "noName"
         self.storage = {}
-        self.firmware_version = firmware_version
-        self.is_implemented_by_integration = self.device_type is not None
+        self.firmware_version = "noVersion"
         self.has_aws_thing = "false"
         self.capabilities_str = ""
         self.capabilities = []
         self.supported_features = []
         self.mode_enum_to_value_mapp = {}
         self.mode_value_to_enum_mapp = {}
+        self.is_online = False
+        if tcl_thing is not None:
+            self.is_online = tcl_thing.is_online
+            self.device_type_str = tcl_thing.device_name
+            self.device_id = tcl_thing.device_id
+            self.name = tcl_thing.nick_name
+            self.firmware_version = tcl_thing.firmware_version
 
+        self.device_type = calculateDeviceType(self.device_type_str)
+        self.is_implemented_by_integration = self.device_type is not None
         if aws_thing is not None:
             self.has_aws_thing = "true"
             try:
@@ -73,7 +74,7 @@ class Device:
             except Exception as e:
                 _LOGGER.error(
                     "Error while getting capabilities for device %s: %s",
-                    device_id,
+                    self.device_id,
                     str(e),
                 )
                 self.capabilities_str = str(e)
@@ -81,21 +82,21 @@ class Device:
             match self.device_type:
                 case DeviceTypeEnum.SPLIT_AC:
                     self.data = TCL_SplitAC_DeviceData(
-                        device_id,
-                        aws_thing["state"]["reported"],
-                        aws_thing["state"].get("delta", {}),
+                        device_id=self.device_id,
+                        aws_thing_state=aws_thing["state"]["reported"],
+                        delta=aws_thing["state"].get("delta", {}),
                     )
                 case DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
                     self.data = TCL_SplitAC_Fresh_Air_DeviceData(
-                        device_id,
-                        aws_thing["state"]["reported"],
-                        aws_thing["state"].get("delta", {}),
+                        device_id=self.device_id,
+                        aws_thing_state=aws_thing["state"]["reported"],
+                        delta=aws_thing["state"].get("delta", {}),
                     )
                 case DeviceTypeEnum.PORTABLE_AC:
                     self.data = TCL_PortableAC_DeviceData(
-                        device_id,
-                        aws_thing["state"]["reported"],
-                        aws_thing["state"].get("delta", {}),
+                        device_id=self.device_id,
+                        aws_thing_state=aws_thing["state"]["reported"],
+                        delta=aws_thing["state"].get("delta", {}),
                     )
 
                 case _:
@@ -112,6 +113,7 @@ class Device:
     has_aws_thing: str
     name: str
     firmware_version: str
+    is_online: bool
     is_implemented_by_integration: bool
     storage: dict[str, any]
     mode_enum_to_value_mapp: dict[str, int]
@@ -139,7 +141,7 @@ class Device:
 
     def create_mode_mapps(self) -> None:
         self.mode_enum_to_value_mapp: dict[str, int] = {}
-        self.mode_value_to_enum_mapp: dict[int,str] = {}
+        self.mode_value_to_enum_mapp: dict[int, str] = {}
         work_mode = 0
         if DeviceFeatureEnum.MODE_AUTO in self.supported_features:
             self.mode_enum_to_value_mapp[ModeEnum.AUTO] = work_mode
@@ -147,28 +149,28 @@ class Device:
             work_mode += 1
         else:
             self.mode_enum_to_value_mapp[ModeEnum.AUTO] = 0
-            
+
         if DeviceFeatureEnum.MODE_COOL in self.supported_features:
             self.mode_enum_to_value_mapp[ModeEnum.COOL] = work_mode
             self.mode_value_to_enum_mapp[work_mode] = ModeEnum.COOL
             work_mode += 1
         else:
             self.mode_enum_to_value_mapp[ModeEnum.COOL] = 0
-            
+
         if DeviceFeatureEnum.MODE_DEHUMIDIFICATION in self.supported_features:
             self.mode_enum_to_value_mapp[ModeEnum.DEHUMIDIFICATION] = work_mode
             self.mode_value_to_enum_mapp[work_mode] = ModeEnum.DEHUMIDIFICATION
             work_mode += 1
         else:
             self.mode_enum_to_value_mapp[ModeEnum.DEHUMIDIFICATION] = 0
-            
+
         if DeviceFeatureEnum.MODE_FAN in self.supported_features:
             self.mode_enum_to_value_mapp[ModeEnum.FAN] = work_mode
             self.mode_value_to_enum_mapp[work_mode] = ModeEnum.FAN
             work_mode += 1
         else:
             self.mode_enum_to_value_mapp[ModeEnum.FAN] = 0
-            
+
         if DeviceFeatureEnum.MODE_HEAT in self.supported_features:
             self.mode_enum_to_value_mapp[ModeEnum.HEAT] = work_mode
             self.mode_value_to_enum_mapp[work_mode] = ModeEnum.HEAT

@@ -42,12 +42,13 @@ class TclEntityBase(CoordinatorEntity):
     def state_class(self) -> str | None:
         return None
 
+    @property
+    def available(self) -> bool:
+        return self.device.is_online == 1
 
 
 class TclNonPollingEntityBase(Entity):
-    def __init__(
-        self, type: str, name: str, device: Device
-    ) -> None:
+    def __init__(self, type: str, name: str, device: Device) -> None:
         super().__init__()
         self.device = device
         self.type = type

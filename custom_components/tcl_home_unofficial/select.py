@@ -1010,4 +1010,6 @@ class DynamicSelectHandler(SelectHandler, SelectEntity):
 
     @property
     def available(self) -> bool:
-        return self.available_fn(self.device)
+        if self.device.is_online:
+            return self.available_fn(self.device)
+        return False

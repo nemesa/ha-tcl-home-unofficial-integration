@@ -61,14 +61,13 @@ class IotDeviceCoordinator(DataUpdateCoordinator):
 
         devices = []
         try:
-            for device in self.config_entry.devices:
-                aws_thing = await self.aws_iot.async_get_thing(device.device_id)
+            tcl_things = await self.aws_iot.get_all_things()
+            for tcl_thing in tcl_things.data:
+                aws_thing = None
+                if tcl_thing.is_online:
+                    aws_thing = await self.aws_iot.async_get_thing(tcl_thing.device_id)
                 d = Device(
-                    device_id=device.device_id,
-                    device_type=device.device_type,
-                    device_type_str=None,
-                    name=device.name,
-                    firmware_version=device.firmware_version,
+                    tcl_thing=tcl_thing,
                     aws_thing=aws_thing,
                 )
                 d.storage = await get_stored_data(self.hass, d.device_id)
