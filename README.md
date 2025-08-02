@@ -75,9 +75,18 @@ Then the integration related logs will start with
 [custom_components.tcl_home_unofficial...
 <img src="./ha_log2.jpg" width="800"/>
 
+## Diagnosics files
 
+### Config diagnostic
+In Home Assistant go to
+Settings -> "Devices & services" -> on the Integrations tab find the "TCL Home - Unofficial" integartion
+In the "..." menu select the "Download diagnostics"
+<img src="./config_diagnostic.jpg" width="800"/>
 
-
+### Device diagnostic
+Same path as for the "Config diagnostic" select the device, then user
+the "DOWNLOAD DIAGNOSTICS" link
+<img src="./device_diagnostic.jpg" width="400"/>
 
 
 ## Functions map
