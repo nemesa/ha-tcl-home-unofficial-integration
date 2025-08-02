@@ -8,8 +8,9 @@ import random
 import string
 import time
 
-import httpx
 import jwt
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.httpx_client import get_async_client
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -192,7 +193,11 @@ class GetAwsCredentialsResponse:
 
 
 async def do_account_auth(
-    username: str, password: str, login_url: str, verbose_logging: bool = False
+    hass: HomeAssistant,
+    username: str,
+    password: str,
+    login_url: str,
+    verbose_logging: bool = False,
 ) -> DoAccountAuthResponse:
     if verbose_logging:
         _LOGGER.info("TCL-Service.do_account_auth: %s", login_url)
@@ -218,21 +223,25 @@ async def do_account_auth(
         "content-type": "application/json; charset=UTF-8",
     }
 
-    async with httpx.AsyncClient() as client:
-        response = await client.post(login_url, json=payload, headers=headers)
+    httpx_client = get_async_client(hass)
+    response = await httpx_client.post(login_url, json=payload, headers=headers)
 
-        response_obj = response.json()
-        if verbose_logging:
-            _LOGGER.info("TCL-Service.do_account_auth response: %s", response_obj)
-        if response.status_code == 200:
-            authResponse = DoAccountAuthResponse(response_obj)
-            if authResponse.status == 1:
-                return authResponse
-        return None
+    response_obj = response.json()
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.do_account_auth response: %s", response_obj)
+    if response.status_code == 200:
+        authResponse = DoAccountAuthResponse(response_obj)
+        if authResponse.status == 1:
+            return authResponse
+    return None
 
 
 async def get_cloud_urls(
-    cloud_urls: str, username: str, token: str, verbose_logging: bool = False
+    hass: HomeAssistant,
+    cloud_urls: str,
+    username: str,
+    token: str,
+    verbose_logging: bool = False,
 ) -> CloudUrlsResponse:
     if verbose_logging:
         _LOGGER.info("TCL-Service.get_cloud_urls: %s", cloud_urls)
@@ -244,17 +253,18 @@ async def get_cloud_urls(
         "content-type": "application/json; charset=UTF-8",
     }
 
-    async with httpx.AsyncClient() as client:
-        response = await client.post(cloud_urls, json=payload, headers=headers)
-        response_obj = response.json()
-        if verbose_logging:
-            _LOGGER.info("TCL-Service.get_cloud_urls response: %s", response_obj)
-        if response.status_code == 200:
-            return CloudUrlsResponse(response_obj)
-        return None
+    httpx_client = get_async_client(hass)
+    response = await httpx_client.post(cloud_urls, json=payload, headers=headers)
+    response_obj = response.json()
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.get_cloud_urls response: %s", response_obj)
+    if response.status_code == 200:
+        return CloudUrlsResponse(response_obj)
+    return None
 
 
 async def refreshTokens(
+    hass: HomeAssistant,
     refresh_tokens_url: str,
     username: str,
     accessToken: str,
@@ -277,18 +287,21 @@ async def refreshTokens(
         "accept-encoding": "gzip, deflate, br",
     }
 
-    async with httpx.AsyncClient() as client:
-        response = await client.post(url, json=payload, headers=headers)
-        response_obj = response.json()
-        if verbose_logging:
-            _LOGGER.info("TCL-Service.refreshTokens response: %s", response_obj)
-        if response.status_code == 200:
-            return RefreshTokensResponse(response_obj)
-        return None
+    httpx_client = get_async_client(hass)
+    response = await httpx_client.post(url, json=payload, headers=headers)
+    response_obj = response.json()
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.refreshTokens response: %s", response_obj)
+    if response.status_code == 200:
+        return RefreshTokensResponse(response_obj)
+    return None
 
 
 async def get_aws_credentials(
-    aws_region: str, cognitoToken: str, verbose_logging: bool = False
+    hass: HomeAssistant,
+    aws_region: str,
+    cognitoToken: str,
+    verbose_logging: bool = False,
 ) -> GetAwsCredentialsResponse:
     url = f"https://cognito-identity.{aws_region}.amazonaws.com/"
 
@@ -307,18 +320,22 @@ async def get_aws_credentials(
         "content-type": "application/x-amz-json-1.1",
     }
 
-    async with httpx.AsyncClient() as client:
-        response = await client.post(url, json=payload, headers=headers)
-        response_obj = response.json()
-        if verbose_logging:
-            _LOGGER.info("TCL-Service.get_aws_credentials response: %s", response_obj)
-        if response.status_code == 200:
-            return GetAwsCredentialsResponse(response_obj)
-        return None
+    httpx_client = get_async_client(hass)
+    response = await httpx_client.post(url, json=payload, headers=headers)
+    response_obj = response.json()
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.get_aws_credentials response: %s", response_obj)
+    if response.status_code == 200:
+        return GetAwsCredentialsResponse(response_obj)
+    return None
 
 
 async def get_things(
-    device_url: str, saas_token: str, country_abbr: str, verbose_logging: bool = False
+    hass: HomeAssistant,
+    device_url: str,
+    saas_token: str,
+    country_abbr: str,
+    verbose_logging: bool = False,
 ) -> GetThingsResponse:
     url = f"{device_url}/v3/user/get_things"
     if verbose_logging:
@@ -344,15 +361,16 @@ async def get_things(
         "accept-encoding": "gzip, deflate, br",
     }
 
-    async with httpx.AsyncClient() as client:
-        response = await client.post(url, json={}, headers=headers)
-        if response.status_code != 200:
-            raise Exception("Error at get_things: " + response.text)
-        response_obj = response.json()
-        # _LOGGER.info("TCL-Service.get_things: %s", response_obj)
-        if verbose_logging:
-            _LOGGER.info("TCL-Service.get_things response: %s", response_obj)
-        return GetThingsResponse(response_obj)
+    httpx_client = get_async_client(hass)
+
+    response = await httpx_client.post(url, json={}, headers=headers)
+    if response.status_code != 200:
+        raise Exception("Error at get_things: " + response.text)
+    response_obj = response.json()
+    # _LOGGER.info("TCL-Service.get_things: %s", response_obj)
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.get_things response: %s", response_obj)
+    return GetThingsResponse(response_obj)
 
 
 def calculate_md5_hash_bytes(input_str: str) -> str:

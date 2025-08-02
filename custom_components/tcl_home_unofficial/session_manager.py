@@ -43,7 +43,7 @@ class SessionManager:
             self.configData = configData
         else:
             self.configData = convertToConfigData(config_entry)
-
+        self.hass = hass
         self._store: storage.Store[dict] = storage.Store(
             hass=hass, version=1, key=DOMAIN
         )
@@ -136,6 +136,7 @@ class SessionManager:
         if self.is_verbose_session_logging():
             _LOGGER.info("SessionManager.async_force_get_auth_data")
         authData = await do_account_auth(
+            hass=self.hass,
             username=self.configData.username,
             password=self.configData.password,
             login_url=self.configData.app_login_url,
@@ -182,6 +183,7 @@ class SessionManager:
         cloud_urls = await self.async_aws_cloud_urls()
 
         refreshTokensData = await refreshTokens(
+            hass=self.hass,
             refresh_tokens_url=cloud_urls.data.cloud_url,
             username=authData.user.username,
             accessToken=authData.token,
@@ -237,6 +239,7 @@ class SessionManager:
         aws_region = await self.get_aws_region()
 
         awsCredentials = await get_aws_credentials(
+            hass=self.hass,
             aws_region=aws_region,
             cognitoToken=refreshTokensData.data.cognito_token,
             verbose_logging=self.is_verbose_session_logging(),
@@ -276,6 +279,7 @@ class SessionManager:
         authData = await self.async_get_auth_data()
 
         cloudUrls = await get_cloud_urls(
+            hass=self.hass,
             cloud_urls=self.configData.cloud_urls,
             username=authData.user.username,
             token=authData.token,

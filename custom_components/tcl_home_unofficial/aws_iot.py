@@ -69,6 +69,7 @@ class AwsIot:
         clud_urls = await self.session_manager.async_aws_cloud_urls()
 
         things = await get_things(
+            hass=self.hass,
             device_url=clud_urls.data.device_url,
             saas_token=saas_token,
             country_abbr=authResult.user.country_abbr,
