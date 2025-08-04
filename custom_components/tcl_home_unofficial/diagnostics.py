@@ -37,6 +37,29 @@ async def async_get_config_entry_diagnostics(
     except Exception as e:
         aws_iot_init_error = {"error": str(e)}
 
+    user_country_abbr = ""
+    cloud_urls = {}
+
+    if aws_iot_init_success:
+        session_manager = aws_iot.get_session_manager()
+        authResult = await session_manager.async_get_auth_data(allowInvalid=True)
+        if authResult is not None and authResult.user is not None:
+            user_country_abbr = authResult.user.country_abbr
+        cloudUrls = await session_manager.async_force_cloud_urls()
+        if cloudUrls is not None and cloudUrls.data is not None:
+            cloud_urls = {
+                "sso_region": cloudUrls.data.sso_region,
+                "cloud_region": cloudUrls.data.cloud_region,
+                "sso_url": cloudUrls.data.sso_url,
+                "cloud_url": cloudUrls.data.cloud_url,
+                "icon_resource_url": cloudUrls.data.icon_resource_url,
+                "identity_pool_id": cloudUrls.data.identity_pool_id,
+                "upload_web_url": cloudUrls.data.upload_web_url,
+                "device_url": cloudUrls.data.device_url,
+                "cloud_url_emq": cloudUrls.data.cloud_url_emq,
+            }
+            cloudUrls.data
+
     tcl_things = []
     tcl_things_response_code = 0
     tcl_things_response_message = 0
@@ -73,6 +96,10 @@ async def async_get_config_entry_diagnostics(
 
     return {
         "configData": configData,
+        "regionData": {
+            "user_country_abbr": user_country_abbr,
+            "cloud_urls": cloud_urls,
+        },
         "aws_init": {
             "init_success": aws_iot_init_success,
             "init_error": aws_iot_init_error,

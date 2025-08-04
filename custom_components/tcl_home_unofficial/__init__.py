@@ -75,7 +75,10 @@ async def async_setup_entry(
             aws_thing = await aws_iot.async_get_thing(thing.device_id)
         else:
             aws_thing = None
-            _LOGGER.warning("Setup.async_setup_entry device is not implemented by this integration: %s",thing)
+            if thing.is_online:
+                _LOGGER.warning("Setup.async_setup_entry device is not implemented by this integration: %s",thing)
+            else:
+                _LOGGER.warning("Setup.async_setup_entry device is not online or not implemented by this integration (is_implemented:%s): %s",is_implemented,thing)
 
         device = Device(
             tcl_thing=thing,
