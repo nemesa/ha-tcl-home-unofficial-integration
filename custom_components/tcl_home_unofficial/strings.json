@@ -71,5 +71,23 @@
         }
       }
     }
+  },
+  "entity": {
+    "switch": {
+      "switch.beepSwitch": {
+        "name": "Beep Mode Switch"
+      },
+      "switch.powerSwitch": {
+        "name": "Power Switch"
+      }
+    },
+    "number": {
+      "number.targetDegree": {
+        "name": "Set Target Temperature"
+      },
+      "number.targetTemperature": {
+        "name": "Set Target Temperature"
+      }
+    }
   }
 }

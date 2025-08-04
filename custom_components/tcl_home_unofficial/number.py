@@ -2,7 +2,7 @@
 
 import logging
 
-from homeassistant.components.number import NumberDeviceClass, NumberEntity, NumberMode
+from homeassistant.components.number import NumberDeviceClass, NumberEntity, NumberMode, NumberEntityDescription
 from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -199,6 +199,10 @@ class TemperatureHandler(TclEntityBase, NumberEntity):
         self._attr_native_step = self.device.storage["non_user_config"][
             "native_temp_step"
         ]
+        self.entity_description = NumberEntityDescription(
+            key=deviceFeature,
+            translation_key=deviceFeature,            
+        )
 
     @property
     def available(self) -> bool:

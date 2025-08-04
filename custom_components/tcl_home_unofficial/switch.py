@@ -3,7 +3,13 @@
 import logging
 from typing import Any
 
-from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
+from homeassistant.components.switch import (
+    SwitchDeviceClass,
+    SwitchEntity,
+    SwitchEntityDescription,
+)
+from homeassistant.helpers.entity import EntityDescription
+from homeassistant.helpers.translation import async_get_translations
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -77,7 +83,9 @@ class DesiredStateHandlerForSwitch:
                 return await self.SWITCH_FRESH_AIR(value=value)
 
     def is_allowed(self) -> bool:
-        mode = self.device.mode_value_to_enum_mapp.get(self.device.data.work_mode,ModeEnum.AUTO)
+        mode = self.device.mode_value_to_enum_mapp.get(
+            self.device.data.work_mode, ModeEnum.AUTO
+        )
         match self.deviceFeature:
             case DeviceFeatureEnum.SWITCH_DRYING:
                 if (
@@ -154,9 +162,13 @@ class DesiredStateHandlerForSwitch:
     async def SWITCH_ECO(self, value: int):
         desired_state = {"ECO": value}
 
-        if (DeviceFeatureEnum.INTERNAL_HAS_TURBO_PROPERTY in self.device.supported_features
-            and DeviceFeatureEnum.INTERNAL_HAS_HIGHTEMPERATUREWIND_PROPERTY in self.device.supported_features
-            and DeviceFeatureEnum.INTERNAL_HAS_SILENCESWITCH_PROPERTY in self.device.supported_features
+        if (
+            DeviceFeatureEnum.INTERNAL_HAS_TURBO_PROPERTY
+            in self.device.supported_features
+            and DeviceFeatureEnum.INTERNAL_HAS_HIGHTEMPERATUREWIND_PROPERTY
+            in self.device.supported_features
+            and DeviceFeatureEnum.INTERNAL_HAS_SILENCESWITCH_PROPERTY
+            in self.device.supported_features
         ):
             desired_state["highTemperatureWind"] = 0
             desired_state["highTemperatureWind"] = 0
@@ -240,6 +252,16 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ):
     """Set up the Binary Sensors."""
+
+    # _LOGGER.info("*********************")
+    # t = await async_get_translations(
+    #     hass=hass,
+    #     language="hu",
+    #     integrations=["tcl_home_unofficial"],
+    #     category="entity",
+    # )
+    # _LOGGER.info("async_get_translations : %s", t)
+
     coordinator = config_entry.runtime_data.coordinator
     switches = []
     for device in config_entry.devices:
@@ -507,6 +529,10 @@ class SwitchHandler(TclEntityBase, SwitchEntity):
             deviceFeature=deviceFeature,
             device=self.device,
         )
+        self.entity_description = SwitchEntityDescription(
+            key=deviceFeature,
+            translation_key=deviceFeature,
+        )
 
     @property
     def device_class(self) -> str:
@@ -607,7 +633,7 @@ class DynamicSwitchHandler(SwitchHandler, SwitchEntity):
 
     @property
     def available(self) -> bool:
-        if self.device.is_online:            
+        if self.device.is_online:
             self.device = self.coordinator.get_device_by_id(self.device.device_id)
             self.iot_handler.refreshDevice(self.device)
             return self.iot_handler.is_allowed()

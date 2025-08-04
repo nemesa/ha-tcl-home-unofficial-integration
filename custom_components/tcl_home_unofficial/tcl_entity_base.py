@@ -34,9 +34,9 @@ class TclEntityBase(CoordinatorEntity):
     def device_info(self) -> DeviceInfo:
         return toDeviceInfo(self.device)
 
-    @property
-    def name(self) -> str:
-        return self._name
+    # @property
+    # def name(self) -> str:
+    #     return self._name
 
     @property
     def state_class(self) -> str | None:

@@ -75,15 +75,10 @@
   "entity": {
     "switch": {
       "switch.beepSwitch": {
-        "name": "Beep Mode Switch"
-      }
-    },
-    "number": {
-      "number.targetDegree": {
-        "name": "Set Target Temperature"
+        "name": "Csipogás hang"
       },
-      "number.targetTemperature": {
-        "name": "Set Target Temperature"
+      "switch.powerSwitch": {
+        "name": "Bekapcsológomb"
       }
     }
   }
