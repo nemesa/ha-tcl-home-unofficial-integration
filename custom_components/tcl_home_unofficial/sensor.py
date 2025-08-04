@@ -6,6 +6,7 @@ from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
     SensorStateClass,
+    SensorEntityDescription,
 )
 from homeassistant.const import UnitOfTemperature
 from homeassistant.core import HomeAssistant
@@ -37,6 +38,7 @@ async def async_setup_entry(
                 TemperatureSensor(
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeatureEnum.SENSOR_CURRENT_TEMPERATURE,
                     type="CurrentTemperature",
                     name="Current Temperature",
                     value_fn=lambda device: device.data.current_temperature,
@@ -48,6 +50,7 @@ async def async_setup_entry(
                 TemperatureSensor(
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeatureEnum.SENSOR_INTERNAL_UNIT_COIL_TEMPERATURE,
                     type="InternalUnitCoilTemperature",
                     name="Internal Unit Coil Temperature",
                     value_fn=lambda device: device.data.internal_unit_coil_temperature,
@@ -59,6 +62,7 @@ async def async_setup_entry(
                 TemperatureSensor(
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeatureEnum.SENSOR_EXTERNAL_UNIT_COIL_TEMPERATURE,
                     type="ExternalUnitCoilTemperature",
                     name="External Unit Coil Temperature",
                     value_fn=lambda device: device.data.external_unit_coil_temperature,
@@ -70,6 +74,7 @@ async def async_setup_entry(
                 TemperatureSensor(
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeatureEnum.SENSOR_EXTERNAL_UNIT_TEMPERATURE,
                     type="ExternalUnitTemperature",
                     name="External Unit Temperature",
                     value_fn=lambda device: device.data.external_unit_temperature,
@@ -81,6 +86,7 @@ async def async_setup_entry(
                 TemperatureSensor(
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeatureEnum.SENSOR_EXTERNAL_UNIT_EXHAUST_TEMPERATURE,
                     type="ExternalUnitExhaustTemperature",
                     name="External Unit Exhaust Temperature",
                     value_fn=lambda device: device.data.external_unit_exhaust_temperature,
@@ -97,10 +103,15 @@ class TemperatureSensor(TclEntityBase, SensorEntity):
         device: Device,
         type: str,
         name: str,
+        deviceFeature: DeviceFeatureEnum,
         value_fn,
     ) -> None:
         TclEntityBase.__init__(self, coordinator, type, name, device)
         self.value_fn = value_fn
+        self.entity_description = SensorEntityDescription(
+            key=deviceFeature,
+            translation_key=deviceFeature,
+        )
 
     @property
     def device_class(self) -> str:

@@ -76,6 +76,192 @@
     "switch": {
       "switch.beepSwitch": {
         "name": "Beep Mode Switch"
+      },
+      "switch.powerSwitch": {
+        "name": "Power Switch"
+      },
+      "switch.eco": {
+        "name": "ECO Switch"
+      },
+      "switch.AIeco": {
+        "name": "AI ECO Switch"
+      },
+      "switch.8CHeating": {
+        "name": "8 °C Heating"
+      },
+      "switch.healthy": {
+        "name": "Healthy Switch"
+      },
+      "switch.drying": {
+        "name": "Drying Switch"
+      },
+      "switch.screen": {
+        "name": "Diplay Light Switch"
+      },
+      "switch.lightSense": {
+        "name": "Light Sense"
+      },
+      "switch.swingWind": {
+        "name": "Up and down wind"
+      },
+      "switch.sleep": {
+        "name": "Sleep"
+      },
+      "switch.softWind": {
+        "name": "Soft Wind"
+      },
+      "switch.freshAir": {
+        "name": "Fresh Air"
+      },
+      "user_config.behavior.memorize_temp_by_mode": {
+        "name": "Save temp by mode"
+      },
+      "user_config.behavior.memorize_fan_speed_by_mode": {
+        "name": "Save fan speed by mode"
+      },
+      "user_config.behavior.silent_beep_when_turn_on": {
+        "name": "Silent beep when turn on"
+      }
+    },
+    "sensor": {
+      "sensor.current_temperature": {
+        "name": "Current Temperature"
+      },
+      "sensor.internal_unit_coil_temperature": {
+        "name": "Internal Unit Coil Temperature"
+      },
+      "sensor.external_unit_coil_temperature": {
+        "name": "External Unit Coil Temperature"
+      },
+      "sensor.external_unit_temperature": {
+        "name": "External Unit Temperature"
+      },
+      "sensor.external_unit_exhaust_temperature": {
+        "name": "External Unit Exhaust Temperature"
+      }
+    },
+    "binary_sensor": {
+      "sensor.is_online": {
+        "name": "Is Online"
+      }
+    },
+    "select": {
+      "select.mode": {
+        "name": "Mode",
+        "state": {
+          "Cool":"Cool",
+          "Heat":"Heat",
+          "Dehumidification":"Dehumidification",
+          "Fan":"Fan",
+          "Auto":"Auto"
+        }
+      },
+      "select.windSpeed": {
+        "name": "Wind Speed",
+        "state": {
+          "Strong":"Strong",
+          "High":"High",
+          "Mid-high":"Mid-high",
+          "Medium":"Medium",
+          "Mid-low":"Mid-low",
+          "Low":"Low",
+          "Mute":"Mute",
+          "Auto":"Auto"
+        }
+      },
+      "select.windSpeed7Gear": {
+        "name": "Wind Speed",
+        "state": {
+          "Turbo":"Turbo",
+          "Auto":"Auto",
+          "1": "1",
+          "2": "2",
+          "3": "3",
+          "4": "4",
+          "5": "5",
+          "6": "6"
+        }
+      },
+      "select.windFeeling": {
+        "name": "Wind Feeling",
+        "state": {
+          "Not set":"Not set",
+          "Soft":"Soft",
+          "Shower":"Shower",
+          "Carpet":"Carpet",
+          "Surround":"Surround"
+        }
+      },
+      "select.verticalDirection": {
+        "name": "Up and Down air supply",
+        "state": {
+          "Up and down swing":"Up and down swing",
+          "Upwards swing":"Upwards swing",
+          "Downwards swing":"Downwards swing",
+          "Top fix":"Top fix",
+          "Upper fix":"Upper fix",
+          "Middle fix":"Middle fix",
+          "Lower fix":"Lower fix",
+          "Bottom fix":"Bottom fix",
+          "Not set":"Not set"
+        }
+      },
+      "select.horizontalDirection": {
+        "name": "Left and Right air supply",
+        "state": {
+          "Left and right swing":"Left and right swing",
+          "Left swing":"Left swing",
+          "Middle swing":"Middle swing",
+          "Right swing":"Right swing",
+          "Left fix":"Left fix",
+          "Center-left fix":"Center-left fix",
+          "Middle fix":"Middle fix",
+          "Center-right fix":"Center-right fix",
+          "Right fix":"Right fix",
+          "Not set":"Not set"
+        }
+      },
+      "select.sleepMode": {
+        "name": "Sleep Mode",
+        "state": {
+          "Standard": "Standard",
+          "Elderly": "Elderly",
+          "Child": "Child",
+          "off": "off"
+        }
+      },
+      "select.freshAir": {
+        "name": "Fresh Air Strength",
+        "state": {
+          "Auto":"Auto",
+          "1": "1",
+          "2": "2",
+          "3": "3"
+        }
+      },
+      "select.generatorMode": {
+        "name": "Generator Mode",
+        "state": {
+            "Not set":"Not set",
+            "L1 30%":"L1 30%",
+            "L2 50%":"L2 50%",
+            "L3 70%": "L3 70%"
+        }
+      },
+      "select.temperatureType": {
+        "name": "Temperature Type",
+        "state": {
+          "Fahrenheit":"Fahrenheit",
+          "Celsius":"Celsius"
+        }
+      },
+      "select.portableWindSeed": {
+        "name": "Wind Speed",
+        "state": {
+          "High":"High",
+          "Low":"Low",
+          "Auto":"Auto"
+        }
       }
     },
     "number": {
@@ -84,6 +270,14 @@
       },
       "number.targetTemperature": {
         "name": "Set Target Temperature"
+      }
+    },
+    "button":{
+      "button.selfClean.on": {
+        "name": "Stop Evaporator Cleaning"
+      },
+      "button.selfClean.off": {
+        "name": "Start Evaporator Cleaning"
       }
     }
   }

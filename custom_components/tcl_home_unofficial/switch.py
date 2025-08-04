@@ -254,6 +254,8 @@ async def async_setup_entry(
     """Set up the Binary Sensors."""
 
     # _LOGGER.info("*********************")
+    # _LOGGER.info("hass.config.language : %s", hass.config.language)
+    
     # t = await async_get_translations(
     #     hass=hass,
     #     language="hu",
@@ -463,43 +465,37 @@ async def async_setup_entry(
                 )
             )
 
-        if (
-            DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE
-            in device.supported_features
-        ):
+        if (DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE in device.supported_features):
             switches.append(
                 ConfigSwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE,
                     config_path="user_config.behavior.memorize_temp_by_mode",
                     name="Save temp by mode",
                 )
             )
 
-        if (
-            DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE
-            in device.supported_features
-        ):
+        if (DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE in device.supported_features):
             switches.append(
                 ConfigSwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE,
                     config_path="user_config.behavior.memorize_fan_speed_by_mode",
                     name="Save fan speed by mode",
                 )
             )
 
-        if (
-            DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON
-            in device.supported_features
-        ):
+        if (DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON in device.supported_features):
             switches.append(
                 ConfigSwitchHandler(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
+                    deviceFeature=DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON,
                     config_path="user_config.behavior.silent_beep_when_turn_on",
                     name="Silent beep when turn on",
                 )
@@ -565,11 +561,17 @@ class ConfigSwitchHandler(TclEntityBase, SwitchEntity):
         device: Device,
         name: str,
         config_path: str,
+        deviceFeature: DeviceFeatureEnum,
     ) -> None:
         TclEntityBase.__init__(self, coordinator, config_path, name, device)
         self.hass = hass
         self.config_path = config_path
         self._attr_entity_category = EntityCategory.CONFIG
+        
+        self.entity_description = SwitchEntityDescription(
+            key=deviceFeature,
+            translation_key=deviceFeature,
+        )
 
     @property
     def device_class(self) -> str:

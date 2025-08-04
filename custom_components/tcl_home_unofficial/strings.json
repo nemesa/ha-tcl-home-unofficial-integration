@@ -79,6 +79,48 @@
       },
       "switch.powerSwitch": {
         "name": "Power Switch"
+      },
+      "switch.eco": {
+        "name": "ECO Switch"
+      },
+      "switch.AIeco": {
+        "name": "AI ECO Switch"
+      },
+      "switch.8CHeating": {
+        "name": "8 °C Heating"
+      },
+      "switch.healthy": {
+        "name": "Healthy Switch"
+      },
+      "switch.drying": {
+        "name": "Drying Switch"
+      },
+      "switch.screen": {
+        "name": "Diplay Light Switch"
+      },
+      "switch.lightSense": {
+        "name": "Light Sense"
+      },
+      "switch.swingWind": {
+        "name": "Up and down wind"
+      },
+      "switch.sleep": {
+        "name": "Sleep"
+      },
+      "switch.softWind": {
+        "name": "Soft Wind"
+      },
+      "switch.freshAir": {
+        "name": "Fresh Air"
+      },
+      "user_config.behavior.memorize_temp_by_mode": {
+        "name": "Save temp by mode"
+      },
+      "user_config.behavior.memorize_fan_speed_by_mode": {
+        "name": "Save fan speed by mode"
+      },
+      "user_config.behavior.silent_beep_when_turn_on": {
+        "name": "Silent beep when turn on"
       }
     },
     "number": {

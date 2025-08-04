@@ -129,7 +129,7 @@ async def async_setup_entry(
                     coordinator=coordinator,
                     device=device,
                     deviceFeature=DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE,
-                    name="Set Target Temperature",
+                    name=None,
                     type="SetTargetTemperature",
                     available_fn=lambda device: is_allowed(device),
                     current_value_fn=lambda device: float(
@@ -148,7 +148,7 @@ async def async_setup_entry(
                     coordinator=coordinator,
                     device=device,
                     deviceFeature=DeviceFeatureEnum.NUMBER_TARGET_DEGREE,
-                    name="Set Target Temperature",
+                    name=None,
                     type="SetTargetDegree",
                     available_fn=lambda device: is_allowed(device),
                     current_value_fn=lambda device: float(
@@ -189,7 +189,6 @@ class TemperatureHandler(TclEntityBase, NumberEntity):
 
         self._attr_assumed_state = False
         self._attr_device_class = NumberDeviceClass.TEMPERATURE
-        self._attr_translation_key = None
         self._attr_mode = NumberMode.BOX
         self._attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
         self._attr_native_value = self.current_value_fn(self.device)
@@ -201,7 +200,7 @@ class TemperatureHandler(TclEntityBase, NumberEntity):
         ]
         self.entity_description = NumberEntityDescription(
             key=deviceFeature,
-            translation_key=deviceFeature,            
+            translation_key=deviceFeature,
         )
 
     @property
@@ -210,9 +209,9 @@ class TemperatureHandler(TclEntityBase, NumberEntity):
             return self.available_fn(self.device)
         return False
 
-    @property
-    def device_class(self) -> str:
-        return NumberDeviceClass.TEMPERATURE
+    # @property
+    # def device_class(self) -> str:
+    #     return NumberDeviceClass.TEMPERATURE
 
     @property
     def native_value(self) -> int | float:

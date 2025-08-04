@@ -2,7 +2,7 @@
 
 import logging
 
-from homeassistant.components.select import SelectEntity
+from homeassistant.components.select import SelectEntity, SelectEntityDescription
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -691,19 +691,6 @@ class DesiredStateHandlerForSelect:
             self.device.device_id, desired_state
         )
 
-
-def get_SELECT_VERTICAL_DIRECTION_name(device: Device) -> str:
-    if device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-        return "Air flow"
-    return "Up and Down air supply"
-
-
-def get_SELECT_HORIZONTAL_DIRECTION_name(device: Device) -> str:
-    if device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-        return "Horizontal Air flow"
-    return "Left and Right air supply"
-
-
 def get_SELECT_PORTABLE_WIND_SEED_options(device: Device) -> list[str] | None:
     all = [PortableWindSeedEnum.LOW, PortableWindSeedEnum.HIGH]
     if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
@@ -887,7 +874,7 @@ async def async_setup_entry(
                     device=device,
                     deviceFeature=DeviceFeatureEnum.SELECT_VERTICAL_DIRECTION,
                     type="UpAndDownAirSupplyVector",
-                    name=get_SELECT_VERTICAL_DIRECTION_name(device),
+                    name="Up and Down air supply",
                     icon_fn=lambda device: "mdi:swap-vertical",
                 )
             )
@@ -900,7 +887,7 @@ async def async_setup_entry(
                     device=device,
                     deviceFeature=DeviceFeatureEnum.SELECT_HORIZONTAL_DIRECTION,
                     type="LeftAndRightAirSupplyVector",
-                    name=get_SELECT_HORIZONTAL_DIRECTION_name(device),
+                    name="Left and Right air supply",
                     icon_fn=lambda device: "mdi:swap-horizontal",
                 )
             )
@@ -957,6 +944,10 @@ class SelectHandler(TclEntityBase, SelectEntity):
             coordinator=coordinator,
             deviceFeature=deviceFeature,
             device=self.device,
+        )
+        self.entity_description = SelectEntityDescription(
+            key=deviceFeature,
+            translation_key=deviceFeature,
         )
 
         self._attr_current_option = self.iot_handler.current_state()

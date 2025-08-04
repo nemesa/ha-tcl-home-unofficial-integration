@@ -258,8 +258,8 @@ def getWindFeeling(soft_wind: int) -> WindFeelingEnum:
 class GeneratorModeEnum(StrEnum):
     NONE = "Not set"
     L1 = "L1 30%"
-    L2 = "L1 50%"
-    L3 = "L1 70%"
+    L2 = "L2 50%"
+    L3 = "L3 70%"
 
 
 def getGeneratorMode(generator_mode: int) -> GeneratorModeEnum:

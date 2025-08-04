@@ -5,13 +5,15 @@ import logging
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
+    BinarySensorEntityDescription,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
-from .device import Device, DeviceTypeEnum
+from .device_features import DeviceFeatureEnum
+from .device import Device
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,19 +30,21 @@ async def async_setup_entry(
 
     sensors = []
     for device in config_entry.devices:
-        sensors.append(
-            DynamicBinarySensorHandlerNoAutoIsOnlineCheck(
-                coordinator=coordinator,
-                device=device,
-                type="IsOnline",
-                name="Is Online",
-                icon_fn=lambda device: "mdi:cloud-check-outline"
-                if device.is_online == 1
-                else "mdi:cloud-cancel-outline",
-                is_on_fn=lambda device: device.is_online,
-                is_available_fn=lambda device: True,
+        if DeviceFeatureEnum.SENSOR_IS_ONLINE in device.supported_features:
+            sensors.append(
+                DynamicBinarySensorHandlerNoAutoIsOnlineCheck(
+                    coordinator=coordinator,
+                    device=device,
+                    type="IsOnline",
+                    name="Is Online",
+                    deviceFeature=DeviceFeatureEnum.SENSOR_IS_ONLINE,
+                    icon_fn=lambda device: "mdi:cloud-check-outline"
+                    if device.is_online == 1
+                    else "mdi:cloud-cancel-outline",
+                    is_on_fn=lambda device: device.is_online,
+                    is_available_fn=lambda device: True,
+                )
             )
-        )
 
     async_add_entities(sensors)
 
@@ -52,12 +56,17 @@ class BinarySensorHandler(TclEntityBase, BinarySensorEntity):
         device: Device,
         type: str,
         name: str,
+        deviceFeature: DeviceFeatureEnum,
         icon_fn: lambda device: str,
         is_on_fn: lambda device: bool,
     ) -> None:
         TclEntityBase.__init__(self, coordinator, type, name, device)
         self.icon_fn = icon_fn
         self.is_on_fn = is_on_fn
+        self.entity_description = BinarySensorEntityDescription(
+            key=deviceFeature,
+            translation_key=deviceFeature,
+        )
 
     @property
     def icon(self):
@@ -82,6 +91,7 @@ class DynamicBinarySensorHandlerNoAutoIsOnlineCheck(
         device: Device,
         type: str,
         name: str,
+        deviceFeature: DeviceFeatureEnum,
         icon_fn: lambda device: str,
         is_on_fn: lambda device: bool,
         is_available_fn: lambda device: bool,
@@ -92,6 +102,7 @@ class DynamicBinarySensorHandlerNoAutoIsOnlineCheck(
             device=device,
             type=type,
             name=name,
+            deviceFeature=deviceFeature,
             icon_fn=icon_fn,
             is_on_fn=is_on_fn,
         )
