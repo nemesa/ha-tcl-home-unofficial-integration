@@ -351,7 +351,7 @@ async def get_things(
         "appversion": "5.4.1",
         "thomeversion": "4.8.1",
         "accesstoken": saas_token,
-        "countrycode": country_abbr,
+        #"countrycode": country_abbr,
         "accept-language": "en",
         "timestamp": timestamp,
         "nonce": nonce,
@@ -359,7 +359,7 @@ async def get_things(
         "user-agent": "Android",
         "content-type": "application/json; charset=UTF-8",
         "accept-encoding": "gzip, deflate, br",
-    }
+    }    
 
     httpx_client = get_async_client(hass)
 
