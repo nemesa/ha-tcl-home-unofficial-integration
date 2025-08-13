@@ -6,6 +6,8 @@ from homeassistant.core import HomeAssistant
 
 from .calculations import try_get_value
 from .device_data_storage import get_stored_data, safe_set_value, set_stored_data
+from .device_enums import ModeEnum
+from .device_features import DeviceFeatureEnum
 
 
 @dataclass
@@ -102,3 +104,64 @@ async def get_stored_spit_ac_data(
     if need_save:
         await set_stored_data(hass, device_id, stored_data)
     return stored_data
+
+def handle_split_ac_mode_change(desired_state:dict, value:ModeEnum, supported_features: list[DeviceFeatureEnum], stored_data: dict) -> dict:
+    match value:
+        case ModeEnum.AUTO:
+            if (DeviceFeatureEnum.INTERNAL_HAS_TURBO_PROPERTY in supported_features):
+                desired_state["turbo"] = 0
+                desired_state["ECO"] = 0
+            if (DeviceFeatureEnum.SWITCH_8_C_HEATING in supported_features):
+                desired_state["eightAddHot"] = 0
+            if (DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in supported_features):
+                desired_state["windSpeedAutoSwitch"] = 1
+                desired_state["windSpeed7Gear"] = 0
+            if (DeviceFeatureEnum.SELECT_WIND_SPEED in supported_features):
+                desired_state["windSpeed"] = 0                                    
+        case ModeEnum.COOL:
+            if (DeviceFeatureEnum.INTERNAL_HAS_TURBO_PROPERTY in supported_features):
+                desired_state["turbo"] = 0
+                desired_state["ECO"] = 0
+                desired_state["targetTemperature"] = 24
+            if (DeviceFeatureEnum.SWITCH_8_C_HEATING in supported_features):
+                desired_state["eightAddHot"] = 0
+            if (DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in supported_features):
+                desired_state["windSpeedAutoSwitch"] = 1
+                desired_state["windSpeed7Gear"] = 0
+            if (DeviceFeatureEnum.SELECT_WIND_SPEED in supported_features):
+                desired_state["windSpeed"] = 0
+        case ModeEnum.DEHUMIDIFICATION:
+            if (DeviceFeatureEnum.INTERNAL_HAS_TURBO_PROPERTY in supported_features):
+                desired_state["turbo"] = 0
+                desired_state["ECO"] = 0
+            if (DeviceFeatureEnum.SWITCH_8_C_HEATING in supported_features):
+                desired_state["eightAddHot"] = 0
+            if (DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in supported_features):
+                desired_state["windSpeed7Gear"] = 2
+                desired_state["windSpeedAutoSwitch"] = 0
+            if (DeviceFeatureEnum.SELECT_WIND_SPEED in supported_features):
+                desired_state["windSpeed"] = 2
+        case ModeEnum.FAN:            
+            if (DeviceFeatureEnum.INTERNAL_HAS_TURBO_PROPERTY in supported_features):
+                desired_state["turbo"] = 0
+                desired_state["ECO"] = 0
+            if (DeviceFeatureEnum.SWITCH_8_C_HEATING in supported_features):
+                desired_state["eightAddHot"] = 0
+            if (DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in supported_features):
+                desired_state["windSpeedAutoSwitch"] = 1
+                desired_state["windSpeed7Gear"] = 0
+            if (DeviceFeatureEnum.SELECT_WIND_SPEED in supported_features):
+                desired_state["windSpeed"] = 0
+        case ModeEnum.HEAT:
+            if (DeviceFeatureEnum.INTERNAL_HAS_TURBO_PROPERTY in supported_features):
+                desired_state["turbo"] = 0
+                desired_state["ECO"] = 0
+                desired_state["targetTemperature"] = 26
+            if (DeviceFeatureEnum.SWITCH_8_C_HEATING in supported_features):
+                desired_state["eightAddHot"] = 0
+            if (DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in supported_features):
+                desired_state["windSpeedAutoSwitch"] = 1
+                desired_state["windSpeed7Gear"] = 0
+            if (DeviceFeatureEnum.SELECT_WIND_SPEED in supported_features):
+                desired_state["windSpeed"] = 0
+    return desired_state
