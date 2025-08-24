@@ -1,6 +1,7 @@
 """Switch setup for our Integration."""
 
 import logging
+from typing import Any
 
 from homeassistant.components.select import SelectEntity
 from homeassistant.core import HomeAssistant
@@ -110,6 +111,10 @@ class DesiredStateHandlerForSelect:
             case DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR:
                 return getWindSeed7Gear(self.device.data.wind_speed_7_gear)
             case DeviceFeatureEnum.SELECT_PORTABLE_WIND_SEED:
+                # Prefer detected mapping if present
+                label = _ReactNativeBundleFanSpeedMapping.get_current_label(self.device)
+                if label is not None:
+                    return label
                 return getPortableWindSeed(
                     wind_speed=self.device.data.wind_speed,
                     has_auto_mode=(
@@ -142,6 +147,9 @@ class DesiredStateHandlerForSelect:
             case DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR:
                 return [e.value for e in WindSeed7GearEnum]
             case DeviceFeatureEnum.SELECT_PORTABLE_WIND_SEED:
+                labels = _ReactNativeBundleFanSpeedMapping.get_options_for_current_mode(self.device)
+                if labels:
+                    return labels
                 return [e.value for e in PortableWindSeedEnum]
             case DeviceFeatureEnum.SELECT_GENERATOR_MODE:
                 return [e.value for e in GeneratorModeEnum]
@@ -498,6 +506,10 @@ class DesiredStateHandlerForSelect:
         )
 
     def desired_state_SELECT_PORTABLE_WIND_SEED(self, value: PortableWindSeedEnum):
+        desired = _ReactNativeBundleFanSpeedMapping.desired_state_from_value(value, self.device)
+        if desired is not None:
+            return desired
+        # Fallback to legacy behavior
         desired_state = {}
         if DeviceFeatureEnum.MODE_AUTO in self.device.supported_features:
             match value:
@@ -705,6 +717,12 @@ def get_SELECT_HORIZONTAL_DIRECTION_name(device: Device) -> str:
 
 
 def get_SELECT_PORTABLE_WIND_SEED_options(device: Device) -> list[str] | None:
+    # Prefer detected mapping tokens transformed to labels, filtered by current mode
+    labels = _ReactNativeBundleFanSpeedMapping.get_options_for_current_mode(device)
+    if labels:
+        return labels
+
+    # Fallback to legacy enum-based options
     all = [PortableWindSeedEnum.LOW, PortableWindSeedEnum.HIGH]
     if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
         all.append(PortableWindSeedEnum.AUTO)
@@ -1013,3 +1031,84 @@ class DynamicSelectHandler(SelectHandler, SelectEntity):
         if self.device.is_online:
             return self.available_fn(self.device)
         return False
+
+class _ReactNativeBundleFanSpeedMapping:
+    """Portable fan-speed mapping derived from React Native bundle parsing.
+
+    All methods use per-device storage populated by RN bundle parsing
+    (detected.fan_speed.mapping) to convert between numeric windSpeed
+    indices and human-readable labels.
+    """
+
+    @staticmethod
+    def _tokens_to_labels(tokens: list[str]) -> list[str]:
+        labels: list[str] = []
+        for t in tokens:
+            if isinstance(t, str) and t.startswith("FAN_SPEED_"):
+                name = t[len("FAN_SPEED_"):].lower().capitalize()
+                # Friendly rename: Med -> Medium
+                if name == "Med":
+                    name = "Medium"
+                labels.append(name)
+            else:
+                labels.append(str(t))
+        return labels
+
+    @staticmethod
+    def get_labels(device: Device) -> list[str] | None:
+        mapping = safe_get_value(device.storage, "detected.fan_speed.mapping", None)
+        if isinstance(mapping, list) and len(mapping) > 0:
+            labels = _ReactNativeBundleFanSpeedMapping._tokens_to_labels(mapping)
+            if len(labels) > 0:
+                return labels
+        return None
+
+    @staticmethod
+    def get_current_label(device: Device) -> str | None:
+        labels = _ReactNativeBundleFanSpeedMapping.get_labels(device)
+        if labels:
+            try:
+                idx = int(device.data.wind_speed)
+                if 0 <= idx < len(labels):
+                    return labels[idx]
+            except (ValueError, TypeError):
+                return None
+        return None
+
+    @staticmethod
+    def desired_state_from_value(value: Any, device: Device) -> dict | None:
+        labels = _ReactNativeBundleFanSpeedMapping.get_labels(device)
+        if labels:
+            selected = value.value if hasattr(value, "value") else str(value)
+            try:
+                idx = labels.index(selected)
+                return {"windSpeed": idx}
+            except ValueError:
+                return None
+        return None
+
+    @staticmethod
+    def get_options(device: Device) -> list[str] | None:
+        return _ReactNativeBundleFanSpeedMapping.get_labels(device)
+
+    @staticmethod
+    def get_options_for_current_mode(device: Device) -> list[str] | None:
+        """Return RN-mapped labels filtered by the device's current HVAC mode.
+
+        Rules:
+        - Cool/Heat/Auto: all RN-mapped speeds are available.
+        - Dehumidification: keep only 'Auto' if present; otherwise none.
+        - Fan: exclude 'Auto' if present; keep all other mapped labels.
+        - Devices without 'Auto' are handled naturally by the label set.
+        """
+        labels = _ReactNativeBundleFanSpeedMapping.get_labels(device)
+        if not labels:
+            return None
+        mode = device.mode_value_to_enum_mapp.get(device.data.work_mode, ModeEnum.COOL)
+        if mode == ModeEnum.DEHUMIDIFICATION:
+            # Only keep 'Auto' (if present); else none
+            return [l for l in labels if l == "Auto"]
+        if mode == ModeEnum.FAN:
+            # Opposite: exclude 'Auto' if present; keep whatever else mapping provides
+            return [l for l in labels if l != "Auto"]
+        return labels
