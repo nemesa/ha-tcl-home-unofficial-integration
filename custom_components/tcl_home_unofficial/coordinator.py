@@ -14,9 +14,6 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .aws_iot import AwsIot
 from .const import DEFAULT_SCAN_INTERVAL, DOMAIN
 from .device import Device
-from .device_types import DeviceTypeEnum
-from .device_data_storage import get_detected_fan_speed_mapping
-from .device_rn_probe import probe_and_persist_mapping
 from .device_data_storage import get_stored_data
 from .config_entry import ConfigData
 
@@ -40,7 +37,6 @@ class IotDeviceCoordinator(DataUpdateCoordinator):
 
         self.hass = hass
         self.aws_iot = aws_iot
-        self._attempted_probe: set[str] = set()
         self.poll_interval = config_entry.options.get(
             CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
         )
@@ -76,16 +72,6 @@ class IotDeviceCoordinator(DataUpdateCoordinator):
                 )
                 d.storage = await get_stored_data(self.hass, d.device_id)
                 devices.append(d)
-
-            # After devices are built, attempt RN download once per boot for Portable ACs without mapping
-            for d in devices:
-                if d.device_type == DeviceTypeEnum.PORTABLE_AC and d.device_id not in self._attempted_probe:
-                    mapping = await get_detected_fan_speed_mapping(self.hass, d.device_id)
-                    if mapping is None:
-                        self._attempted_probe.add(d.device_id)
-                        self.hass.async_create_task(
-                            probe_and_persist_mapping(self.hass, self.aws_iot.get_session_manager(), d)
-                        )
         except Exception as err:
             raise UpdateFailed(f"Error communicating with API: {err}") from err
 
