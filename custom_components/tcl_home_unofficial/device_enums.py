@@ -194,6 +194,37 @@ def getPortableWindSeed(wind_speed: int, has_auto_mode: bool) -> PortableWindSee
                 return PortableWindSeedEnum.LOW
 
 
+class PortableWind4ValueSeedEnum(StrEnum):
+    HIGH = "High"
+    MEDIUM = "Medium"
+    LOW = "Low"
+    AUTO = "Auto"
+
+
+def getPortableWind4ValueSeed(wind_speed: int, has_auto_mode: bool) -> PortableWind4ValueSeedEnum:
+    if has_auto_mode:
+        match wind_speed:
+            case 3:
+                return PortableWind4ValueSeedEnum.HIGH
+            case 2:
+                return PortableWind4ValueSeedEnum.MEDIUM
+            case 1:
+                return PortableWind4ValueSeedEnum.LOW
+            case 0:
+                return PortableWind4ValueSeedEnum.AUTO
+            case _:
+                return PortableWind4ValueSeedEnum.AUTO
+    else:
+        match wind_speed:
+            case 2:
+                return PortableWind4ValueSeedEnum.HIGH
+            case 1:
+                return PortableWind4ValueSeedEnum.MEDIUM
+            case 0:
+                return PortableWind4ValueSeedEnum.LOW
+            case _:
+                return PortableWind4ValueSeedEnum.LOW
+
 class WindowAcWindSeedEnum(StrEnum):
     SPEED_1 = "1"
     SPEED_2 = "2"

@@ -13,7 +13,7 @@ async def get_stored_data(hass: HomeAssistant, device_id: str) -> dict[str, any]
     """Get stored data for a device."""
     key = get_device_data_storege_key(device_id)
     data_storage: storage.Store[dict] = storage.Store(hass=hass, version=1, key=key)
-
+    
     data = await data_storage.async_load()
     _LOGGER.debug("device_data_storage.get_stored_data %s - %s", key, data)
 
@@ -118,24 +118,3 @@ def safe_get_value(data: dict[str, any] | None, path: str, defaul_value: any) ->
                 pointer = pointer[part]
 
     return return_value
-
-
-# Fan speed mapping (detected, per-device)
-async def set_detected_fan_speed_mapping(
-    hass: HomeAssistant, device_id: str, mapping: list[str] | None
-) -> dict[str, any] | None:
-    """Persist detected fan speed mapping under detected.fan_speed.mapping (per device)."""
-    data = await get_stored_data(hass, device_id)
-    data, need_save = safe_set_value(
-        data, "detected.fan_speed.mapping", mapping, overwrite_if_exists=True
-    )
-    if need_save:
-        return await set_stored_data(hass, device_id, data)
-    return data
-
-
-async def get_detected_fan_speed_mapping(
-    hass: HomeAssistant, device_id: str
-) -> list[str] | None:
-    data = await get_stored_data(hass, device_id)
-    return safe_get_value(data, "detected.fan_speed.mapping", None)

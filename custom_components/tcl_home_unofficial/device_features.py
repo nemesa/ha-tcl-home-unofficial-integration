@@ -45,6 +45,7 @@ class DeviceFeatureEnum(StrEnum):
     SELECT_GENERATOR_MODE = "select.generatorMode"
     SELECT_TEMPERATURE_TYPE = "select.temperatureType"
     SELECT_PORTABLE_WIND_SPEED = "select.portableWindSpeed"
+    SELECT_PORTABLE_WIND_4VALUE_SPEED = "select.portableWind4ValueSpeed"
     SELECT_WINDOW_AS_WIND_SPEED = "select.WindowAcWindSpeed"
     NUMBER_TARGET_DEGREE = "number.targetDegree"
     NUMBER_TARGET_TEMPERATURE = "number.targetTemperature"
@@ -66,9 +67,14 @@ def has_property(aws_thing_state_reported: dict[str, any], propertyName: str) ->
 
 
 def getSupportedFeatures(
-    device_type: DeviceTypeEnum, aws_thing_state_reported: dict[str, any]
+    device_type: DeviceTypeEnum, aws_thing_state_reported: dict[str, any], device_storage: dict[str, any] | None = None,
 ) -> list[DeviceFeatureEnum]:
     capabilities = aws_thing_state_reported.get("capabilities", [])
+    has_rn_probe_data= False
+    rn_probe_data={}
+    if device_storage is not None:
+        has_rn_probe_data= device_storage.get("non_user_config", {}).get("rn_probe_data", {}).get("is_success", False)
+        rn_probe_data=device_storage.get("non_user_config", {}).get("rn_probe_data", {}).get("data", {})
 
     match device_type:
         case DeviceTypeEnum.SPLIT_AC:
@@ -205,14 +211,30 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.SWITCH_POWER,
                 DeviceFeatureEnum.SWITCH_SLEEP,
                 DeviceFeatureEnum.SELECT_MODE,
-                DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED,
                 DeviceFeatureEnum.NUMBER_TARGET_DEGREE,
                 DeviceFeatureEnum.SENSOR_IS_ONLINE,
             ]
             
+            if has_rn_probe_data:
+                fan_speed_mapping = rn_probe_data.get("fan_speed_mapping", [])
+                if ("FAN_SPEED_AUTO" in fan_speed_mapping 
+                    and "FAN_SPEED_LOW" in fan_speed_mapping
+                    and ("FAN_SPEED_MED" in fan_speed_mapping or "FAN_SPEED_MEDIUM" in fan_speed_mapping)
+                    and "FAN_SPEED_HIGH" in fan_speed_mapping):
+                    features.append(DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED)
+                else:
+                    features.append(DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED)
+            else:
+                features.append(DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED)
+            
             if has_property(aws_thing_state_reported, "swingWind"):
                 features.append(DeviceFeatureEnum.SWITCH_SWING_WIND)
                 features.append(DeviceFeatureEnum.MODE_AUTO)
+            
+            
+            if has_property(aws_thing_state_reported, "currentTemperature"):
+                features.append(DeviceFeatureEnum.SENSOR_CURRENT_TEMPERATURE)
+                features.append(DeviceFeatureEnum.CLIMATE)
                 
             return features
         case _:

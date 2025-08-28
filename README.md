@@ -312,6 +312,14 @@ SELECT_PORTABLE_WIND_SPEED -
 |  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
 | TODO:add pic |TODO:add pic ||
 
+### SELECT_PORTABLE_WIND_4VALUE_SPEED
+
+SELECT_PORTABLE_WIND_4VALUE_SPEED - 
+
+|  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+|  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| TODO:add pic |TODO:add pic ||
+
 ### BUTTON_SELF_CLEAN
 
 BUTTON_SELF_CLEAN - 

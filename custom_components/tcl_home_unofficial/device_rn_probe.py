@@ -12,9 +12,17 @@ What this module provides:
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from io import BytesIO
+import logging
 from typing import Any
 import zipfile
+
+from homeassistant.helpers.httpx_client import get_async_client
+
+from .tcl import get_config
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def _version_key(v: str | None) -> tuple[int, ...]:
@@ -30,7 +38,9 @@ def _version_key(v: str | None) -> tuple[int, ...]:
         return (0,)
 
 
-def pick_best_plugin_record(cfg_data: Any) -> dict | None:
+def pick_best_plugin_record(
+    device_id: str, product_key: str, cfg_data: Any
+) -> dict | None:
     """From /v3/config/get payload (.data), pick the record with highest plugInVersion.
 
     Accepts either a list of dicts or a single dict. Returns the chosen dict or None.
@@ -46,7 +56,8 @@ def pick_best_plugin_record(cfg_data: Any) -> dict | None:
     if not records:
         return None
 
-    return max(records, key=lambda r: _version_key(r.get("plugInVersion")))
+    filtered_records = [r for r in records if r.get("deviceId") == device_id and r.get("productKey") == product_key]
+    return max(filtered_records, key=lambda r: _version_key(r.get("plugInVersion")))
 
 
 def zip_contains_main_jsbundle(zip_bytes: bytes) -> bool:
@@ -74,6 +85,101 @@ def read_main_jsbundle_text(zip_bytes: bytes) -> tuple[str | None, str | None]:
     return None, None
 
 
+@dataclass
+class ProbeResult:
+    def __init__(self) -> None:
+        self.is_success = False
+        self.config_data = {}
+        self.probing_messages = []
+        self.data = None
+
+    is_success: bool
+    config_data: dict
+    probing_messages: list[str]
+    data: ProbeData | None = None
+
+
+@dataclass
+class ProbeData:
+    fan_speed_mapping: list[str] | None = None
+
+
+# Orchestration (HA-aware): fetch config, download ZIP, read bundle, parse config
+async def fetch_and_parse_config(
+    hass, session_manager, device_id: str | None, product_key: str | None
+) -> ProbeResult:
+    """Fetch RN config, download ZIP, read main.jsbundle, and parse mapping.
+
+    Returns ordered FAN_SPEED_* tokens or None.
+    """
+    probe_result = ProbeResult()
+    probe_result.is_success = False
+
+    if not product_key:
+        probe_result.probing_messages.append("No product_key")
+        return probe_result
+
+    if not device_id:
+        probe_result.probing_messages.append("No device_id")
+        return probe_result
+
+    try:
+        cloud = await session_manager.async_aws_cloud_urls()
+        tokens = await session_manager.async_refresh_tokens()
+        auth = await session_manager.async_get_auth_data(allowInvalid=True)
+
+        cfg = await get_config(
+            hass=hass,
+            cloud_url=cloud.data.cloud_url,
+            saas_token=tokens.data.saas_token,
+            country_abbr=(auth.user.country_abbr if auth and auth.user else None),
+            product_key=product_key,
+            verbose_logging=session_manager.is_verbose_device_logging(),
+        )
+        if session_manager.is_verbose_device_logging():
+            _LOGGER.info("device_rn_probe: get_config result: %s", cfg)
+        if not cfg or cfg.data is None:
+            probe_result.probing_messages.append("no config data")
+            return probe_result
+
+        probe_result.config_data = cfg.data
+
+        best = pick_best_plugin_record(device_id, product_key, cfg.data)
+        if not best:
+            probe_result.probing_messages.append("no best plugin record")
+            return probe_result
+        url = best.get("plugInUrl")
+        if not url:
+            probe_result.probing_messages.append("no url for best plugin record")
+            return probe_result
+
+        httpx = get_async_client(hass)
+        resp = await httpx.get(url)
+        if resp.status_code != 200:
+            probe_result.probing_messages.append("non-200 response for fetching bundle")
+            return probe_result
+
+        bundle_text, _member = read_main_jsbundle_text(resp.content)
+        if not bundle_text:
+            probe_result.probing_messages.append("no bundle text")
+            return probe_result
+
+        probe_result.is_success = True
+        probe_result.data = process_bundle_text(bundle_text)
+        return probe_result
+    except Exception as e:
+        probe_result.is_success = False
+        probe_result.probing_messages.append(str(e))
+    return probe_result
+
+
+def process_bundle_text(bundle_text: str) -> ProbeData:
+    """Process the bundle text to extract useful information."""
+    probe_data = ProbeData()
+    probe_data.fan_speed_mapping = parse_fan_speed_mapping(bundle_text)
+    return probe_data
+
+
 def parse_fan_speed_mapping(bundle_text: str) -> list[str] | None:
     """Parse FAN_SPEED_* new Map([...]) tokens from bundle text and return ordered list.
 
@@ -90,61 +196,3 @@ def parse_fan_speed_mapping(bundle_text: str) -> list[str] | None:
         if entries and any(tok.startswith("FAN_SPEED_") for tok, _ in entries):
             return [tok for tok, _ in entries]
     return None
-
-
-# Orchestration (HA-aware): fetch config, download ZIP, read bundle, parse mapping
-async def fetch_and_parse_mapping(hass, session_manager, product_key: str | None) -> list[str] | None:
-    """Fetch RN config, download ZIP, read main.jsbundle, and parse mapping.
-
-    Returns ordered FAN_SPEED_* tokens or None.
-    """
-    if not product_key:
-        return None
-    from .tcl import get_config
-    from homeassistant.helpers.httpx_client import get_async_client
-
-    cloud = await session_manager.async_aws_cloud_urls()
-    tokens = await session_manager.async_refresh_tokens()
-    auth = await session_manager.async_get_auth_data(allowInvalid=True)
-
-    cfg = await get_config(
-        hass=hass,
-        cloud_url=cloud.data.cloud_url,
-        saas_token=tokens.data.saas_token,
-        country_abbr=(auth.user.country_abbr if auth and auth.user else None),
-        product_key=product_key,
-        verbose_logging=False,
-    )
-    if not cfg or cfg.data is None:
-        return None
-
-    best = pick_best_plugin_record(cfg.data)
-    if not best:
-        return None
-    url = best.get("plugInUrl")
-    if not url:
-        return None
-
-    httpx = get_async_client(hass)
-    resp = await httpx.get(url)
-    if resp.status_code != 200:
-        return None
-
-    bundle_text, _member = read_main_jsbundle_text(resp.content)
-    if not bundle_text:
-        return None
-    return parse_fan_speed_mapping(bundle_text)
-
-
-async def probe_and_persist_mapping(hass, session_manager, device) -> None:
-    """End-to-end probe for a device: fetch RN bundle, parse mapping, persist per-device.
-
-    Writes mapping to detected.fan_speed.mapping if available. Silent no-op on failure.
-    """
-    from .device_data_storage import set_detected_fan_speed_mapping
-
-    product_key = getattr(device, "product_key", None)
-    mapping = await fetch_and_parse_mapping(hass, session_manager, product_key)
-    if not mapping:
-        return
-    await set_detected_fan_speed_mapping(hass, device.device_id, mapping)
