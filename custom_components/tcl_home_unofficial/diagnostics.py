@@ -72,6 +72,7 @@ async def async_get_config_entry_diagnostics(
             deviceIds.append(thing.device_id)
             tcl_things.append(
                 {
+                    "product_key": thing.product_key,
                     "platform": thing.platform,
                     "nick_name": thing.nick_name,
                     "device_name": thing.device_name,
@@ -146,6 +147,7 @@ async def async_get_device_diagnostics(
                 tcl_thing.append(
                     {
                         "device_id": thing.device_id,
+                        "product_key": thing.product_key,
                         "platform": thing.platform,
                         "nick_name": thing.nick_name,
                         "device_name": thing.device_name,
