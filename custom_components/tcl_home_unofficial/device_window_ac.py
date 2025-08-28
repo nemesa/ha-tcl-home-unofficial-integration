@@ -49,7 +49,7 @@ async def get_stored_window_ac_data(
         stored_data = {}
         need_save = True
 
-    stored_data, need_save = safe_set_value(stored_data, "non_user_config.native_temp_step", 1, True)
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.native_temp_step", 0.5, True)
 
     stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.memorize_temp_by_mode", False)
     stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.memorize_fan_speed_by_mode", False)
