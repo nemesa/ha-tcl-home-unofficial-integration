@@ -35,6 +35,7 @@ class Device:
         tcl_thing: GetThingsResponseData | None = None,
     ) -> None:
         self.device_id = "noId"
+        self.product_key = None
         self.device_type_str = ""
         self.name = "noName"
         self.storage = {}
@@ -48,6 +49,7 @@ class Device:
         self.is_online = False
         if tcl_thing is not None:
             self.is_online = tcl_thing.is_online
+            self.product_key = tcl_thing.product_key
             self.device_type_str = tcl_thing.device_name
             self.device_id = tcl_thing.device_id
             self.name = tcl_thing.nick_name

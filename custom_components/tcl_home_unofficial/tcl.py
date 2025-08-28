@@ -373,6 +373,78 @@ async def get_things(
     return GetThingsResponse(response_obj)
 
 
+@dataclass
+class ConfigGetResponse:
+    def __init__(self, data: dict) -> None:
+        self.code = getValue(data, ["code"])
+        self.message = getValue(data, ["message"])
+        # Store full payload from the API under .data (no filtering)
+        self.data = data.get("data", data)
+
+    code: int | None
+    message: str | None
+    data: dict
+
+
+async def get_config(
+    hass: HomeAssistant,
+    cloud_url: str,
+    saas_token: str,
+    country_abbr: str | None = None,
+    product_key: str | None = None,
+    verbose_logging: bool = False,
+) -> ConfigGetResponse | None:
+    """Call `/v3/config/get` and return the full response.
+
+    Stores the entire payload under `.data` without adding convenience fields
+    or aliases. Callers should access fields directly from `.data`.
+    """
+    url = f"{cloud_url}/v3/config/get"
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.get_config: %s (productKey=%s)", url, product_key)
+
+    payload = {}
+    if product_key:
+        payload["productKey"] = product_key
+    if country_abbr:
+        payload["countryCode"] = country_abbr
+
+    timestamp = str(int(time.time() * 1000))
+    nonce = "".join(random.choices(string.ascii_lowercase + string.digits, k=16))
+    sign = calculate_md5_hash_bytes(timestamp + nonce + saas_token)
+
+    headers = {
+        "platform": "android",
+        "appversion": "5.4.1",
+        "thomeversion": "4.8.1",
+        "accesstoken": saas_token,
+        "accept-language": "en",
+        "timestamp": timestamp,
+        "nonce": nonce,
+        "sign": sign,
+        "user-agent": "Android",
+        "content-type": "application/json; charset=UTF-8",
+        "accept-encoding": "gzip, deflate, br",
+    }
+
+    httpx_client = get_async_client(hass)
+    response = await httpx_client.post(url, json=payload, headers=headers)
+    if response.status_code != 200:
+        if verbose_logging:
+            _LOGGER.error(
+                "TCL-Service.get_config: HTTP %s - %s",
+                response.status_code,
+                response.text,
+            )
+        return None
+
+    resp_json = response.json()
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.get_config response: %s", resp_json)
+
+    return ConfigGetResponse(resp_json)
+
+
 def calculate_md5_hash_bytes(input_str: str) -> str:
     try:
         digest = hashlib.md5(input_str.encode("utf-8")).digest()
