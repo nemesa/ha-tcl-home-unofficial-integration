@@ -26,6 +26,8 @@ from .device_enums import (
     getWindSpeed,
     PortableWindSeedEnum,
     getPortableWindSeed,
+    PortableWind4ValueSeedEnum,
+    getPortableWind4ValueSeed,
     TemperatureTypeEnum,
     getTemperatureType,
     FreshAirEnum,
@@ -36,6 +38,7 @@ from .device_enums import (
     getWindFeeling,
     WindowAcWindSeedEnum,
     getWindowAcWindSeed,
+    
 )
 
 from .tcl_entity_base import TclEntityBase
@@ -77,6 +80,8 @@ class DesiredStateHandlerForSelect:
                 return await self.SELECT_WIND_SPEED_7_GEAR(value=value)
             case DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED:
                 return await self.SELECT_PORTABLE_WIND_SPEED(value=value)
+            case DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED:
+                return await self.SELECT_PORTABLE_WIND_4VALUE_SPEED(value=value)
             case DeviceFeatureEnum.SELECT_WINDOW_AS_WIND_SPEED:
                 return await self.SELECT_WINDOW_AS_WIND_SPEED(value=value)
             case DeviceFeatureEnum.SELECT_GENERATOR_MODE:
@@ -122,6 +127,13 @@ class DesiredStateHandlerForSelect:
                         DeviceFeatureEnum.MODE_AUTO in self.device.supported_features
                     ),
                 )
+            case DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED:
+                return getPortableWind4ValueSeed(
+                    wind_speed=self.device.data.wind_speed,
+                    has_auto_mode=(
+                        DeviceFeatureEnum.MODE_AUTO in self.device.supported_features
+                    ),
+                )
             case DeviceFeatureEnum.SELECT_GENERATOR_MODE:
                 return getGeneratorMode(self.device.data.generator_mode)
             case DeviceFeatureEnum.SELECT_FRESH_AIR:
@@ -149,6 +161,8 @@ class DesiredStateHandlerForSelect:
                 return [e.value for e in WindSeed7GearEnum]
             case DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED:
                 return [e.value for e in PortableWindSeedEnum]
+            case DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED:
+                return [e.value for e in PortableWind4ValueSeedEnum]
             case DeviceFeatureEnum.SELECT_WINDOW_AS_WIND_SPEED:
                 return [e.value for e in WindowAcWindSeedEnum]
             case DeviceFeatureEnum.SELECT_GENERATOR_MODE:
@@ -221,6 +235,10 @@ class DesiredStateHandlerForSelect:
                 )
             if (DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED in self.device.supported_features):
                 desired_state_override = self.desired_state_SELECT_PORTABLE_WIND_SPEED(
+                    saved_fan_speed
+                )
+            if (DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in self.device.supported_features):
+                desired_state_override = self.desired_state_SELECT_PORTABLE_WIND_4VALUE_SPEED(
                     saved_fan_speed
                 )
             if (DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in self.device.supported_features):
@@ -386,6 +404,50 @@ class DesiredStateHandlerForSelect:
         if need_save:
             await set_stored_data(self.hass, self.device.device_id, stored_data)
         desired_state = self.desired_state_SELECT_PORTABLE_WIND_SPEED(value)
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+    
+    
+    def desired_state_SELECT_PORTABLE_WIND_4VALUE_SPEED(self, value: PortableWind4ValueSeedEnum):
+        desired_state = {}
+        if DeviceFeatureEnum.MODE_AUTO in self.device.supported_features:
+            match value:
+                case PortableWind4ValueSeedEnum.AUTO:
+                    desired_state = {"windSpeed": 0}
+                case PortableWind4ValueSeedEnum.LOW:
+                    desired_state = {"windSpeed": 1}
+                case PortableWind4ValueSeedEnum.MEDIUM:
+                    desired_state = {"windSpeed": 2}
+                case PortableWind4ValueSeedEnum.HIGH:
+                    desired_state = {"windSpeed": 3}
+        else:
+            match value:
+                case PortableWind4ValueSeedEnum.LOW:
+                    desired_state = {"windSpeed": 0}
+                case PortableWind4ValueSeedEnum.MEDIUM:
+                    desired_state = {"windSpeed": 1}
+                case PortableWind4ValueSeedEnum.HIGH:
+                    desired_state = {"windSpeed": 2}
+
+        return desired_state
+
+    async def SELECT_PORTABLE_WIND_4VALUE_SPEED(self, value: PortableWind4ValueSeedEnum):
+        stored_data = await get_stored_data(self.hass, self.device.device_id)
+        mode = self.device.mode_value_to_enum_mapp.get(
+            self.device.data.work_mode,
+            (
+                ModeEnum.AUTO
+                if DeviceFeatureEnum.MODE_AUTO in self.device.supported_features
+                else ModeEnum.COOL
+            ),
+        )
+        stored_data, need_save = safe_set_value(
+            stored_data, "fan_speed." + mode + ".value", value, overwrite_if_exists=True
+        )
+        if need_save:
+            await set_stored_data(self.hass, self.device.device_id, stored_data)
+        desired_state = self.desired_state_SELECT_PORTABLE_WIND_4VALUE_SPEED(value)
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
         )
@@ -607,6 +669,26 @@ def get_SELECT_PORTABLE_WIND_SPEED_options(device: Device) -> list[str] | None:
     return all
 
 
+
+def get_SELECT_PORTABLE_WIND_4VALUE_SPEED_options(device: Device) -> list[str] | None:
+    all = [PortableWind4ValueSeedEnum.LOW, PortableWind4ValueSeedEnum.MEDIUM, PortableWind4ValueSeedEnum.HIGH]
+    if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
+        all.append(PortableWind4ValueSeedEnum.AUTO)
+
+    current_mode = device.mode_value_to_enum_mapp.get(
+        device.data.work_mode, ModeEnum.COOL
+    )
+    if current_mode == ModeEnum.DEHUMIDIFICATION:
+        if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
+            return [PortableWind4ValueSeedEnum.AUTO]
+        return []
+
+    if current_mode == ModeEnum.FAN:
+        return [PortableWind4ValueSeedEnum.LOW, PortableWind4ValueSeedEnum.MEDIUM, PortableWind4ValueSeedEnum.HIGH]
+
+    return all
+
+
 def get_SELECT_SLEEP_MODE_available_fn(device: Device) -> str:
     mode = device.mode_value_to_enum_mapp.get(
         device.data.work_mode,
@@ -637,6 +719,17 @@ def get_SELECT_WIND_SPEED_available_fn(device: Device) -> str:
 
 
 def get_SELECT_PORTABLE_WIND_SPEED_available_fn(device: Device) -> str:
+    if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
+        return device.data.sleep != 1
+    else:
+        current_mode = device.mode_value_to_enum_mapp.get(
+            device.data.work_mode, ModeEnum.COOL
+        )
+        if current_mode == ModeEnum.DEHUMIDIFICATION:
+            return False
+        return device.data.sleep != 1
+
+def get_SELECT_PORTABLE_WIND_4VALUE_SPEED_available_fn(device: Device) -> str:
     if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
         return device.data.sleep != 1
     else:
@@ -728,6 +821,25 @@ async def async_setup_entry(
                         device
                     ),
                     available_fn=lambda device: get_SELECT_PORTABLE_WIND_SPEED_available_fn(
+                        device
+                    ),
+                )
+            )
+
+        if DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in device.supported_features:
+            switches.append(
+                DynamicSelectHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED,
+                    type="PortableWind4ValueSpeed",
+                    name="Wind Speed",
+                    icon_fn=lambda device: "mdi:weather-windy",
+                    options_values_fn=lambda device: get_SELECT_PORTABLE_WIND_4VALUE_SPEED_options(
+                        device
+                    ),
+                    available_fn=lambda device: get_SELECT_PORTABLE_WIND_4VALUE_SPEED_available_fn(
                         device
                     ),
                 )

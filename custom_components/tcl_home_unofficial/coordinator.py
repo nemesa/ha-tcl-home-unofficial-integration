@@ -64,13 +64,15 @@ class IotDeviceCoordinator(DataUpdateCoordinator):
             tcl_things = await self.aws_iot.get_all_things()
             for tcl_thing in tcl_things.data:
                 aws_thing = None
+                storage = None
                 if tcl_thing.is_online:
                     aws_thing = await self.aws_iot.async_get_thing(tcl_thing.device_id)
+                    storage = await get_stored_data(self.hass, tcl_thing.device_id)
                 d = Device(
                     tcl_thing=tcl_thing,
                     aws_thing=aws_thing,
-                )
-                d.storage = await get_stored_data(self.hass, d.device_id)
+                    device_storage=storage
+                )                
                 devices.append(d)
         except Exception as err:
             raise UpdateFailed(f"Error communicating with API: {err}") from err
