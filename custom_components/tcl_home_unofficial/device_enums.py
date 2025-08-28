@@ -173,8 +173,8 @@ class PortableWindSeedEnum(StrEnum):
     AUTO = "Auto"
 
 
-def getPortableWindSeed(wind_speed: int, has_auto_mode:bool) -> PortableWindSeedEnum:
-    if has_auto_mode:    
+def getPortableWindSeed(wind_speed: int, has_auto_mode: bool) -> PortableWindSeedEnum:
+    if has_auto_mode:
         match wind_speed:
             case 2:
                 return PortableWindSeedEnum.HIGH
@@ -192,7 +192,25 @@ def getPortableWindSeed(wind_speed: int, has_auto_mode:bool) -> PortableWindSeed
                 return PortableWindSeedEnum.LOW
             case _:
                 return PortableWindSeedEnum.LOW
-        
+
+
+class WindowAcWindSeedEnum(StrEnum):
+    SPEED_1 = "1"
+    SPEED_2 = "2"
+    SPEED_3 = "3"
+    AUTO = "Auto"
+
+
+def getWindowAcWindSeed(wind_speed: int) -> PortableWindSeedEnum:
+    match wind_speed:
+        case 2:
+            return WindowAcWindSeedEnum.SPEED_1
+        case 4:
+            return WindowAcWindSeedEnum.SPEED_2
+        case 6:
+            return WindowAcWindSeedEnum.SPEED_3
+        case _:
+            return WindowAcWindSeedEnum.AUTO
 
 
 class TemperatureTypeEnum(StrEnum):

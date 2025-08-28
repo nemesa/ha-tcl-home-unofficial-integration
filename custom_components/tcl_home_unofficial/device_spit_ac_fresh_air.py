@@ -6,6 +6,8 @@ from homeassistant.core import HomeAssistant
 
 from .calculations import try_get_value
 from .device_data_storage import get_stored_data, safe_set_value, set_stored_data
+from .device_enums import ModeEnum
+from .device_features import DeviceFeatureEnum
 
 
 @dataclass
@@ -14,9 +16,9 @@ class TCL_SplitAC_Fresh_Air_DeviceData:
         self.device_id = device_id
         self.power_switch                       = int(try_get_value(delta, aws_thing_state, "powerSwitch", -1))
         self.beep_switch                        = int(try_get_value(delta, aws_thing_state, "beepSwitch", -1))
-        self.target_temperature                 = int(try_get_value(delta, aws_thing_state, "targetTemperature", -1))
-        self.current_temperature                = int(try_get_value(delta, aws_thing_state, "currentTemperature", -1))
-        self.internal_unit_coil_temperature     = int(try_get_value(delta, aws_thing_state, "internalUnitCoilTemperature", -1))
+        self.target_temperature                 = float(try_get_value(delta, aws_thing_state, "targetTemperature", -1))
+        self.current_temperature                = float(try_get_value(delta, aws_thing_state, "currentTemperature", -1))
+        self.internal_unit_coil_temperature     = float(try_get_value(delta, aws_thing_state, "internalUnitCoilTemperature", -1))
         self.work_mode                          = int(try_get_value(delta, aws_thing_state, "workMode", -1))
         self.vertical_direction                 = int(try_get_value(delta, aws_thing_state, "verticalDirection", -1))
         self.horizontal_direction               = int(try_get_value(delta, aws_thing_state, "horizontalDirection", -1))
@@ -34,9 +36,9 @@ class TCL_SplitAC_Fresh_Air_DeviceData:
         self.self_clean                         = int(try_get_value(delta, aws_thing_state, "selfClean", -1))
         self.screen                             = int(try_get_value(delta, aws_thing_state, "screen", -1))
         self.light_sense                        = int(try_get_value(delta, aws_thing_state, "lightSense", -1))
-        self.external_unit_coil_temperature     = int(try_get_value(delta, aws_thing_state, "externalUnitCoilTemperature", -1))
-        self.external_unit_temperature          = int(try_get_value(delta, aws_thing_state, "externalUnitTemperature", -1))
-        self.external_unit_exhaust_temperature  = int(try_get_value(delta, aws_thing_state, "externalUnitExhaustTemperature", -1))
+        self.external_unit_coil_temperature     = float(try_get_value(delta, aws_thing_state, "externalUnitCoilTemperature", -1))
+        self.external_unit_temperature          = float(try_get_value(delta, aws_thing_state, "externalUnitTemperature", -1))
+        self.external_unit_exhaust_temperature  = float(try_get_value(delta, aws_thing_state, "externalUnitExhaustTemperature", -1))
         self.lower_temperature_limit            = int(try_get_value(delta, aws_thing_state, "lowerTemperatureLimit", 16))
         self.upper_temperature_limit            = int(try_get_value(delta, aws_thing_state, "upperTemperatureLimit", 31))
 
@@ -100,3 +102,23 @@ async def get_stored_spit_ac_fresh_data(
     if need_save:
         await set_stored_data(hass, device_id, stored_data)
     return stored_data
+
+
+def handle_split_ac_freshair_mode_change(desired_state:dict, value:ModeEnum, supported_features: list[DeviceFeatureEnum], stored_data: dict) -> dict:
+    match value:
+        case ModeEnum.AUTO:
+            desired_state["windSpeedAutoSwitch"] = 1
+            desired_state["windSpeed7Gear"] = 0
+        case ModeEnum.COOL:
+            desired_state["windSpeedAutoSwitch"] = 1
+            desired_state["windSpeed7Gear"] = 0
+        case ModeEnum.DEHUMIDIFICATION:
+            desired_state["windSpeedAutoSwitch"] = 1
+            desired_state["windSpeed7Gear"] = 0
+        case ModeEnum.FAN:
+            desired_state["windSpeedAutoSwitch"] = 1
+            desired_state["windSpeed7Gear"] = 0
+        case ModeEnum.HEAT:
+            desired_state["windSpeedAutoSwitch"] = 1
+            desired_state["windSpeed7Gear"] = 0
+    return desired_state

@@ -1,0 +1,444 @@
+************************************
+Tcl_thing
+{
+  "device_id": "******",
+  "platform": "TCLIOT",
+  "nick_name": "Window AC",
+  "device_name": "Window AC",
+  "category": "AC",
+  "type": 2,
+  "device_type": "",
+  "firmware_version": "V8-R82CT05-LF1V025.0.0.9",
+  "net_type": 1,
+  "is_online": 1
+}
+************************************
+aws_thing
+{
+  "3DAirSurply": 0,
+  "ECO": 1,
+  "LRWideAngleFreeze": 0,
+  "PTC": 0,
+  "acType": 5,
+  "advancedECOMode": 0,
+  "aiFunction": 0,
+  "antiMoldew": 0,
+  "beepSwitch": 0,
+  "capabilities": [
+    10,
+    28,
+    30
+  ],
+  "constTemperatureDehumidification": 0,
+  "constantTemp": 16,
+  "currentTemperature": 23,
+  "dal": 0,
+  "eightAddHot": 0,
+  "errorCode": [],
+  "feelTheWind": 0,
+  "filterBlockStatus": 1,
+  "filterBlockSwitch": 0,
+  "generatorMode": 0,
+  "healthy": 0,
+  "highTemperatureWind": 0,
+  "horizontalDirection": 8,
+  "horizontalSwitch": 0,
+  "horizontalWind": 0,
+  "infrDirect": 0,
+  "infrPower": 0,
+  "lightSense": 0,
+  "polarityFreeze": 0,
+  "powerSwitch": 1,
+  "rightHorizontalDirection": 8,
+  "rightHorizontalSwitch": 0,
+  "rightSilenceSwitch": 0,
+  "rightTurbo": 0,
+  "rightWindSpeed": 0,
+  "screen": 1,
+  "selfClean": 0,
+  "selfLearn": 0,
+  "silenceSwitch": 0,
+  "sleep": 0,
+  "softWind": 0,
+  "surroundWind": 0,
+  "talr": 0,
+  "targetElectric": 166.65,
+  "targetTemperature": 21,
+  "temperatureHumidityControlling": 0,
+  "temperatureType": 1,
+  "turbo": 0,
+  "twoTemperature": 0,
+  "twoTemperatureSkew": 0,
+  "verticalDirection": 8,
+  "verticalSwitch": 0,
+  "verticalWind": 0,
+  "windSpeed": 0,
+  "workMode": 1
+}
+************************************
+manual_state_dump_data
+################################
+--------------------------------
+Step: turn on
+--------------------------------
+DesiredKeys: ['powerSwitch', 'ECO', 'sleep']
+   powerSwitch:(0)->(1)
+   ECO:(1)->(1)
+   sleep:(0)->(0)
+ReportedKeys: ['powerSwitch']
+   powerSwitch:(0)->(1)
+################################
+--------------------------------
+Step: startup settings
+--------------------------------
+DesiredKeys: ['workMode', 'ECO', 'windSpeed', 'targetTemperature']
+   workMode:(1)->(1)
+   ECO:(1)->(0)
+   windSpeed:(0)->(0)
+   targetTemperature:(23.5)->(21)
+ReportedKeys: ['ECO', 'targetTemperature']
+   ECO:(1)->(0)
+   targetTemperature:(23.5)->(21)
+################################
+--------------------------------
+Step: mode: Dry
+--------------------------------
+DesiredKeys: ['workMode', 'ECO', 'windSpeed', 'sleep', 'targetTemperature']
+   workMode:(1)->(2)
+   ECO:(0)->(1)
+   windSpeed:(0)->(2)
+   sleep:(0)->(0)
+   targetTemperature:(21)->(22)
+ReportedKeys: ['workMode', 'ECO', 'windSpeed', 'targetTemperature']
+   workMode:(1)->(2)
+   ECO:(0)->(1)
+   windSpeed:(0)->(2)
+   targetTemperature:(21)->(22)
+################################
+--------------------------------
+Step: temp: 73 (not allowed to change while in dry mode)
+--------------------------------
+DesiredKeys: []
+ReportedKeys: []
+################################
+--------------------------------
+Step: mode: Fan
+--------------------------------
+DesiredKeys: ['workMode', 'ECO', 'windSpeed', 'sleep', 'targetTemperature']
+   workMode:(2)->(3)
+   ECO:(1)->(0)
+   windSpeed:(2)->(0)
+   sleep:(0)->(0)
+   targetTemperature:(22)->(26)
+ReportedKeys: ['workMode', 'ECO', 'windSpeed', 'targetTemperature']
+   workMode:(2)->(3)
+   ECO:(1)->(0)
+   windSpeed:(2)->(0)
+   targetTemperature:(22)->(26)
+################################
+--------------------------------
+Step: temp: 75 (not allowed to change while in fan mode)
+--------------------------------
+DesiredKeys: []
+ReportedKeys: []
+################################
+--------------------------------
+Step: mode: Auto
+--------------------------------
+DesiredKeys: ['workMode', 'ECO', 'windSpeed', 'sleep', 'targetTemperature']
+   workMode:(3)->(0)
+   ECO:(0)->(0)
+   windSpeed:(0)->(0)
+   sleep:(0)->(0)
+   targetTemperature:(26)->(23)
+ReportedKeys: ['workMode', 'targetTemperature']
+   workMode:(3)->(0)
+   targetTemperature:(26)->(23)
+################################
+--------------------------------
+Step: temp: 77 (not allowed to change while in auto mode)
+--------------------------------
+DesiredKeys: []
+ReportedKeys: []
+################################
+--------------------------------
+Step: mode: Cool
+--------------------------------
+DesiredKeys: ['workMode', 'ECO', 'windSpeed', 'sleep', 'targetTemperature']
+   workMode:(0)->(1)
+   ECO:(0)->(1)
+   windSpeed:(0)->(0)
+   sleep:(0)->(0)
+   targetTemperature:(23)->(23.5)
+ReportedKeys: ['workMode', 'ECO', 'targetTemperature']
+   workMode:(0)->(1)
+   ECO:(0)->(1)
+   targetTemperature:(23)->(23.5)
+################################
+--------------------------------
+Step: temp: 70
+--------------------------------
+DesiredKeys: ['workMode', 'windSpeed', 'targetTemperature']
+   workMode:(1)->(1)
+   windSpeed:(0)->(0)
+   targetTemperature:(23.5)->(21)
+ReportedKeys: ['targetTemperature']
+   targetTemperature:(23.5)->(21)
+################################
+--------------------------------
+Step: Fan speed: 1
+--------------------------------
+DesiredKeys: ['workMode', 'windSpeed', 'targetTemperature']
+   workMode:(1)->(1)
+   windSpeed:(0)->(2)
+   targetTemperature:(21)->(21)
+ReportedKeys: ['windSpeed']
+   windSpeed:(0)->(2)
+################################
+--------------------------------
+Step: Fan speed: 2
+--------------------------------
+DesiredKeys: ['workMode', 'windSpeed', 'targetTemperature']
+   workMode:(1)->(1)
+   windSpeed:(2)->(4)
+   targetTemperature:(21)->(21)
+ReportedKeys: ['windSpeed']
+   windSpeed:(2)->(4)
+################################
+--------------------------------
+Step: Fan Speed: 3
+--------------------------------
+DesiredKeys: ['workMode', 'windSpeed', 'targetTemperature']
+   workMode:(1)->(1)
+   windSpeed:(4)->(6)
+   targetTemperature:(21)->(21)
+ReportedKeys: ['windSpeed']
+   windSpeed:(4)->(6)
+################################
+--------------------------------
+Step: Fan Speed: Auto
+--------------------------------
+DesiredKeys: ['workMode', 'windSpeed', 'targetTemperature']
+   workMode:(1)->(1)
+   windSpeed:(6)->(0)
+   targetTemperature:(21)->(21)
+ReportedKeys: ['windSpeed']
+   windSpeed:(6)->(0)
+################################
+--------------------------------
+Step: ECO: On
+--------------------------------
+DesiredKeys: ['ECO', 'currentTemperature']
+   ECO:(1)->(1)
+   currentTemperature:(23)->(23)
+ReportedKeys: ['ECO', 'currentTemperature']
+   ECO:(1)->(1)
+   currentTemperature:(23)->(23)
+################################
+--------------------------------
+Step: ECO: Off
+--------------------------------
+DesiredKeys: ['ECO']
+   ECO:(1)->(0)
+ReportedKeys: ['ECO']
+   ECO:(1)->(0)
+################################
+--------------------------------
+Step: Sleep: On
+--------------------------------
+DesiredKeys: ['sleep']
+   sleep:(0)->(1)
+ReportedKeys: ['sleep']
+   sleep:(0)->(1)
+################################
+--------------------------------
+Step: Sleep: Off
+--------------------------------
+DesiredKeys: ['sleep']
+   sleep:(1)->(0)
+ReportedKeys: ['sleep']
+   sleep:(1)->(0)
+################################
+--------------------------------
+Step: Light: Off
+--------------------------------
+DesiredKeys: ['screen']
+   screen:(1)->(0)
+ReportedKeys: ['screen']
+   screen:(1)->(0)
+################################
+--------------------------------
+Step: Light: On
+--------------------------------
+DesiredKeys: ['screen']
+   screen:(0)->(1)
+ReportedKeys: ['screen']
+   screen:(0)->(1)
+################################
+--------------------------------
+Step: Prompt: On
+--------------------------------
+DesiredKeys: ['beepSwitch']
+   beepSwitch:(0)->(1)
+ReportedKeys: ['beepSwitch']
+   beepSwitch:(0)->(1)
+################################
+--------------------------------
+Step: Prompt: Off
+--------------------------------
+DesiredKeys: ['beepSwitch']
+   beepSwitch:(1)->(0)
+ReportedKeys: ['beepSwitch']
+   beepSwitch:(1)->(0)
+################################
+--------------------------------
+Step: mode: Dry
+--------------------------------
+DesiredKeys: ['workMode', 'ECO', 'windSpeed', 'sleep', 'targetTemperature']
+   workMode:(1)->(2)
+   ECO:(0)->(1)
+   windSpeed:(0)->(2)
+   sleep:(0)->(0)
+   targetTemperature:(21)->(21)
+ReportedKeys: ['workMode', 'ECO', 'windSpeed']
+   workMode:(1)->(2)
+   ECO:(0)->(1)
+   windSpeed:(0)->(2)
+################################
+--------------------------------
+Step: temp: 70 (not allowed to change while in dry mode)
+--------------------------------
+DesiredKeys: []
+ReportedKeys: []
+################################
+--------------------------------
+Step: ECO: On
+--------------------------------
+DesiredKeys: ['ECO']
+   ECO:(1)->(1)
+ReportedKeys: ['ECO']
+   ECO:(1)->(1)
+################################
+--------------------------------
+Step: ECO: Off
+--------------------------------
+DesiredKeys: ['ECO', 'targetTemperature']
+   ECO:(1)->(0)
+   targetTemperature:(21)->(22)
+ReportedKeys: ['ECO', 'targetTemperature']
+   ECO:(1)->(0)
+   targetTemperature:(21)->(22)
+################################
+--------------------------------
+Step: mode: Fan
+--------------------------------
+DesiredKeys: ['workMode', 'ECO', 'windSpeed', 'sleep', 'targetTemperature']
+   workMode:(2)->(3)
+   ECO:(0)->(0)
+   windSpeed:(2)->(0)
+   sleep:(0)->(0)
+   targetTemperature:(22)->(26)
+ReportedKeys: ['workMode', 'windSpeed', 'targetTemperature']
+   workMode:(2)->(3)
+   windSpeed:(2)->(0)
+   targetTemperature:(22)->(26)
+################################
+--------------------------------
+Step: temp: 73 (not allowed to change while in fan mode)
+--------------------------------
+DesiredKeys: []
+ReportedKeys: []
+################################
+--------------------------------
+Step: Fan speed: 1
+--------------------------------
+DesiredKeys: ['workMode', 'windSpeed', 'targetTemperature']
+   workMode:(3)->(3)
+   windSpeed:(0)->(2)
+   targetTemperature:(26)->(26)
+ReportedKeys: ['windSpeed']
+   windSpeed:(0)->(2)
+################################
+--------------------------------
+Step: Fan speed: 2
+--------------------------------
+DesiredKeys: ['workMode', 'windSpeed', 'targetTemperature']
+   workMode:(3)->(3)
+   windSpeed:(2)->(4)
+   targetTemperature:(26)->(26)
+ReportedKeys: ['windSpeed']
+   windSpeed:(2)->(4)
+################################
+--------------------------------
+Step: Fan speed: Auto
+--------------------------------
+DesiredKeys: ['workMode', 'windSpeed', 'targetTemperature']
+   workMode:(3)->(3)
+   windSpeed:(4)->(0)
+   targetTemperature:(26)->(26)
+ReportedKeys: ['windSpeed']
+   windSpeed:(4)->(0)
+################################
+--------------------------------
+Step: mode: Auto
+--------------------------------
+DesiredKeys: ['workMode', 'ECO', 'windSpeed', 'sleep', 'targetTemperature']
+   workMode:(3)->(0)
+   ECO:(0)->(0)
+   windSpeed:(0)->(0)
+   sleep:(0)->(0)
+   targetTemperature:(26)->(23)
+ReportedKeys: ['workMode', 'windSpeed', 'targetTemperature']
+   workMode:(3)->(0)
+   windSpeed:(0)->(0)
+   targetTemperature:(26)->(23)
+################################
+--------------------------------
+Step: temp: 75 (not allowed to change while in auto mode)
+--------------------------------
+DesiredKeys: []
+ReportedKeys: []
+################################
+--------------------------------
+Step: Fan speed: 3
+--------------------------------
+DesiredKeys: ['workMode', 'windSpeed', 'targetTemperature']
+   workMode:(0)->(0)
+   windSpeed:(0)->(6)
+   targetTemperature:(23)->(23)
+ReportedKeys: ['windSpeed']
+   windSpeed:(0)->(6)
+################################
+--------------------------------
+Step: Fan speed: Auto
+--------------------------------
+DesiredKeys: ['workMode', 'windSpeed', 'targetTemperature']
+   workMode:(0)->(0)
+   windSpeed:(6)->(0)
+   targetTemperature:(23)->(23)
+ReportedKeys: ['windSpeed']
+   windSpeed:(6)->(0)
+################################
+--------------------------------
+Step: mode: Cool
+--------------------------------
+DesiredKeys: ['workMode', 'ECO', 'windSpeed', 'sleep', 'targetTemperature']
+   workMode:(0)->(1)
+   ECO:(0)->(1)
+   windSpeed:(0)->(0)
+   sleep:(0)->(0)
+   targetTemperature:(23)->(23)
+ReportedKeys: ['workMode', 'ECO', 'targetTemperature']
+   workMode:(0)->(1)
+   ECO:(0)->(1)
+   targetTemperature:(23)->(23)
+################################
+--------------------------------
+Step: temp: 70
+--------------------------------
+DesiredKeys: ['workMode', 'windSpeed', 'targetTemperature']
+   workMode:(1)->(1)
+   windSpeed:(0)->(0)
+   targetTemperature:(23)->(21)
+ReportedKeys: ['targetTemperature']
+   targetTemperature:(23)->(21)

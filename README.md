@@ -8,6 +8,7 @@
 - Split AC
 - Split AC Fresh air
 - Portable AC
+- Window AC
 
 ## Notes by device types
 
@@ -243,6 +244,14 @@ SELECT_WIND_SPEED_7_GEAR -
 | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
 | TODO:add pic |TODO:add pic ||
 
+### SELECT_WINDOW_AS_WIND_SPEED
+
+SELECT_WINDOW_AS_WIND_SPEED - 
+
+| Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
+| :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
+| TODO:add pic |TODO:add pic ||
+
 ### SELECT_WIND_FEELING
 
 SELECT_WIND_FEELING - 
@@ -295,9 +304,9 @@ SELECT_GENERATOR_MODE -
 
 SELECT_TEMPERATURE_TYPE - not enabled to any devices as integrations is using °C and the Home Assistant will convert the user's System Temperature Unit.
 
-### SELECT_PORTABLE_WIND_SEED
+### SELECT_PORTABLE_WIND_SPEED
 
-SELECT_PORTABLE_WIND_SEED - 
+SELECT_PORTABLE_WIND_SPEED - 
 
 |  Value    | Home Assistan                                                  | TCL app                                                         | Alternative (for different device type) |
 |  :------- | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|

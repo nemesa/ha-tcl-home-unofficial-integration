@@ -10,14 +10,25 @@ from .const import DOMAIN
 from .device_enums import ModeEnum
 from .device_capabilities import DeviceCapabilityEnum, get_capabilities
 from .device_features import getSupportedFeatures, DeviceFeatureEnum
-from .device_portable_ac import TCL_PortableAC_DeviceData, get_stored_portable_ac_data
+from .device_portable_ac import (
+    TCL_PortableAC_DeviceData, 
+    get_stored_portable_ac_data,
+    handle_portable_ac_mode_change,
+)
 from .device_spit_ac_fresh_air import (
     TCL_SplitAC_Fresh_Air_DeviceData,
     get_stored_spit_ac_fresh_data,
+    handle_split_ac_freshair_mode_change,
 )
 from .device_spit_ac import (
     TCL_SplitAC_DeviceData,
     get_stored_spit_ac_data,
+    handle_split_ac_mode_change,
+)
+from .device_window_ac import (
+    TCL_WindowAC_DeviceData,
+    get_stored_window_ac_data,
+    handle_window_ac_mode_change,
 )
 
 from .device_types import DeviceTypeEnum, calculateDeviceType
@@ -100,6 +111,12 @@ class Device:
                         aws_thing_state=aws_thing["state"]["reported"],
                         delta=aws_thing["state"].get("delta", {}),
                     )
+                case DeviceTypeEnum.WINDOW_AC:
+                    self.data = TCL_WindowAC_DeviceData(
+                        device_id=self.device_id,
+                        aws_thing_state=aws_thing["state"]["reported"],
+                        delta=aws_thing["state"].get("delta", {}),
+                    )
 
                 case _:
                     self.data = None
@@ -124,6 +141,7 @@ class Device:
         TCL_SplitAC_DeviceData
         | TCL_SplitAC_Fresh_Air_DeviceData
         | TCL_PortableAC_DeviceData
+        | TCL_WindowAC_DeviceData
         | None
     ) = None
 
@@ -204,3 +222,39 @@ async def get_device_storage(hass: HomeAssistant, device: Device) -> None:
         return await get_stored_spit_ac_data(hass, device.device_id)
     elif device.device_type == DeviceTypeEnum.PORTABLE_AC:
         return await get_stored_portable_ac_data(hass, device.device_id)
+    elif device.device_type == DeviceTypeEnum.WINDOW_AC:
+        return await get_stored_window_ac_data(hass, device.device_id)
+
+def get_desired_state_for_mode_change(
+    device: Device, stored_data: dict, value: ModeEnum
+) -> dict:
+    desired_state = {"workMode": device.mode_enum_to_value_mapp.get(value, 0)}
+    if device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
+        desired_state = handle_split_ac_freshair_mode_change(
+            desired_state=desired_state,
+            value=value,
+            supported_features=device.supported_features,
+            stored_data=stored_data,
+        )
+    elif device.device_type == DeviceTypeEnum.SPLIT_AC:
+        desired_state = handle_split_ac_mode_change(
+            desired_state=desired_state,
+            value=value,
+            supported_features=device.supported_features,
+            stored_data=stored_data,
+        )
+    elif device.device_type == DeviceTypeEnum.PORTABLE_AC:
+        desired_state = handle_portable_ac_mode_change(
+            desired_state=desired_state,
+            value=value,
+            supported_features=device.supported_features,
+            stored_data=stored_data,
+        )
+    elif device.device_type == DeviceTypeEnum.WINDOW_AC:
+        desired_state = handle_window_ac_mode_change(
+            desired_state=desired_state,
+            value=value,
+            supported_features=device.supported_features,
+            stored_data=stored_data,
+        )
+    return desired_state

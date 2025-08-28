@@ -44,7 +44,8 @@ class DeviceFeatureEnum(StrEnum):
     SELECT_FRESH_AIR = "select.freshAir"
     SELECT_GENERATOR_MODE = "select.generatorMode"
     SELECT_TEMPERATURE_TYPE = "select.temperatureType"
-    SELECT_PORTABLE_WIND_SEED = "select.portableWindSeed"
+    SELECT_PORTABLE_WIND_SPEED = "select.portableWindSpeed"
+    SELECT_WINDOW_AS_WIND_SPEED = "select.WindowAcWindSpeed"
     NUMBER_TARGET_DEGREE = "number.targetDegree"
     NUMBER_TARGET_TEMPERATURE = "number.targetTemperature"
     NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS = "number.targetTemperature.allow_half_digits"
@@ -174,6 +175,28 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE,
                 DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON,
             ]
+        case DeviceTypeEnum.WINDOW_AC:
+            return [
+                DeviceFeatureEnum.MODE_AUTO,
+                DeviceFeatureEnum.MODE_COOL,
+                DeviceFeatureEnum.MODE_DEHUMIDIFICATION,
+                DeviceFeatureEnum.MODE_FAN,
+                DeviceFeatureEnum.SENSOR_CURRENT_TEMPERATURE,
+                DeviceFeatureEnum.SENSOR_IS_ONLINE,
+                DeviceFeatureEnum.SWITCH_POWER,
+                DeviceFeatureEnum.SWITCH_BEEP,
+                DeviceFeatureEnum.SWITCH_ECO,
+                DeviceFeatureEnum.SWITCH_SCREEN,
+                DeviceFeatureEnum.SWITCH_SLEEP,
+                DeviceFeatureEnum.SELECT_MODE,
+                DeviceFeatureEnum.SELECT_WINDOW_AS_WIND_SPEED,
+                DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE,
+                DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS,                
+                DeviceFeatureEnum.CLIMATE,
+                DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE,
+                DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE,
+                DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON,
+            ]
         case DeviceTypeEnum.PORTABLE_AC:
             features = [
                 DeviceFeatureEnum.MODE_DEHUMIDIFICATION,
@@ -182,7 +205,7 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.SWITCH_POWER,
                 DeviceFeatureEnum.SWITCH_SLEEP,
                 DeviceFeatureEnum.SELECT_MODE,
-                DeviceFeatureEnum.SELECT_PORTABLE_WIND_SEED,
+                DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED,
                 DeviceFeatureEnum.NUMBER_TARGET_DEGREE,
                 DeviceFeatureEnum.SENSOR_IS_ONLINE,
             ]
