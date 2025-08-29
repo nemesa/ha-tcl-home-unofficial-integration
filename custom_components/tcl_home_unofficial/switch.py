@@ -441,10 +441,7 @@ async def async_setup_entry(
                 )
             )
 
-        if (
-            DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE
-            in device.supported_features
-        ):
+        if (DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE in device.supported_features):
             switches.append(
                 ConfigSwitchHandler(
                     hass=hass,
@@ -455,10 +452,7 @@ async def async_setup_entry(
                 )
             )
 
-        if (
-            DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE
-            in device.supported_features
-        ):
+        if (DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE in device.supported_features):
             switches.append(
                 ConfigSwitchHandler(
                     hass=hass,
@@ -469,10 +463,7 @@ async def async_setup_entry(
                 )
             )
 
-        if (
-            DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON
-            in device.supported_features
-        ):
+        if (DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON in device.supported_features):
             switches.append(
                 ConfigSwitchHandler(
                     hass=hass,
@@ -480,6 +471,17 @@ async def async_setup_entry(
                     device=device,
                     config_path="user_config.behavior.silent_beep_when_turn_on",
                     name="Silent beep when turn on",
+                )
+            )
+
+        if (DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_HUMIDITY_BY_MODE in device.supported_features):
+            switches.append(
+                ConfigSwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    config_path="user_config.behavior.memorize_humidity_by_mode",
+                    name="Save humidity by mode",
                 )
             )
 

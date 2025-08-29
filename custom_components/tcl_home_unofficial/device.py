@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 
 from .const import DOMAIN
-from .device_enums import ModeEnum
+from .device_enums import ModeEnum, DehumidifierModeEnum
 from .device_capabilities import DeviceCapabilityEnum, get_capabilities
 from .device_features import getSupportedFeatures, DeviceFeatureEnum
 from .device_portable_ac import (
@@ -29,6 +29,11 @@ from .device_window_ac import (
     TCL_WindowAC_DeviceData,
     get_stored_window_ac_data,
     handle_window_ac_mode_change,
+)
+from .device_dehumidifier import (
+    TCL_Dehumidifier_DeviceData,
+    get_stored_dehumidifier_data,
+    handle_dehumidifier_mode_change,
 )
 
 from .device_types import DeviceTypeEnum, calculateDeviceType
@@ -119,6 +124,12 @@ class Device:
                         aws_thing_state=aws_thing["state"]["reported"],
                         delta=aws_thing["state"].get("delta", {}),
                     )
+                case DeviceTypeEnum.DEHUMIDIFIER:
+                    self.data = TCL_Dehumidifier_DeviceData(
+                        device_id=self.device_id,
+                        aws_thing_state=aws_thing["state"]["reported"],
+                        delta=aws_thing["state"].get("delta", {}),
+                    )
 
                 case _:
                     self.data = None
@@ -144,61 +155,102 @@ class Device:
         | TCL_SplitAC_Fresh_Air_DeviceData
         | TCL_PortableAC_DeviceData
         | TCL_WindowAC_DeviceData
+        | TCL_Dehumidifier_DeviceData
         | None
     ) = None
 
-    def get_supported_modes(self) -> list[ModeEnum]:
-        modes: list[ModeEnum] = []
-        if DeviceFeatureEnum.MODE_COOL in self.supported_features:
-            modes.append(ModeEnum.COOL)
-        if DeviceFeatureEnum.MODE_HEAT in self.supported_features:
-            modes.append(ModeEnum.HEAT)
-        if DeviceFeatureEnum.MODE_DEHUMIDIFICATION in self.supported_features:
-            modes.append(ModeEnum.DEHUMIDIFICATION)
-        if DeviceFeatureEnum.MODE_FAN in self.supported_features:
-            modes.append(ModeEnum.FAN)
-        if DeviceFeatureEnum.MODE_AUTO in self.supported_features:
-            modes.append(ModeEnum.AUTO)
+    def get_supported_modes(self) -> list[ModeEnum | DehumidifierModeEnum]:
+        modes: list[ModeEnum | DehumidifierModeEnum] = []
+        if DeviceFeatureEnum.INTERNAL_IS_AC in self.supported_features:        
+            if DeviceFeatureEnum.MODE_AC_COOL in self.supported_features:
+                modes.append(ModeEnum.COOL)
+            if DeviceFeatureEnum.MODE_AC_HEAT in self.supported_features:
+                modes.append(ModeEnum.HEAT)
+            if DeviceFeatureEnum.MODE_AC_DEHUMIDIFICATION in self.supported_features:
+                modes.append(ModeEnum.DEHUMIDIFICATION)
+            if DeviceFeatureEnum.MODE_AC_FAN in self.supported_features:
+                modes.append(ModeEnum.FAN)
+            if DeviceFeatureEnum.MODE_AC_AUTO in self.supported_features:
+                modes.append(ModeEnum.AUTO)
+        if DeviceFeatureEnum.INTERNAL_IS_DEHUMIDIFIER in self.supported_features:
+            if DeviceFeatureEnum.MODE_DEHUMIDIFIER_DRY in self.supported_features:
+                modes.append(DehumidifierModeEnum.DRY)
+            if DeviceFeatureEnum.MODE_DEHUMIDIFIER_COMFORT in self.supported_features:
+                modes.append(DehumidifierModeEnum.COMFORT)
+            if DeviceFeatureEnum.MODE_DEHUMIDIFIER_CONTINUE in self.supported_features:
+                modes.append(DehumidifierModeEnum.CONTINUE)
+            if DeviceFeatureEnum.MODE_DEHUMIDIFIER_TURBO in self.supported_features:
+                modes.append(DehumidifierModeEnum.TURBO)
         return modes
 
     def create_mode_mapps(self) -> None:
         self.mode_enum_to_value_mapp: dict[str, int] = {}
         self.mode_value_to_enum_mapp: dict[int, str] = {}
         work_mode = 0
-        if DeviceFeatureEnum.MODE_AUTO in self.supported_features:
-            self.mode_enum_to_value_mapp[ModeEnum.AUTO] = work_mode
-            self.mode_value_to_enum_mapp[work_mode] = ModeEnum.AUTO
-            work_mode += 1
-        else:
-            self.mode_enum_to_value_mapp[ModeEnum.AUTO] = 0
+        if DeviceFeatureEnum.INTERNAL_IS_AC in self.supported_features:
+            if DeviceFeatureEnum.MODE_AC_AUTO in self.supported_features:
+                self.mode_enum_to_value_mapp[ModeEnum.AUTO] = work_mode
+                self.mode_value_to_enum_mapp[work_mode] = ModeEnum.AUTO
+                work_mode += 1
+            else:
+                self.mode_enum_to_value_mapp[ModeEnum.AUTO] = 0
 
-        if DeviceFeatureEnum.MODE_COOL in self.supported_features:
-            self.mode_enum_to_value_mapp[ModeEnum.COOL] = work_mode
-            self.mode_value_to_enum_mapp[work_mode] = ModeEnum.COOL
-            work_mode += 1
-        else:
-            self.mode_enum_to_value_mapp[ModeEnum.COOL] = 0
+            if DeviceFeatureEnum.MODE_AC_COOL in self.supported_features:
+                self.mode_enum_to_value_mapp[ModeEnum.COOL] = work_mode
+                self.mode_value_to_enum_mapp[work_mode] = ModeEnum.COOL
+                work_mode += 1
+            else:
+                self.mode_enum_to_value_mapp[ModeEnum.COOL] = 0
 
-        if DeviceFeatureEnum.MODE_DEHUMIDIFICATION in self.supported_features:
-            self.mode_enum_to_value_mapp[ModeEnum.DEHUMIDIFICATION] = work_mode
-            self.mode_value_to_enum_mapp[work_mode] = ModeEnum.DEHUMIDIFICATION
-            work_mode += 1
-        else:
-            self.mode_enum_to_value_mapp[ModeEnum.DEHUMIDIFICATION] = 0
+            if DeviceFeatureEnum.MODE_AC_DEHUMIDIFICATION in self.supported_features:
+                self.mode_enum_to_value_mapp[ModeEnum.DEHUMIDIFICATION] = work_mode
+                self.mode_value_to_enum_mapp[work_mode] = ModeEnum.DEHUMIDIFICATION
+                work_mode += 1
+            else:
+                self.mode_enum_to_value_mapp[ModeEnum.DEHUMIDIFICATION] = 0
 
-        if DeviceFeatureEnum.MODE_FAN in self.supported_features:
-            self.mode_enum_to_value_mapp[ModeEnum.FAN] = work_mode
-            self.mode_value_to_enum_mapp[work_mode] = ModeEnum.FAN
-            work_mode += 1
-        else:
-            self.mode_enum_to_value_mapp[ModeEnum.FAN] = 0
+            if DeviceFeatureEnum.MODE_AC_FAN in self.supported_features:
+                self.mode_enum_to_value_mapp[ModeEnum.FAN] = work_mode
+                self.mode_value_to_enum_mapp[work_mode] = ModeEnum.FAN
+                work_mode += 1
+            else:
+                self.mode_enum_to_value_mapp[ModeEnum.FAN] = 0
 
-        if DeviceFeatureEnum.MODE_HEAT in self.supported_features:
-            self.mode_enum_to_value_mapp[ModeEnum.HEAT] = work_mode
-            self.mode_value_to_enum_mapp[work_mode] = ModeEnum.HEAT
-            work_mode += 1
-        else:
-            self.mode_enum_to_value_mapp[ModeEnum.HEAT] = 0
+            if DeviceFeatureEnum.MODE_AC_HEAT in self.supported_features:
+                self.mode_enum_to_value_mapp[ModeEnum.HEAT] = work_mode
+                self.mode_value_to_enum_mapp[work_mode] = ModeEnum.HEAT
+                work_mode += 1
+            else:
+                self.mode_enum_to_value_mapp[ModeEnum.HEAT] = 0
+        
+        if DeviceFeatureEnum.INTERNAL_IS_DEHUMIDIFIER in self.supported_features:
+            if DeviceFeatureEnum.MODE_DEHUMIDIFIER_DRY in self.supported_features:
+                self.mode_enum_to_value_mapp[DehumidifierModeEnum.DRY] = work_mode
+                self.mode_value_to_enum_mapp[work_mode] = DehumidifierModeEnum.DRY
+                work_mode += 1
+            else:
+                self.mode_enum_to_value_mapp[DehumidifierModeEnum.DRY] = 0
+                
+            if DeviceFeatureEnum.MODE_DEHUMIDIFIER_TURBO in self.supported_features:
+                self.mode_enum_to_value_mapp[DehumidifierModeEnum.TURBO] = work_mode
+                self.mode_value_to_enum_mapp[work_mode] = DehumidifierModeEnum.TURBO
+                work_mode += 1
+            else:
+                self.mode_enum_to_value_mapp[DehumidifierModeEnum.TURBO] = 0
+                
+            if DeviceFeatureEnum.MODE_DEHUMIDIFIER_COMFORT in self.supported_features:
+                self.mode_enum_to_value_mapp[DehumidifierModeEnum.COMFORT] = work_mode
+                self.mode_value_to_enum_mapp[work_mode] = DehumidifierModeEnum.COMFORT
+                work_mode += 1
+            else:
+                self.mode_enum_to_value_mapp[DehumidifierModeEnum.COMFORT] = 0
+                
+            if DeviceFeatureEnum.MODE_DEHUMIDIFIER_CONTINUE in self.supported_features:
+                self.mode_enum_to_value_mapp[DehumidifierModeEnum.CONTINUE] = work_mode
+                self.mode_value_to_enum_mapp[work_mode] = DehumidifierModeEnum.CONTINUE
+                work_mode += 1
+            else:
+                self.mode_enum_to_value_mapp[DehumidifierModeEnum.CONTINUE] = 0
 
 
 def toDeviceInfo(device: Device) -> DeviceInfo:
@@ -226,6 +278,8 @@ async def get_device_storage(hass: HomeAssistant, device: Device) -> None:
         return await get_stored_portable_ac_data(hass, device.device_id)
     elif device.device_type == DeviceTypeEnum.WINDOW_AC:
         return await get_stored_window_ac_data(hass, device.device_id)
+    elif device.device_type == DeviceTypeEnum.DEHUMIDIFIER:
+        return await get_stored_dehumidifier_data(hass, device.device_id)
 
 
 def get_desired_state_for_mode_change(
@@ -255,6 +309,13 @@ def get_desired_state_for_mode_change(
         )
     elif device.device_type == DeviceTypeEnum.WINDOW_AC:
         desired_state = handle_window_ac_mode_change(
+            desired_state=desired_state,
+            value=value,
+            supported_features=device.supported_features,
+            stored_data=stored_data,
+        )
+    elif device.device_type == DeviceTypeEnum.DEHUMIDIFIER:
+        desired_state = handle_dehumidifier_mode_change(
             desired_state=desired_state,
             value=value,
             supported_features=device.supported_features,

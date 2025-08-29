@@ -98,11 +98,11 @@ SELECT_MODE
 | :------------------------------------------------------------: | :-------------------------------------------------------------: |:-:|
 | <img src="./function-map-images/ha_mode_all.jpg" width="400"/> | <img src="./function-map-images/app_mode_auto.jpg" width="400"/> ||
 
-#### MODE_AUTO
-#### MODE_COOL
-#### MODE_DEHUMIDIFICATION
-#### MODE_FAN
-#### MODE_HEAT
+#### MODE_AC_AUTO
+#### MODE_AC_COOL
+#### MODE_AC_DEHUMIDIFICATION
+#### MODE_AC_FAN
+#### MODE_AC_HEAT
 
 ### SWITCH_POWER
 

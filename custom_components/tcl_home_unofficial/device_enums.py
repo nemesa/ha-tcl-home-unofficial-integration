@@ -10,6 +10,11 @@ class ModeEnum(StrEnum):
     FAN = "Fan"
     AUTO = "Auto"
 
+class DehumidifierModeEnum(StrEnum):
+    DRY = "Dry"
+    TURBO = "Turbo"
+    COMFORT = "Comfort"
+    CONTINUE = "Continue"
 
 class UpAndDownAirSupplyVectorEnum(StrEnum):
     UP_AND_DOWN_SWING = "Up and down swing"
