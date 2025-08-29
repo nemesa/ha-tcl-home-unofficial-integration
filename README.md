@@ -9,6 +9,7 @@
 - Split AC Fresh air
 - Portable AC
 - Window AC
+- Dehumidifier (DEM)
 
 ## Notes by device types
 
