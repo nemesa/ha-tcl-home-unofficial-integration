@@ -29,6 +29,8 @@ from .device_enums import (
     getPortableWindSeed,
     PortableWind4ValueSeedEnum,
     getPortableWind4ValueSeed,
+    PortableWind4ValueSeedEnum,
+    getPortableWind4ValueSeed,
     TemperatureTypeEnum,
     getTemperatureType,
     FreshAirEnum,
@@ -121,6 +123,20 @@ class DesiredStateHandlerForSelect:
                 return getWindowAcWindSeed(self.device.data.wind_speed)
             case DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED:
                 return getPortableWindSeed(
+                    wind_speed=self.device.data.wind_speed,
+                    has_auto_mode=(
+                        DeviceFeatureEnum.MODE_AC_AUTO in self.device.supported_features
+                    ),
+                )
+            case DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED:
+                return getPortableWind4ValueSeed(
+                    wind_speed=self.device.data.wind_speed,
+                    has_auto_mode=(
+                        DeviceFeatureEnum.MODE_AC_AUTO in self.device.supported_features
+                    ),
+                )
+            case DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED:
+                return getPortableWind4ValueSeed(
                     wind_speed=self.device.data.wind_speed,
                     has_auto_mode=(
                         DeviceFeatureEnum.MODE_AC_AUTO in self.device.supported_features

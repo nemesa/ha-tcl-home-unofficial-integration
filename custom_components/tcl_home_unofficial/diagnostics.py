@@ -154,11 +154,13 @@ async def get_diagnosics_data(hass: HomeAssistant, entry: New_NameConfigEntry, d
         },
         "device_storages": device_storages,
         "manual_state_dump_data": manual_state_dump_data,
+        "device_storage": device_storage,
     }
 
 async def try_get_stored_data(hass: HomeAssistant, device_id: str):    
     try:
         data = await get_stored_data(hass, device_id)
         return data
+
     except Exception as e:
         return {"error": str(e)}

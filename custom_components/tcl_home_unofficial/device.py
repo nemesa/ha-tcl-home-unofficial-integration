@@ -12,6 +12,7 @@ from .device_capabilities import DeviceCapabilityEnum, get_capabilities
 from .device_features import getSupportedFeatures, DeviceFeatureEnum
 from .device_portable_ac import (
     TCL_PortableAC_DeviceData,
+    TCL_PortableAC_DeviceData,
     get_stored_portable_ac_data,
     handle_portable_ac_mode_change,
 )
@@ -51,11 +52,13 @@ class Device:
         aws_thing: dict | None,
         tcl_thing: GetThingsResponseData | None = None,
         device_storage: dict | None = None,
+        device_storage: dict | None = None,
     ) -> None:
         self.device_id = "noId"
         self.product_key = None
         self.device_type_str = ""
         self.name = "noName"
+        self.storage = device_storage
         self.storage = device_storage
         self.firmware_version = "noVersion"
         self.has_aws_thing = "false"
@@ -81,6 +84,7 @@ class Device:
                 if "state" in aws_thing:
                     if "reported" in aws_thing["state"]:
                         self.supported_features = getSupportedFeatures(
+                            self.device_type, aws_thing["state"]["reported"], self.storage
                             self.device_type, aws_thing["state"]["reported"], self.storage
                         )
                         self.create_mode_mapps()
@@ -280,6 +284,8 @@ async def get_device_storage(hass: HomeAssistant, device: Device) -> None:
         return await get_stored_window_ac_data(hass, device.device_id)
     elif device.device_type == DeviceTypeEnum.DEHUMIDIFIER:
         return await get_stored_dehumidifier_data(hass, device.device_id)
+    
+
 
 
 def get_desired_state_for_mode_change(
@@ -322,6 +328,22 @@ def get_desired_state_for_mode_change(
             stored_data=stored_data,
         )
     return desired_state
+
+
+async def store_rn_prode_data(
+    hass: HomeAssistant, device_id, rn_probe_data: dict
+) -> dict:
+    stored_data = await get_stored_data(hass, device_id)
+    stored_data, need_save = safe_set_value(
+        data=stored_data,
+        path="non_user_config.rn_probe_data",
+        value=rn_probe_data,
+        overwrite_if_exists=True,
+    )
+    if need_save:
+        await set_stored_data(hass, device_id, stored_data)
+    return await get_stored_data(hass, device_id)
+
 
 
 async def store_rn_prode_data(

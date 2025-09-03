@@ -50,6 +50,7 @@ class DeviceFeatureEnum(StrEnum):
     SELECT_TEMPERATURE_TYPE = "select.temperatureType"
     SELECT_PORTABLE_WIND_SPEED = "select.portableWindSpeed"
     SELECT_PORTABLE_WIND_4VALUE_SPEED = "select.portableWind4ValueSpeed"
+    SELECT_PORTABLE_WIND_4VALUE_SPEED = "select.portableWind4ValueSpeed"
     SELECT_WINDOW_AS_WIND_SPEED = "select.WindowAcWindSpeed"
     NUMBER_DEHUMIDIFIER_HUMIDITY = "number.dehumidifier.humidity"
     NUMBER_TARGET_DEGREE = "number.targetDegree"
@@ -235,6 +236,18 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.NUMBER_TARGET_DEGREE,
                 DeviceFeatureEnum.SENSOR_IS_ONLINE,
             ]
+            
+            if has_rn_probe_data:
+                fan_speed_mapping = rn_probe_data.get("fan_speed_mapping", [])
+                if ("FAN_SPEED_AUTO" in fan_speed_mapping 
+                    and "FAN_SPEED_LOW" in fan_speed_mapping
+                    and ("FAN_SPEED_MED" in fan_speed_mapping or "FAN_SPEED_MEDIUM" in fan_speed_mapping)
+                    and "FAN_SPEED_HIGH" in fan_speed_mapping):
+                    features.append(DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED)
+                else:
+                    features.append(DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED)
+            else:
+                features.append(DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED)
             
             if has_rn_probe_data:
                 fan_speed_mapping = rn_probe_data.get("fan_speed_mapping", [])
