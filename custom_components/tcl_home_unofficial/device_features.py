@@ -50,7 +50,6 @@ class DeviceFeatureEnum(StrEnum):
     SELECT_TEMPERATURE_TYPE = "select.temperatureType"
     SELECT_PORTABLE_WIND_SPEED = "select.portableWindSpeed"
     SELECT_PORTABLE_WIND_4VALUE_SPEED = "select.portableWind4ValueSpeed"
-    SELECT_PORTABLE_WIND_4VALUE_SPEED = "select.portableWind4ValueSpeed"
     SELECT_WINDOW_AS_WIND_SPEED = "select.WindowAcWindSpeed"
     NUMBER_DEHUMIDIFIER_HUMIDITY = "number.dehumidifier.humidity"
     NUMBER_TARGET_DEGREE = "number.targetDegree"

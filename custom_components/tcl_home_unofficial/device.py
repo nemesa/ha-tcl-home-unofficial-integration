@@ -12,7 +12,6 @@ from .device_capabilities import DeviceCapabilityEnum, get_capabilities
 from .device_features import getSupportedFeatures, DeviceFeatureEnum
 from .device_portable_ac import (
     TCL_PortableAC_DeviceData,
-    TCL_PortableAC_DeviceData,
     get_stored_portable_ac_data,
     handle_portable_ac_mode_change,
 )
@@ -52,13 +51,11 @@ class Device:
         aws_thing: dict | None,
         tcl_thing: GetThingsResponseData | None = None,
         device_storage: dict | None = None,
-        device_storage: dict | None = None,
     ) -> None:
         self.device_id = "noId"
         self.product_key = None
         self.device_type_str = ""
         self.name = "noName"
-        self.storage = device_storage
         self.storage = device_storage
         self.firmware_version = "noVersion"
         self.has_aws_thing = "false"
@@ -83,10 +80,7 @@ class Device:
             try:
                 if "state" in aws_thing:
                     if "reported" in aws_thing["state"]:
-                        self.supported_features = getSupportedFeatures(
-                            self.device_type, aws_thing["state"]["reported"], self.storage
-                            self.device_type, aws_thing["state"]["reported"], self.storage
-                        )
+                        self.supported_features = getSupportedFeatures(self.device_type,aws_thing["state"]["reported"],self.storage)
                         self.create_mode_mapps()
                         if "capabilities" in aws_thing["state"]["reported"]:
                             capabilities_array = aws_thing["state"]["reported"][
@@ -165,7 +159,7 @@ class Device:
 
     def get_supported_modes(self) -> list[ModeEnum | DehumidifierModeEnum]:
         modes: list[ModeEnum | DehumidifierModeEnum] = []
-        if DeviceFeatureEnum.INTERNAL_IS_AC in self.supported_features:        
+        if DeviceFeatureEnum.INTERNAL_IS_AC in self.supported_features:
             if DeviceFeatureEnum.MODE_AC_COOL in self.supported_features:
                 modes.append(ModeEnum.COOL)
             if DeviceFeatureEnum.MODE_AC_HEAT in self.supported_features:
@@ -226,7 +220,7 @@ class Device:
                 work_mode += 1
             else:
                 self.mode_enum_to_value_mapp[ModeEnum.HEAT] = 0
-        
+
         if DeviceFeatureEnum.INTERNAL_IS_DEHUMIDIFIER in self.supported_features:
             if DeviceFeatureEnum.MODE_DEHUMIDIFIER_DRY in self.supported_features:
                 self.mode_enum_to_value_mapp[DehumidifierModeEnum.DRY] = work_mode
@@ -234,21 +228,21 @@ class Device:
                 work_mode += 1
             else:
                 self.mode_enum_to_value_mapp[DehumidifierModeEnum.DRY] = 0
-                
+
             if DeviceFeatureEnum.MODE_DEHUMIDIFIER_TURBO in self.supported_features:
                 self.mode_enum_to_value_mapp[DehumidifierModeEnum.TURBO] = work_mode
                 self.mode_value_to_enum_mapp[work_mode] = DehumidifierModeEnum.TURBO
                 work_mode += 1
             else:
                 self.mode_enum_to_value_mapp[DehumidifierModeEnum.TURBO] = 0
-                
+
             if DeviceFeatureEnum.MODE_DEHUMIDIFIER_COMFORT in self.supported_features:
                 self.mode_enum_to_value_mapp[DehumidifierModeEnum.COMFORT] = work_mode
                 self.mode_value_to_enum_mapp[work_mode] = DehumidifierModeEnum.COMFORT
                 work_mode += 1
             else:
                 self.mode_enum_to_value_mapp[DehumidifierModeEnum.COMFORT] = 0
-                
+
             if DeviceFeatureEnum.MODE_DEHUMIDIFIER_CONTINUE in self.supported_features:
                 self.mode_enum_to_value_mapp[DehumidifierModeEnum.CONTINUE] = work_mode
                 self.mode_value_to_enum_mapp[work_mode] = DehumidifierModeEnum.CONTINUE
@@ -284,8 +278,6 @@ async def get_device_storage(hass: HomeAssistant, device: Device) -> None:
         return await get_stored_window_ac_data(hass, device.device_id)
     elif device.device_type == DeviceTypeEnum.DEHUMIDIFIER:
         return await get_stored_dehumidifier_data(hass, device.device_id)
-    
-
 
 
 def get_desired_state_for_mode_change(
@@ -343,7 +335,6 @@ async def store_rn_prode_data(
     if need_save:
         await set_stored_data(hass, device_id, stored_data)
     return await get_stored_data(hass, device_id)
-
 
 
 async def store_rn_prode_data(

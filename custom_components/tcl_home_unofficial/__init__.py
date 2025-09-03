@@ -17,7 +17,6 @@ from .config_entry import (
 )
 from .coordinator import IotDeviceCoordinator
 from .device import Device, get_device_storage, store_rn_prode_data
-from .device import Device, get_device_storage, store_rn_prode_data
 from .device_types import is_implemented_by_integration
 from .device_rn_probe import fetch_and_parse_config
 from .data_storage import get_internal_settings, safe_set_value, set_internal_settings, safe_get_value

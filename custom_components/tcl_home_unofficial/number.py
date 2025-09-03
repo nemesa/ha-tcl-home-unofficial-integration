@@ -296,8 +296,8 @@ class HumidityHandler(TclEntityBase, NumberEntity):
         self._attr_native_unit_of_measurement = PERCENTAGE
         self._attr_native_value = self.current_value_fn(self.device)
 
-        self._attr_native_min_value = self.device.data.lower_temperature_limit
-        self._attr_native_max_value = self.device.data.upper_temperature_limit
+        self._attr_native_min_value = 1
+        self._attr_native_max_value = 99
         self._attr_native_step = 1
 
     @property
