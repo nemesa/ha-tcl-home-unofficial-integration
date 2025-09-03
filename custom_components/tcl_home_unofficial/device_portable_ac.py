@@ -26,6 +26,7 @@ class TCL_PortableAC_DeviceData:
         self.sleep                      = int(try_get_value(delta, aws_thing_state, "sleep", -1))
         self.lower_temperature_limit    = int(try_get_value(delta, aws_thing_state, "lowerTemperatureLimit", 18))
         self.upper_temperature_limit    = int(try_get_value(delta, aws_thing_state, "upperTemperatureLimit", 32))
+        self.current_temperature        = int(try_get_value(delta, aws_thing_state, "currentTemperature", -1))
 
     device_id: str
     power_switch: int | bool
@@ -39,6 +40,7 @@ class TCL_PortableAC_DeviceData:
     sleep: int | bool
     upper_temperature_limit: int
     lower_temperature_limit: int
+    current_temperature: int
 
 
 async def get_stored_portable_ac_data(

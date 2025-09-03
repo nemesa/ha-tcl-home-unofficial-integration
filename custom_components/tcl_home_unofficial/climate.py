@@ -2,8 +2,8 @@
 
 import logging
 from typing import Any
-# import asyncio
 
+# import asyncio>
 from homeassistant.components.climate import (
     ClimateEntity,
     ClimateEntityFeature,
@@ -16,25 +16,27 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
 from .device import Device
-from .device_features import DeviceFeatureEnum
-from .device_types import DeviceTypeEnum
 from .device_enums import (
     LeftAndRightAirSupplyVectorEnum,
-    getUpAndDownAirSupplyVector,
     ModeEnum,
+    PortableWind4ValueSeedEnum,
     UpAndDownAirSupplyVectorEnum,
-    getLeftAndRightAirSupplyVector,
-    WindSeedEnum,
-    getWindSpeed,
-    WindSeed7GearEnum,
-    getWindSeed7Gear,
     WindowAcWindSeedEnum,
+    WindSeed7GearEnum,
+    WindSeedEnum,
+    getLeftAndRightAirSupplyVector,
+    getPortableWind4ValueSeed,
+    getUpAndDownAirSupplyVector,
     getWindowAcWindSeed,
+    getWindSeed7Gear,
+    getWindSpeed,
 )
-from .tcl_entity_base import TclEntityBase
-from .switch import DesiredStateHandlerForSwitch
-from .select import DesiredStateHandlerForSelect
+from .device_features import DeviceFeatureEnum
+from .device_types import DeviceTypeEnum
 from .number import DesiredStateHandlerForNumber
+from .select import DesiredStateHandlerForSelect
+from .switch import DesiredStateHandlerForSwitch
+from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,16 +44,22 @@ _LOGGER = logging.getLogger(__name__)
 def get_fan_speed_feature(device: Device) -> str:
     if DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in device.supported_features:
         return DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR
-    
+
     if DeviceFeatureEnum.SELECT_WINDOW_AS_WIND_SPEED in device.supported_features:
         return DeviceFeatureEnum.SELECT_WINDOW_AS_WIND_SPEED
+
+    if DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in device.supported_features:
+        return DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED
     return DeviceFeatureEnum.SELECT_WIND_SPEED
+
 
 def get_current_fan_speed_fn(device: Device) -> str:
     if DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in device.supported_features:
         return getWindSeed7Gear(device.data.wind_speed_7_gear)
     if DeviceFeatureEnum.SELECT_WINDOW_AS_WIND_SPEED in device.supported_features:
         return getWindowAcWindSeed(device.data.wind_speed)
+    if DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in device.supported_features:
+        return getPortableWind4ValueSeed(device.data.wind_speed)
     return getWindSpeed(
         wind_speed=device.data.wind_speed,
         turbo=device.data.turbo,
@@ -64,23 +72,27 @@ def get_options_fan_speed(device: Device) -> list[str]:
         return [e.value for e in WindSeed7GearEnum]
     if DeviceFeatureEnum.SELECT_WINDOW_AS_WIND_SPEED in device.supported_features:
         return [e.value for e in WindowAcWindSeedEnum]
+    if DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in device.supported_features:
+        return [e.value for e in PortableWind4ValueSeedEnum]
     return [e.value for e in WindSeedEnum]
+
 
 def get_vertical_air_direction_feature(device: Device) -> str:
     if DeviceFeatureEnum.SELECT_VERTICAL_DIRECTION in device.supported_features:
-        return DeviceFeatureEnum.SELECT_VERTICAL_DIRECTION       
+        return DeviceFeatureEnum.SELECT_VERTICAL_DIRECTION
     return None
 
 
 def get_horizonta_air_direction_feature(device: Device) -> str:
     if DeviceFeatureEnum.SELECT_VERTICAL_DIRECTION in device.supported_features:
-        return DeviceFeatureEnum.SELECT_VERTICAL_DIRECTION       
+        return DeviceFeatureEnum.SELECT_VERTICAL_DIRECTION
     return None
+
 
 def get_current_mode_fn(device: Device) -> str:
     if device.data.power_switch == 0:
         return "OFF"
-    return device.mode_value_to_enum_mapp.get(device.data.work_mode,ModeEnum.AUTO)
+    return device.mode_value_to_enum_mapp.get(device.data.work_mode, ModeEnum.AUTO)
 
 
 async def async_setup_entry(
@@ -99,13 +111,19 @@ async def async_setup_entry(
                     hass=hass,
                     coordinator=coordinator,
                     device=device,
-                    type="SplitAc" if device.device_type == DeviceTypeEnum.SPLIT_AC else "ClimateControll",
+                    type="SplitAc"
+                    if device.device_type == DeviceTypeEnum.SPLIT_AC
+                    else "ClimateControll",
                     name="Climate",
                     power_switch_feature=DeviceFeatureEnum.SWITCH_POWER,
                     mode_select_feature=DeviceFeatureEnum.SELECT_MODE,
                     temperature_set_feature=DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE,
-                    vertical_air_direction_select_feature=get_vertical_air_direction_feature(device),
-                    horizontal_air_direction_select_feature=get_horizonta_air_direction_feature(device),
+                    vertical_air_direction_select_feature=get_vertical_air_direction_feature(
+                        device
+                    ),
+                    horizontal_air_direction_select_feature=get_horizonta_air_direction_feature(
+                        device
+                    ),
                     fan_speed_select_feature=get_fan_speed_feature(device),
                     current_fan_speed_fn=lambda device: get_current_fan_speed_fn(
                         device
@@ -113,8 +131,12 @@ async def async_setup_entry(
                     current_mode_fn=lambda device: map_mode_to_hvac_mode(
                         get_current_mode_fn(device)
                     ),
-                    current_vertical_air_direction_fn=lambda device: getUpAndDownAirSupplyVector(device.data.vertical_direction),
-                    current_horizontal_air_direction_fn=lambda device: getLeftAndRightAirSupplyVector(device.data.horizontal_direction),
+                    current_vertical_air_direction_fn=lambda device: getUpAndDownAirSupplyVector(
+                        device.data.vertical_direction
+                    ),
+                    current_horizontal_air_direction_fn=lambda device: getLeftAndRightAirSupplyVector(
+                        device.data.horizontal_direction
+                    ),
                     options_fan_speed=get_options_fan_speed(device),
                     options_mode=[
                         map_mode_to_hvac_mode(e) for e in device.get_supported_modes()
@@ -201,8 +223,12 @@ class ClimateHandler(TclEntityBase, ClimateEntity):
         self.current_vertical_air_direction_fn = current_vertical_air_direction_fn
         self.current_horizontal_air_direction_fn = current_horizontal_air_direction_fn
 
-        self.vertical_air_direction_select_feature=vertical_air_direction_select_feature
-        self.horizontal_air_direction_select_feature=horizontal_air_direction_select_feature
+        self.vertical_air_direction_select_feature = (
+            vertical_air_direction_select_feature
+        )
+        self.horizontal_air_direction_select_feature = (
+            horizontal_air_direction_select_feature
+        )
 
         self.iot_handler_power = DesiredStateHandlerForSwitch(
             hass=hass,
@@ -237,10 +263,9 @@ class ClimateHandler(TclEntityBase, ClimateEntity):
         self._attr_supported_features |= ClimateEntityFeature.FAN_MODE
         self._attr_supported_features |= ClimateEntityFeature.TURN_OFF
         self._attr_supported_features |= ClimateEntityFeature.TURN_ON
-        
+
         if self.vertical_air_direction_select_feature is not None:
             self._attr_supported_features |= ClimateEntityFeature.SWING_MODE
-            
 
             self.iot_handler_vertical_air_direction = DesiredStateHandlerForSelect(
                 hass=hass,
@@ -250,7 +275,7 @@ class ClimateHandler(TclEntityBase, ClimateEntity):
             )
             self._current_swing_mode = self.current_vertical_air_direction_fn(device)
             self._swing_modes = options_vertical_air_direction
-        
+
         if self.horizontal_air_direction_select_feature is not None:
             self._attr_supported_features |= ClimateEntityFeature.SWING_HORIZONTAL_MODE
 
@@ -260,8 +285,10 @@ class ClimateHandler(TclEntityBase, ClimateEntity):
                 device=device,
                 deviceFeature=horizontal_air_direction_select_feature,
             )
-            
-            self._current_swing_horizontal_mode = self.current_horizontal_air_direction_fn(device)
+
+            self._current_swing_horizontal_mode = (
+                self.current_horizontal_air_direction_fn(device)
+            )
             self._swing_horizontal_modes = options_horizontal_air_direction
 
         self._target_humidity = None
@@ -275,7 +302,6 @@ class ClimateHandler(TclEntityBase, ClimateEntity):
 
         self._hvac_mode = self.current_mode_fn(device)
         self._hvac_modes = options_mode + [HVACMode.OFF]
-
 
         self._hvac_action = None
         self._attr_temperature_unit = UnitOfTemperature.CELSIUS
@@ -360,7 +386,9 @@ class ClimateHandler(TclEntityBase, ClimateEntity):
 
     async def async_set_swing_horizontal_mode(self, swing_horizontal_mode: str) -> None:
         if self.horizontal_air_direction_select_feature is not None:
-            await self.iot_handler_horizontal_air_direction.call_select_option(swing_horizontal_mode)
+            await self.iot_handler_horizontal_air_direction.call_select_option(
+                swing_horizontal_mode
+            )
             await self.coordinator.async_refresh()
 
     async def async_set_fan_mode(self, fan_mode: str) -> None:

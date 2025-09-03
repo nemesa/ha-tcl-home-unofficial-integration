@@ -16,8 +16,9 @@ from .config_entry import (
     sanitizeConfigData,
 )
 from .coordinator import IotDeviceCoordinator
-from .device import Device, get_device_storage
+from .device import Device, get_device_storage, store_rn_prode_data
 from .device_types import is_implemented_by_integration
+from .device_rn_probe import fetch_and_parse_config
 
 _PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
@@ -41,7 +42,7 @@ async def async_setup_entry(
     configData = convertToConfigData(config_entry)
 
     if configData.verbose_setup_logging:
-        _LOGGER.info("Setup.async_setup_entry %s",sanitizeConfigData(configData),)
+        _LOGGER.info("Setup.async_setup_entry %s",sanitizeConfigData(configData))
 
     config_entry.devices = []
     config_entry.non_implemented_devices = []
@@ -53,7 +54,7 @@ async def async_setup_entry(
     if configData.verbose_setup_logging:
         _LOGGER.info("Setup.async_setup_entry session_manager.clear_storage")
     await aws_iot.get_session_manager().clear_storage()
-    
+
     if configData.verbose_setup_logging:
         _LOGGER.info("Setup.async_setup_entry aws_iot.async_init")
     await aws_iot.async_init()
@@ -62,7 +63,7 @@ async def async_setup_entry(
         _LOGGER.info("Setup.async_setup_entry aws_iot.get_all_things")
 
     things = await aws_iot.get_all_things()
-    
+
     if configData.verbose_setup_logging:
         _LOGGER.info("Setup.async_setup_entry aws_iot.get_all_things result %s", things)
 
@@ -71,7 +72,7 @@ async def async_setup_entry(
 
         if thing.is_online and is_implemented:
             if configData.verbose_setup_logging:
-                _LOGGER.info("Setup.async_setup_entry aws_iot.async_get_thing deviceName:%s id:%s", thing.device_name, thing.device_id)
+                _LOGGER.info("Setup.async_setup_entry aws_iot.async_get_thing deviceName:%s id:%s",thing.device_name,thing.device_id,)
             aws_thing = await aws_iot.async_get_thing(thing.device_id)
         else:
             aws_thing = None
@@ -80,10 +81,15 @@ async def async_setup_entry(
             else:
                 _LOGGER.warning("Setup.async_setup_entry device is not online or not implemented by this integration (is_implemented:%s): %s",is_implemented,thing)
 
+        probe_result = await fetch_and_parse_config(hass, aws_iot.get_session_manager(), thing.device_id, thing.product_key)
+        storage = await store_rn_prode_data(hass, thing.device_id, probe_result)
+
         device = Device(
             tcl_thing=thing,
             aws_thing=aws_thing,
+            device_storage=storage,
         )
+
         if device.device_type is not None:
             if configData.verbose_setup_logging:
                 _LOGGER.info("Setup.async_setup_entry found device:%s", device)
