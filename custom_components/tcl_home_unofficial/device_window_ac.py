@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from homeassistant.core import HomeAssistant
 
 from .calculations import try_get_value
-from .device_data_storage import get_stored_data, safe_set_value, set_stored_data
+from .data_storage import get_stored_data, safe_set_value, set_stored_data
 from .device_enums import ModeEnum
 from .device_features import DeviceFeatureEnum
 

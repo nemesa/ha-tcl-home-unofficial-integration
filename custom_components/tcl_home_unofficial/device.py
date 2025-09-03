@@ -37,7 +37,7 @@ from .device_dehumidifier import (
 )
 
 from .device_types import DeviceTypeEnum, calculateDeviceType
-from .device_data_storage import get_stored_data, safe_set_value, set_stored_data
+from .data_storage import get_stored_data, safe_set_value, set_stored_data
 from .tcl import GetThingsResponseData
 
 _LOGGER = logging.getLogger(__name__)

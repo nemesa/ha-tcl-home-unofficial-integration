@@ -14,7 +14,7 @@ from .device import Device
 from .device_features import DeviceFeatureEnum
 from .device_types import DeviceTypeEnum
 from .device_enums import ModeEnum, DehumidifierModeEnum
-from .device_data_storage import set_stored_data, get_stored_data
+from .data_storage import set_stored_data, get_stored_data
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)

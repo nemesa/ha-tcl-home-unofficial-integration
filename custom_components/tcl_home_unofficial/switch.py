@@ -13,7 +13,7 @@ from .coordinator import IotDeviceCoordinator
 from .device import Device
 from .device_features import DeviceFeatureEnum
 from .device_types import DeviceTypeEnum
-from .device_data_storage import (
+from .data_storage import (
     get_stored_data,
     safe_get_value,
     safe_set_value,

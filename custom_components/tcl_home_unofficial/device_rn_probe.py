@@ -21,6 +21,7 @@ import zipfile
 from homeassistant.helpers.httpx_client import get_async_client
 
 from .tcl import get_config
+from .fakes_for_debug import device_rn_probe_fetch_and_parse_config
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -56,7 +57,11 @@ def pick_best_plugin_record(
     if not records:
         return None
 
-    filtered_records = [r for r in records if r.get("deviceId") == device_id and r.get("productKey") == product_key]
+    filtered_records = [
+        r
+        for r in records
+        if r.get("deviceId") == device_id and r.get("productKey") == product_key
+    ]
     return max(filtered_records, key=lambda r: _version_key(r.get("plugInVersion")))
 
 
@@ -106,7 +111,11 @@ class ProbeData:
 
 # Orchestration (HA-aware): fetch config, download ZIP, read bundle, parse config
 async def fetch_and_parse_config(
-    hass, session_manager, device_id: str | None, product_key: str | None
+    hass,
+    session_manager,
+    device_id: str | None,
+    product_key: str | None,
+    use_fakes: bool = False,
 ) -> ProbeResult:
     """Fetch RN config, download ZIP, read main.jsbundle, and parse mapping.
 
@@ -124,18 +133,24 @@ async def fetch_and_parse_config(
         return probe_result
 
     try:
-        cloud = await session_manager.async_aws_cloud_urls()
-        tokens = await session_manager.async_refresh_tokens()
-        auth = await session_manager.async_get_auth_data(allowInvalid=True)
+        cfg = {}
+        if use_fakes:
+            _LOGGER.warning("device_rn_probe.FAKES_ENABLED")
+            fake_cfg = await device_rn_probe_fetch_and_parse_config(hass, device_id)
+            cfg=fake_cfg
+        else:
+            cloud = await session_manager.async_aws_cloud_urls()
+            tokens = await session_manager.async_refresh_tokens()
+            auth = await session_manager.async_get_auth_data(allowInvalid=True)
 
-        cfg = await get_config(
-            hass=hass,
-            cloud_url=cloud.data.cloud_url,
-            saas_token=tokens.data.saas_token,
-            country_abbr=(auth.user.country_abbr if auth and auth.user else None),
-            product_key=product_key,
-            verbose_logging=session_manager.is_verbose_device_logging(),
-        )
+            cfg = await get_config(
+                hass=hass,
+                cloud_url=cloud.data.cloud_url,
+                saas_token=tokens.data.saas_token,
+                country_abbr=(auth.user.country_abbr if auth and auth.user else None),
+                product_key=product_key,
+                verbose_logging=session_manager.is_verbose_device_logging(),
+            )
         if session_manager.is_verbose_device_logging():
             _LOGGER.info("device_rn_probe: get_config result: %s", cfg)
         if not cfg or cfg.data is None:

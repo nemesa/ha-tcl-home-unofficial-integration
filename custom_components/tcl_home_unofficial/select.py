@@ -43,7 +43,7 @@ from .device_enums import (
 )
 
 from .tcl_entity_base import TclEntityBase
-from .device_data_storage import (
+from .data_storage import (
     safe_get_value,
     get_stored_data,
     safe_set_value,
