@@ -179,6 +179,15 @@ class Device:
                 modes.append(DehumidifierModeEnum.CONTINUE)
             if DeviceFeatureEnum.MODE_DEHUMIDIFIER_TURBO in self.supported_features:
                 modes.append(DehumidifierModeEnum.TURBO)
+                
+        _LOGGER.info("**********************************************************")
+        _LOGGER.info("**********************************************************")
+        _LOGGER.info("**********************************************************")
+        _LOGGER.info("**********************************************************")
+        _LOGGER.info("**********************************************************")
+        _LOGGER.info("Supported modes for device %s: %s", self.device_id, modes)
+        _LOGGER.info("self.supported_features %s", self.supported_features)
+                    
         return modes
 
     def create_mode_mapps(self) -> None:

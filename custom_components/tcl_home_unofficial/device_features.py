@@ -217,6 +217,10 @@ def getSupportedFeatures(
         case DeviceTypeEnum.DEHUMIDIFIER:
             return [
                 DeviceFeatureEnum.INTERNAL_IS_DEHUMIDIFIER,
+                DeviceFeatureEnum.MODE_DEHUMIDIFIER_DRY,
+                DeviceFeatureEnum.MODE_DEHUMIDIFIER_TURBO,
+                DeviceFeatureEnum.MODE_DEHUMIDIFIER_COMFORT,
+                DeviceFeatureEnum.MODE_DEHUMIDIFIER_CONTINUE,
                 DeviceFeatureEnum.SWITCH_POWER,
                 DeviceFeatureEnum.SELECT_MODE,
                 DeviceFeatureEnum.NUMBER_DEHUMIDIFIER_HUMIDITY,
