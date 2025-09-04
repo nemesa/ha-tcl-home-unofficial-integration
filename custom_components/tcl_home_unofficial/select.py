@@ -13,19 +13,22 @@ from .device import Device, get_desired_state_for_mode_change
 from .device_features import DeviceFeatureEnum
 from .device_types import DeviceTypeEnum
 from .device_enums import (
+    ModeEnum,
+    DehumidifierModeEnum,
     LeftAndRightAirSupplyVectorEnum,
     getLeftAndRightAirSupplyVector,
     SleepModeEnum,
     getSleepMode,
     UpAndDownAirSupplyVectorEnum,
     getUpAndDownAirSupplyVector,
-    ModeEnum,
     WindSeed7GearEnum,
     getWindSeed7Gear,
     WindSeedEnum,
     getWindSpeed,
     PortableWindSeedEnum,
     getPortableWindSeed,
+    PortableWind4ValueSeedEnum,
+    getPortableWind4ValueSeed,
     PortableWind4ValueSeedEnum,
     getPortableWind4ValueSeed,
     TemperatureTypeEnum,
@@ -42,7 +45,7 @@ from .device_enums import (
 )
 
 from .tcl_entity_base import TclEntityBase
-from .device_data_storage import (
+from .data_storage import (
     safe_get_value,
     get_stored_data,
     safe_set_value,
@@ -102,14 +105,12 @@ class DesiredStateHandlerForSelect:
             case DeviceFeatureEnum.SELECT_SLEEP_MODE:
                 return getSleepMode(self.device.data.sleep)
             case DeviceFeatureEnum.SELECT_MODE:
-                return self.device.mode_value_to_enum_mapp.get(
-                    self.device.data.work_mode,
-                    (
-                        ModeEnum.AUTO
-                        if DeviceFeatureEnum.MODE_AUTO in self.device.supported_features
-                        else ModeEnum.COOL
-                    ),
-                )
+                if DeviceFeatureEnum.INTERNAL_IS_AC in self.device.supported_features:                
+                    default_dehumidifier_mode=DehumidifierModeEnum.DRY
+                    return self.device.mode_value_to_enum_mapp.get(self.device.data.work_mode,default_dehumidifier_mode)
+                else:
+                    default_ac_mode=ModeEnum.AUTO if DeviceFeatureEnum.MODE_AC_AUTO in self.device.supported_features else ModeEnum.COOL
+                    return self.device.mode_value_to_enum_mapp.get(self.device.data.work_mode,default_ac_mode)
             case DeviceFeatureEnum.SELECT_WIND_SPEED:
                 return getWindSpeed(
                     wind_speed=self.device.data.wind_speed,
@@ -124,14 +125,28 @@ class DesiredStateHandlerForSelect:
                 return getPortableWindSeed(
                     wind_speed=self.device.data.wind_speed,
                     has_auto_mode=(
-                        DeviceFeatureEnum.MODE_AUTO in self.device.supported_features
+                        DeviceFeatureEnum.MODE_AC_AUTO in self.device.supported_features
                     ),
                 )
             case DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED:
                 return getPortableWind4ValueSeed(
                     wind_speed=self.device.data.wind_speed,
                     has_auto_mode=(
-                        DeviceFeatureEnum.MODE_AUTO in self.device.supported_features
+                        DeviceFeatureEnum.MODE_AC_AUTO in self.device.supported_features
+                    ),
+                )
+            case DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED:
+                return getPortableWind4ValueSeed(
+                    wind_speed=self.device.data.wind_speed,
+                    has_auto_mode=(
+                        DeviceFeatureEnum.MODE_AC_AUTO in self.device.supported_features
+                    ),
+                )
+            case DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED:
+                return getPortableWind4ValueSeed(
+                    wind_speed=self.device.data.wind_speed,
+                    has_auto_mode=(
+                        DeviceFeatureEnum.MODE_AC_AUTO in self.device.supported_features
                     ),
                 )
             case DeviceFeatureEnum.SELECT_GENERATOR_MODE:
@@ -212,6 +227,9 @@ class DesiredStateHandlerForSelect:
         memorize_fan_speed_by_mode = safe_get_value(
             stored_data, "user_config.behavior.memorize_fan_speed_by_mode", False
         )
+        memorize_humidity_by_mode = safe_get_value(
+            stored_data, "user_config.behavior.memorize_humidity_by_mode", False
+        )
 
         desired_state = {"workMode": self.device.mode_enum_to_value_mapp.get(value, 0)}
         
@@ -224,6 +242,10 @@ class DesiredStateHandlerForSelect:
         if memorize_temp_by_mode:
             saved_target_temperature = stored_data["target_temperature"][value]["value"]
             desired_state["targetTemperature"] = saved_target_temperature
+                
+        if memorize_humidity_by_mode:
+            saved_humidity = stored_data["humidity"][value]["value"]
+            desired_state["Humidity"] = saved_humidity
 
         if memorize_fan_speed_by_mode:
             saved_fan_speed = stored_data["fan_speed"][value]["value"]
@@ -371,7 +393,7 @@ class DesiredStateHandlerForSelect:
 
     def desired_state_SELECT_PORTABLE_WIND_SPEED(self, value: PortableWindSeedEnum):
         desired_state = {}
-        if DeviceFeatureEnum.MODE_AUTO in self.device.supported_features:
+        if DeviceFeatureEnum.MODE_AC_AUTO in self.device.supported_features:
             match value:
                 case PortableWindSeedEnum.AUTO:
                     desired_state = {"windSpeed": 0}
@@ -394,7 +416,7 @@ class DesiredStateHandlerForSelect:
             self.device.data.work_mode,
             (
                 ModeEnum.AUTO
-                if DeviceFeatureEnum.MODE_AUTO in self.device.supported_features
+                if DeviceFeatureEnum.MODE_AC_AUTO in self.device.supported_features
                 else ModeEnum.COOL
             ),
         )
@@ -411,7 +433,7 @@ class DesiredStateHandlerForSelect:
     
     def desired_state_SELECT_PORTABLE_WIND_4VALUE_SPEED(self, value: PortableWind4ValueSeedEnum):
         desired_state = {}
-        if DeviceFeatureEnum.MODE_AUTO in self.device.supported_features:
+        if DeviceFeatureEnum.MODE_AC_AUTO in self.device.supported_features:
             match value:
                 case PortableWind4ValueSeedEnum.AUTO:
                     desired_state = {"windSpeed": 0}
@@ -438,7 +460,7 @@ class DesiredStateHandlerForSelect:
             self.device.data.work_mode,
             (
                 ModeEnum.AUTO
-                if DeviceFeatureEnum.MODE_AUTO in self.device.supported_features
+                if DeviceFeatureEnum.MODE_AC_AUTO in self.device.supported_features
                 else ModeEnum.COOL
             ),
         )
@@ -643,23 +665,21 @@ def get_SELECT_VERTICAL_DIRECTION_name(device: Device) -> str:
         return "Air flow"
     return "Up and Down air supply"
 
-
 def get_SELECT_HORIZONTAL_DIRECTION_name(device: Device) -> str:
     if device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
         return "Horizontal Air flow"
     return "Left and Right air supply"
 
-
 def get_SELECT_PORTABLE_WIND_SPEED_options(device: Device) -> list[str] | None:
     all = [PortableWindSeedEnum.LOW, PortableWindSeedEnum.HIGH]
-    if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
+    if DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features:
         all.append(PortableWindSeedEnum.AUTO)
 
     current_mode = device.mode_value_to_enum_mapp.get(
         device.data.work_mode, ModeEnum.COOL
     )
     if current_mode == ModeEnum.DEHUMIDIFICATION:
-        if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
+        if DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features:
             return [PortableWindSeedEnum.AUTO]
         return []
 
@@ -668,18 +688,16 @@ def get_SELECT_PORTABLE_WIND_SPEED_options(device: Device) -> list[str] | None:
 
     return all
 
-
-
 def get_SELECT_PORTABLE_WIND_4VALUE_SPEED_options(device: Device) -> list[str] | None:
     all = [PortableWind4ValueSeedEnum.LOW, PortableWind4ValueSeedEnum.MEDIUM, PortableWind4ValueSeedEnum.HIGH]
-    if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
+    if DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features:
         all.append(PortableWind4ValueSeedEnum.AUTO)
 
     current_mode = device.mode_value_to_enum_mapp.get(
         device.data.work_mode, ModeEnum.COOL
     )
     if current_mode == ModeEnum.DEHUMIDIFICATION:
-        if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
+        if DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features:
             return [PortableWind4ValueSeedEnum.AUTO]
         return []
 
@@ -688,13 +706,12 @@ def get_SELECT_PORTABLE_WIND_4VALUE_SPEED_options(device: Device) -> list[str] |
 
     return all
 
-
 def get_SELECT_SLEEP_MODE_available_fn(device: Device) -> str:
     mode = device.mode_value_to_enum_mapp.get(
         device.data.work_mode,
         (
             ModeEnum.AUTO
-            if DeviceFeatureEnum.MODE_AUTO in device.supported_features
+            if DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features
             else ModeEnum.COOL
         ),
     )
@@ -706,20 +723,17 @@ def get_SELECT_SLEEP_MODE_available_fn(device: Device) -> str:
         return False
     return True
 
-
 def get_SELECT_FRESH_AIR_available_fn(device: Device) -> str:
     if device.data.new_wind_switch == 1:
         return True
     return False
 
-
 def get_SELECT_WIND_SPEED_available_fn(device: Device) -> str:
     mode = device.mode_value_to_enum_mapp.get(device.data.work_mode, ModeEnum.AUTO)
     return mode != ModeEnum.DEHUMIDIFICATION
 
-
 def get_SELECT_PORTABLE_WIND_SPEED_available_fn(device: Device) -> str:
-    if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
+    if DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features:
         return device.data.sleep != 1
     else:
         current_mode = device.mode_value_to_enum_mapp.get(
@@ -730,7 +744,7 @@ def get_SELECT_PORTABLE_WIND_SPEED_available_fn(device: Device) -> str:
         return device.data.sleep != 1
 
 def get_SELECT_PORTABLE_WIND_4VALUE_SPEED_available_fn(device: Device) -> str:
-    if DeviceFeatureEnum.MODE_AUTO in device.supported_features:
+    if DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features:
         return device.data.sleep != 1
     else:
         current_mode = device.mode_value_to_enum_mapp.get(
@@ -739,7 +753,6 @@ def get_SELECT_PORTABLE_WIND_4VALUE_SPEED_available_fn(device: Device) -> str:
         if current_mode == ModeEnum.DEHUMIDIFICATION:
             return False
         return device.data.sleep != 1
-
 
 async def async_setup_entry(
     hass: HomeAssistant,

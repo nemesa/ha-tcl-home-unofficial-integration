@@ -11,9 +11,10 @@ import boto3.session
 from homeassistant.core import HomeAssistant
 
 from .config_entry import New_NameConfigEntry
-from .device_data_storage import get_stored_data
+from .data_storage import get_stored_data
 from .session_manager import SessionManager
 from .tcl import GetThingsResponse, get_things
+from .fakes_for_debug import aws_iot_get_all_things, aws_iot_get_thing
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,11 +31,13 @@ class AwsIot:
         self,
         hass: HomeAssistant,
         config_entry: New_NameConfigEntry | None = None,
+        use_fakes: bool = False,
     ) -> None:
         """Initialize the AWS IoT client."""
         self.hass = hass
         self.session_manager = SessionManager(hass=hass, config_entry=config_entry)
         self.client = None
+        self.use_fakes = use_fakes
 
     async def async_setup_client(self) -> None:
         aws_region = await self.session_manager.get_aws_region()
@@ -62,6 +65,10 @@ class AwsIot:
     async def get_all_things(self) -> GetThingsResponse:
         if self.session_manager.is_verbose_device_logging():
             _LOGGER.info("AwsIot.get_all_things")
+        if self.use_fakes:
+            _LOGGER.warning("AwsIot.get_all_things.FAKES_ENABLED")
+            fake_things = await aws_iot_get_all_things(self.hass)
+            return fake_things
         authResult = await self.session_manager.async_get_auth_data()
         refreshTokensResult = await self.session_manager.async_refresh_tokens()
         saas_token = refreshTokensResult.data.saas_token
@@ -139,10 +146,12 @@ class AwsIot:
         self, device_id: str, fromException: bool = False
     ) -> dict:
         if self.session_manager.is_verbose_device_logging():
-            stored_data = await get_stored_data(self.hass, device_id)
-            _LOGGER.info(
-                "AwsIot.async_get_thing.stored_data (%s): %s", device_id, stored_data
-            )
+            _LOGGER.info("AwsIot.async_get_thing (%s)", device_id)
+        if self.use_fakes:
+            _LOGGER.warning("AwsIot.async_get_thing (%s) FAKES_ENABLED", device_id)
+            fake_thing = await aws_iot_get_thing(self.hass, device_id)
+            return fake_thing
+
         return await self.execute_and_re_try_call_with_device_id(
             self.get_thing, device_id, fromException
         )
@@ -174,4 +183,10 @@ class AwsIot:
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
         )
+        
+        if self.use_fakes:
+            _LOGGER.warning("AwsIot.set_desired_state (%s) FAKES_ENABLED", device_id)
+            _LOGGER.info("AwsIot.set_desired_state (%s) payload: %s", device_id, payload)
+            return
+        
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)

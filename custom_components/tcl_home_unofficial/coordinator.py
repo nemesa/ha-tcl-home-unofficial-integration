@@ -14,7 +14,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .aws_iot import AwsIot
 from .const import DEFAULT_SCAN_INTERVAL, DOMAIN
 from .device import Device
-from .device_data_storage import get_stored_data
+from .data_storage import get_stored_data
 from .config_entry import ConfigData
 
 _LOGGER = logging.getLogger(__name__)

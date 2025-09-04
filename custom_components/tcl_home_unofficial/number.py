@@ -3,7 +3,7 @@
 import logging
 
 from homeassistant.components.number import NumberDeviceClass, NumberEntity, NumberMode
-from homeassistant.const import UnitOfTemperature
+from homeassistant.const import UnitOfTemperature, PERCENTAGE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -13,8 +13,8 @@ from .coordinator import IotDeviceCoordinator
 from .device import Device
 from .device_features import DeviceFeatureEnum
 from .device_types import DeviceTypeEnum
-from .device_enums import ModeEnum
-from .device_data_storage import set_stored_data, get_stored_data
+from .device_enums import ModeEnum, DehumidifierModeEnum
+from .data_storage import set_stored_data, get_stored_data
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -42,6 +42,8 @@ class DesiredStateHandlerForNumber:
                 return await self.NUMBER_TARGET_TEMPERATURE(value=value)
             case DeviceFeatureEnum.NUMBER_TARGET_DEGREE:
                 return await self.NUMBER_TARGET_DEGREE(value=value)
+            case DeviceFeatureEnum.NUMBER_DEHUMIDIFIER_HUMIDITY:
+                return await self.NUMBER_DEHUMIDIFIER_HUMIDITY(value=value)
 
     async def store_target_temp(self, value: int | float):
         stored_data = await get_stored_data(self.hass, self.device.device_id)
@@ -50,6 +52,17 @@ class DesiredStateHandlerForNumber:
         )
         # _LOGGER.info("Storing target temperature %s for mode %s in device storage %s",value,mode,self.device.device_id)
         stored_data["target_temperature"][mode]["value"] = value
+        self.device.storage = stored_data
+        await set_stored_data(self.hass, self.device.device_id, stored_data)
+
+
+    async def store_humidity(self, value: int | float):
+        stored_data = await get_stored_data(self.hass, self.device.device_id)
+        mode = self.device.mode_value_to_enum_mapp.get(
+            self.device.data.work_mode, DehumidifierModeEnum.DRY
+        )
+        # _LOGGER.info("Storing target temperature %s for mode %s in device storage %s",value,mode,self.device.device_id)
+        stored_data["humidity"][mode]["value"] = value
         self.device.storage = stored_data
         await set_stored_data(self.hass, self.device.device_id, stored_data)
 
@@ -94,6 +107,24 @@ class DesiredStateHandlerForNumber:
             "targetCelsiusDegree": value_celsius_to_set,
             "targetFahrenheitDegree": value_fahrenheit_to_set,
         }
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+        
+    async def NUMBER_DEHUMIDIFIER_HUMIDITY(self, value: int | float):
+        min_temp = 1
+        max_temp = 99
+
+        if value < min_temp or value > max_temp:
+            _LOGGER.error(
+                "Invalid target humidity (%): %s (Min:%s Max:%s)",
+                value,
+                min_temp,
+                max_temp,
+            )
+            return
+
+        desired_state = {"Humidity": value}
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
         )
@@ -151,12 +182,21 @@ async def async_setup_entry(
                     name="Set Target Temperature",
                     type="SetTargetDegree",
                     available_fn=lambda device: is_allowed(device),
-                    current_value_fn=lambda device: float(
-                        device.data.target_temperature
-                    )
-                    if DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS
-                    in device.supported_features
-                    else int(device.data.target_temperature),
+                    current_value_fn=lambda device: float(device.data.target_temperature) if DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS in device.supported_features else int(device.data.target_temperature),
+                )
+            )
+            
+        if DeviceFeatureEnum.NUMBER_DEHUMIDIFIER_HUMIDITY in device.supported_features:
+            customEntities.append(
+                HumidityHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.NUMBER_DEHUMIDIFIER_HUMIDITY,
+                    name="Set Target Humidity",
+                    type="SetDehumidifierHumidity",
+                    available_fn=lambda device: is_allowed(device),
+                    current_value_fn=lambda device: device.data.humidity
                 )
             )
 
@@ -222,5 +262,65 @@ class TemperatureHandler(TclEntityBase, NumberEntity):
         self.iot_handler.refreshDevice(self.device)
         await self.iot_handler.call_set_number(value)
         await self.iot_handler.store_target_temp(value)
+        await self.coordinator.async_refresh()
+        self.async_write_ha_state()
+
+class HumidityHandler(TclEntityBase, NumberEntity):
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        coordinator: IotDeviceCoordinator,
+        device: Device,
+        type: str,
+        name: str,
+        deviceFeature: DeviceFeatureEnum,
+        current_value_fn: lambda device: bool | None,
+        available_fn: lambda device: bool,
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, type, name, device)
+        self.hass = hass
+        self.iot_handler = DesiredStateHandlerForNumber(
+            hass=hass,
+            coordinator=coordinator,
+            deviceFeature=deviceFeature,
+            device=self.device,
+        )
+        self.current_value_fn = current_value_fn
+        self.available_fn = available_fn
+        self._attr_available = True
+
+        self._attr_assumed_state = False
+        self._attr_device_class = NumberDeviceClass.HUMIDITY
+        self._attr_translation_key = None
+        self._attr_mode = NumberMode.BOX
+        self._attr_native_unit_of_measurement = PERCENTAGE
+        self._attr_native_value = self.current_value_fn(self.device)
+
+        self._attr_native_min_value = 1
+        self._attr_native_max_value = 99
+        self._attr_native_step = 1
+
+    @property
+    def available(self) -> bool:
+        if self.device.is_online:
+            return self.available_fn(self.device)
+        return False
+
+    @property
+    def device_class(self) -> str:
+        return NumberDeviceClass.HUMIDITY
+
+    @property
+    def native_value(self) -> int | float:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        self.iot_handler.refreshDevice(self.device)
+        return self.current_value_fn(self.device)
+
+    async def async_set_native_value(self, value: float) -> None:
+        """Update the current value."""
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        self.iot_handler.refreshDevice(self.device)
+        await self.iot_handler.call_set_number(value)
+        await self.iot_handler.store_humidity(value)
         await self.coordinator.async_refresh()
         self.async_write_ha_state()

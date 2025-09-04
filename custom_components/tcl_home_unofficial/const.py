@@ -11,6 +11,10 @@ def get_device_self_dignose_storege_key(device_id: str) -> str:
     return f"{DOMAIN}.device_self_dignose_storage.{device_id}"
 
 
+def get_internal_settings_storege_key() -> str:
+    """Get the storage key for a device."""
+    return f"{DOMAIN}.internal_settings_storage"
+
 DOMAIN = "tcl_home_unofficial"
 
 

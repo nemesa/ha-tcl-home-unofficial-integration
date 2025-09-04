@@ -19,6 +19,7 @@ from .coordinator import IotDeviceCoordinator
 from .device import Device, get_device_storage, store_rn_prode_data
 from .device_types import is_implemented_by_integration
 from .device_rn_probe import fetch_and_parse_config
+from .data_storage import get_internal_settings, safe_set_value, set_internal_settings, safe_get_value
 
 _PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
@@ -29,6 +30,7 @@ _PLATFORMS: list[Platform] = [
     Platform.BUTTON,
     Platform.REMOTE,
     Platform.CLIMATE,
+    Platform.HUMIDIFIER,
     Platform.TEXT,
 ]
 
@@ -47,9 +49,14 @@ async def async_setup_entry(
     config_entry.devices = []
     config_entry.non_implemented_devices = []
 
+    internal_settings = await internal_settings_setup(hass)
+    if configData.verbose_setup_logging:
+        _LOGGER.info("Setup.internal_settings %s",internal_settings)    
+
     aws_iot = AwsIot(
         hass=hass,
         config_entry=config_entry,
+        use_fakes=safe_get_value(internal_settings, "fake.use_fake_data", False)
     )
     if configData.verbose_setup_logging:
         _LOGGER.info("Setup.async_setup_entry session_manager.clear_storage")
@@ -81,7 +88,13 @@ async def async_setup_entry(
             else:
                 _LOGGER.warning("Setup.async_setup_entry device is not online or not implemented by this integration (is_implemented:%s): %s",is_implemented,thing)
 
-        probe_result = await fetch_and_parse_config(hass, aws_iot.get_session_manager(), thing.device_id, thing.product_key)
+        probe_result = await fetch_and_parse_config(
+            hass= hass, 
+            session_manager= aws_iot.get_session_manager(), 
+            device_id= thing.device_id, 
+            product_key=thing.product_key,
+            use_fakes=safe_get_value(internal_settings, "fake.use_fake_data", False)
+        )
         storage = await store_rn_prode_data(hass, thing.device_id, probe_result)
 
         device = Device(
@@ -89,7 +102,7 @@ async def async_setup_entry(
             aws_thing=aws_thing,
             device_storage=storage,
         )
-
+        
         if device.device_type is not None:
             if configData.verbose_setup_logging:
                 _LOGGER.info("Setup.async_setup_entry found device:%s", device)
@@ -132,3 +145,31 @@ async def _async_update_listener(hass: HomeAssistant, config_entry: ConfigEntry)
             sanitizeConfigData(configData),
         )
     await hass.config_entries.async_reload(config_entry.entry_id)
+
+async def internal_settings_setup(hass: HomeAssistant):
+    need_save = False
+    stored_data = await get_internal_settings(hass)
+    if stored_data is None:
+        stored_data = {}
+        need_save = True
+
+    stored_data, need_save = safe_set_value(stored_data, "fake.use_fake_data", False, overwrite_if_exists=False)
+    stored_data, need_save = safe_set_value(stored_data, "fake.data", {}, overwrite_if_exists=False)    
+    if need_save:
+        await set_internal_settings(hass, stored_data)
+    return stored_data
+
+
+"""
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "tcl_home_unofficial.internal_settings_storage",
+  "data": {
+    "fake": {
+      "use_fake_data": false,
+      "data": {}
+    }
+  }
+}
+"""

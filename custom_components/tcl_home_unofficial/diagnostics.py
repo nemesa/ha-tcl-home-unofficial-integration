@@ -7,7 +7,7 @@ from homeassistant.helpers.device_registry import DeviceEntry
 
 from .aws_iot import AwsIot
 from .config_entry import New_NameConfigEntry
-from .device_data_storage import get_stored_data
+from .data_storage import get_stored_data
 from .self_diagnostics import SelfDiagnostics
 from .config_entry import (
     New_NameConfigEntry,
@@ -22,6 +22,26 @@ async def async_get_config_entry_diagnostics(
 ) -> dict[str, Any]:
     """Return diagnostics for a config entry."""
 
+    data= await get_diagnosics_data(hass, entry,None)
+    return data
+
+
+async def async_get_device_diagnostics(
+    hass: HomeAssistant, entry: New_NameConfigEntry, device: DeviceEntry
+) -> dict[str, Any]:
+    """Return diagnostics for a device."""
+
+    device_id = next(
+        identifier[1]
+        for identifier in device.identifiers
+        if identifier[0] == "tcl_home_unofficial"
+    ).split("-")[1]
+    
+
+    data= await get_diagnosics_data(hass, entry,device_id)
+    return data
+
+async def get_diagnosics_data(hass: HomeAssistant, entry: New_NameConfigEntry, device_id:str | None) -> dict[str, Any]:
     configData = asDict(sanitizeConfigData(convertToConfigData(entry)))
 
     aws_iot = AwsIot(
@@ -70,41 +90,51 @@ async def async_get_config_entry_diagnostics(
         tcl_things_response_code = all_things_response.code
         tcl_things_response_message = all_things_response.message
         for thing in all_things_response.data:
-            deviceIds.append(thing.device_id)
-            tcl_things.append(
-                {
-                    "product_key": thing.product_key,
-                    "platform": thing.platform,
-                    "nick_name": thing.nick_name,
-                    "device_name": thing.device_name,
-                    "category": thing.category,
-                    "type": thing.type,
-                    "device_type": thing.device_type,
-                    "firmware_version": thing.firmware_version,
-                    "net_type": thing.net_type,
-                    "is_online": thing.is_online,
-                }
-            )
+            if device_id is None or thing.device_id == device_id:
+                deviceIds.append(thing.device_id)
+                tcl_things.append(
+                    {
+                        "device_id": thing.device_id,
+                        "product_key": thing.product_key,
+                        "platform": thing.platform,
+                        "nick_name": thing.nick_name,
+                        "device_name": thing.device_name,
+                        "category": thing.category,
+                        "type": thing.type,
+                        "device_type": thing.device_type,
+                        "firmware_version": thing.firmware_version,
+                        "net_type": thing.net_type,
+                        "is_online": thing.is_online,
+                        "room": thing.room,
+                    }
+                )
     except Exception as e:
         tcl_things = {"error": str(e)}
 
     aws_things = []
     try:
-        for deviceId in deviceIds:
-            aws_thing = await aws_iot.async_get_thing(deviceId)
-            aws_things.append(aws_thing.get("state", {}).get("reported", {}))
+        for deviceId in deviceIds:            
+            if device_id is None or deviceId == device_id:
+                aws_thing = await aws_iot.async_get_thing(deviceId)
+                aws_things.append({"deviceId":deviceId,"reported":aws_thing.get("state", {}).get("reported", {})})
     except Exception as e:
         aws_things = {"error": str(e)}
-        
-        
+    
     device_storages = []
+    manual_state_dump_data = {}
     try:
         for deviceId in deviceIds:
-            device_storage = await try_get_stored_data(hass, deviceId)
-            device_storage["deviceId"]=deviceId
-            device_storages.append(device_storage)
+            if device_id is None or deviceId == device_id:
+                device_storage = await try_get_stored_data(hass, deviceId)
+                device_storage["deviceId"]=deviceId
+                device_storages.append(device_storage)
     except Exception as e:
         device_storages = {"error": str(e)}
+
+    if device_id is not None:
+        self_diagnostics = SelfDiagnostics(hass=hass, device_id=device_id)
+        manual_state_dump_data = await self_diagnostics.get_stored_data()
+        
 
     return {
         "configData": configData,
@@ -123,85 +153,13 @@ async def async_get_config_entry_diagnostics(
             "tcl_things": tcl_things,
         },
         "device_storages": device_storages,
-    }
-
-
-async def async_get_device_diagnostics(
-    hass: HomeAssistant, entry: New_NameConfigEntry, device: DeviceEntry
-) -> dict[str, Any]:
-    """Return diagnostics for a device."""
-
-    device_id = next(
-        identifier[1]
-        for identifier in device.identifiers
-        if identifier[0] == "tcl_home_unofficial"
-    ).split("-")[1]
-
-    aws_iot = AwsIot(
-        hass=hass,
-        config_entry=entry,
-    )
-
-    aws_iot_init_success = False
-    aws_iot_init_error = None
-
-    try:
-        await aws_iot.async_init()
-        aws_iot_init_success = True
-    except Exception as e:
-        aws_iot_init_error = {"error": str(e)}
-
-    tcl_thing = []
-    try:
-        all_things_response = await aws_iot.get_all_things()
-        for thing in all_things_response.data:
-            if thing.device_id == device_id:
-                tcl_thing.append(
-                    {
-                        "device_id": thing.device_id,
-                        "product_key": thing.product_key,
-                        "platform": thing.platform,
-                        "nick_name": thing.nick_name,
-                        "device_name": thing.device_name,
-                        "category": thing.category,
-                        "type": thing.type,
-                        "device_type": thing.device_type,
-                        "firmware_version": thing.firmware_version,
-                        "net_type": thing.net_type,
-                        "is_online": thing.is_online,
-                    }
-                )
-    except Exception as e:
-        tcl_thing = {"error": str(e)}
-
-    aws_thing = None
-    try:
-        aws_thing_raw = await aws_iot.async_get_thing(device_id)
-        aws_thing =aws_thing_raw.get("state", {}).get("reported", {})
-    except Exception as e:
-        aws_thing = {"error": str(e)}
-
-    self_diagnostics = SelfDiagnostics(hass=hass, device_id=device_id)
-    manual_state_dump_data = await self_diagnostics.get_stored_data()
-    device_storage = await try_get_stored_data(hass, device_id)        
-
-    return {
-        "device": {
-            "model": device.model,
-            "sw_version": device.sw_version,
-        },
-        "aws_iot_init_success": aws_iot_init_success,
-        "aws_iot_init_error": aws_iot_init_error,
-        "tcl_thing": tcl_thing,
-        "aws_thing": aws_thing,
         "manual_state_dump_data": manual_state_dump_data,
-        "device_storage": device_storage,
     }
-
 
 async def try_get_stored_data(hass: HomeAssistant, device_id: str):    
     try:
         data = await get_stored_data(hass, device_id)
         return data
+
     except Exception as e:
         return {"error": str(e)}

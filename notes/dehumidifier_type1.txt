@@ -1,0 +1,174 @@
+************************************
+Tcl_thing
+{
+  "device_id": "******",
+  "platform": "TCLIOT",
+  "nick_name": "Dehumidifier",
+  "device_name": "Dehumidifier DEM",
+  "category": "DH",
+  "type": 1,
+  "device_type": "",
+  "firmware_version": "V8-R82CT08-WFMV025.3.0.3",
+  "net_type": 1,
+  "is_online": 1
+}
+************************************
+aws_thing
+{
+  "Humidity": 70,
+  "authFlag": {
+    "google": true
+  },
+  "envHumidity": 52,
+  "errorCode": [],
+  "powerSwitch": 0,
+  "workMode": 0
+}
+************************************
+manual_state_dump_data
+################################
+--------------------------------
+Step: Turn on
+--------------------------------
+DesiredKeys: ['powerSwitch']
+   powerSwitch:(0)->(1)
+ReportedKeys: ['powerSwitch']
+   powerSwitch:(0)->(1)
+################################
+--------------------------------
+Step: Turbo
+--------------------------------
+DesiredKeys: ['workMode', 'Humidity']
+   workMode:(0)->(1)
+   Humidity:(55)->(35)
+ReportedKeys: ['workMode', 'Humidity']
+   workMode:(0)->(1)
+   Humidity:(55)->(35)
+################################
+--------------------------------
+Step: Comfort
+--------------------------------
+DesiredKeys: ['workMode', 'Humidity']
+   workMode:(1)->(2)
+   Humidity:(35)->(50)
+ReportedKeys: ['workMode', 'Humidity']
+   workMode:(1)->(2)
+   Humidity:(35)->(50)
+################################
+--------------------------------
+Step: Continue
+--------------------------------
+DesiredKeys: ['workMode', 'Humidity']
+   workMode:(2)->(3)
+   Humidity:(50)->(15)
+ReportedKeys: ['workMode', 'Humidity']
+   workMode:(2)->(3)
+   Humidity:(50)->(15)
+################################
+--------------------------------
+Step: Dry
+--------------------------------
+DesiredKeys: ['workMode', 'Humidity']
+   workMode:(3)->(0)
+   Humidity:(15)->(60)
+ReportedKeys: ['workMode', 'Humidity']
+   workMode:(3)->(0)
+   Humidity:(15)->(60)
+################################
+--------------------------------
+Step: Humidity 55%
+--------------------------------
+DesiredKeys: ['workMode', 'Humidity']
+   workMode:(0)->(0)
+   Humidity:(60)->(55)
+ReportedKeys: ['Humidity']
+   Humidity:(60)->(55)
+################################
+--------------------------------
+Step: Humidity 40%
+--------------------------------
+DesiredKeys: ['workMode', 'Humidity']
+   workMode:(0)->(0)
+   Humidity:(55)->(40)
+ReportedKeys: ['Humidity']
+   Humidity:(55)->(40)
+################################
+--------------------------------
+Step: Humidity 70%
+--------------------------------
+DesiredKeys: ['workMode', 'Humidity']
+   workMode:(0)->(0)
+   Humidity:(40)->(70)
+ReportedKeys: ['Humidity']
+   Humidity:(40)->(70)
+################################
+--------------------------------
+Step: Turn off
+--------------------------------
+DesiredKeys: ['powerSwitch', 'workMode', 'Humidity']
+   powerSwitch:(1)->(0)
+   workMode:(0)->(0)
+   Humidity:(70)->(70)
+ReportedKeys: ['powerSwitch']
+   powerSwitch:(1)->(0)
+
+
+
+
+"aws_init": {
+      "init_success": true,
+      "init_error": null,
+      "aws_things": [
+        {
+          "deviceId": "xxxxxxxxxxxx",
+          "reported": {
+            "authFlag": {
+              "google": true
+            },
+            "powerSwitch": 1,
+            "workMode": 0,
+            "Humidity": 50,
+            "envHumidity": 63,
+            "errorCode": [
+              5
+            ]
+          }
+        }
+      ]
+    },
+    "tcl": {
+      "things_response_code": 0,
+      "things_response_message": "SUCCESS",
+      "tcl_things": [
+        {
+          "device_id": "xxxxxxxxxxxx",
+          "product_key": "zsSkWpvcMIA5GJ3b",
+          "platform": "TCLIOT",
+          "nick_name": "Dehumidifier",
+          "device_name": "Dehumidifier DEM",
+          "category": "DH",
+          "type": 1,
+          "device_type": "",
+          "firmware_version": "V8-R82CT08-WFMV025.3.0.3",
+          "net_type": 1,
+          "is_online": 1,
+          "room": "Basement "
+        }
+      ]
+    },
+    "device_storages": [
+      {
+        "non_user_config": {
+          "rn_probe_data": {
+            "is_success": true,
+            "config_data": [
+              {
+                "deviceId": "xxxxxxxxxxxx",
+                "productKey": "zsSkWpvcMIA5GJ3b",
+                "TSLVersion": "",
+                "plugInType": 1,
+                "packageName": "com.tcl.panel_dh_dem",
+                "plugInVersion": "3.0.3",
+                "plugInUrl": "https://us-h5-prod.aws.tcljd.com/zsSkWpvcMIA5GJ3b/android/3.0.3/release_android.zip",
+                "minSdkVersion": "5.4.1"
+              },
