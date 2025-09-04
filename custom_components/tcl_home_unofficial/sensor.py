@@ -42,10 +42,7 @@ async def async_setup_entry(
                 )
             )
 
-        if (
-            DeviceFeatureEnum.SENSOR_INTERNAL_UNIT_COIL_TEMPERATURE
-            in device.supported_features
-        ):
+        if DeviceFeatureEnum.SENSOR_INTERNAL_UNIT_COIL_TEMPERATURE in device.supported_features:
             sensors.append(
                 TemperatureSensor(
                     coordinator=coordinator,
@@ -56,10 +53,7 @@ async def async_setup_entry(
                 )
             )
 
-        if (
-            DeviceFeatureEnum.SENSOR_EXTERNAL_UNIT_COIL_TEMPERATURE
-            in device.supported_features
-        ):
+        if DeviceFeatureEnum.SENSOR_EXTERNAL_UNIT_COIL_TEMPERATURE in device.supported_features:
             sensors.append(
                 TemperatureSensor(
                     coordinator=coordinator,
@@ -70,10 +64,7 @@ async def async_setup_entry(
                 )
             )
 
-        if (
-            DeviceFeatureEnum.SENSOR_EXTERNAL_UNIT_TEMPERATURE
-            in device.supported_features
-        ):
+        if DeviceFeatureEnum.SENSOR_EXTERNAL_UNIT_TEMPERATURE in device.supported_features:
             sensors.append(
                 TemperatureSensor(
                     coordinator=coordinator,
@@ -84,10 +75,7 @@ async def async_setup_entry(
                 )
             )
 
-        if (
-            DeviceFeatureEnum.SENSOR_EXTERNAL_UNIT_EXHAUST_TEMPERATURE
-            in device.supported_features
-        ):
+        if DeviceFeatureEnum.SENSOR_EXTERNAL_UNIT_EXHAUST_TEMPERATURE in device.supported_features:
             sensors.append(
                 TemperatureSensor(
                     coordinator=coordinator,
@@ -98,10 +86,7 @@ async def async_setup_entry(
                 )
             )
 
-        if (
-            DeviceFeatureEnum.SENSOR_DEHUMIDIFIER_ENV_HUMIDITY
-            in device.supported_features
-        ):
+        if DeviceFeatureEnum.SENSOR_DEHUMIDIFIER_ENV_HUMIDITY in device.supported_features:
             sensors.append(
                 HumiditySensor(
                     coordinator=coordinator,
