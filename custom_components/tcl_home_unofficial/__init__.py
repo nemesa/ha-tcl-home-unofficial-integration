@@ -30,6 +30,7 @@ _PLATFORMS: list[Platform] = [
     Platform.BUTTON,
     Platform.REMOTE,
     Platform.CLIMATE,
+    Platform.HUMIDIFIER,
     Platform.TEXT,
 ]
 
@@ -101,7 +102,7 @@ async def async_setup_entry(
             aws_thing=aws_thing,
             device_storage=storage,
         )
-
+        
         if device.device_type is not None:
             if configData.verbose_setup_logging:
                 _LOGGER.info("Setup.async_setup_entry found device:%s", device)

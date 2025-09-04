@@ -111,3 +111,64 @@ DesiredKeys: ['powerSwitch', 'workMode', 'Humidity']
    Humidity:(70)->(70)
 ReportedKeys: ['powerSwitch']
    powerSwitch:(1)->(0)
+
+
+
+
+"aws_init": {
+      "init_success": true,
+      "init_error": null,
+      "aws_things": [
+        {
+          "deviceId": "xxxxxxxxxxxx",
+          "reported": {
+            "authFlag": {
+              "google": true
+            },
+            "powerSwitch": 1,
+            "workMode": 0,
+            "Humidity": 50,
+            "envHumidity": 63,
+            "errorCode": [
+              5
+            ]
+          }
+        }
+      ]
+    },
+    "tcl": {
+      "things_response_code": 0,
+      "things_response_message": "SUCCESS",
+      "tcl_things": [
+        {
+          "device_id": "xxxxxxxxxxxx",
+          "product_key": "zsSkWpvcMIA5GJ3b",
+          "platform": "TCLIOT",
+          "nick_name": "Dehumidifier",
+          "device_name": "Dehumidifier DEM",
+          "category": "DH",
+          "type": 1,
+          "device_type": "",
+          "firmware_version": "V8-R82CT08-WFMV025.3.0.3",
+          "net_type": 1,
+          "is_online": 1,
+          "room": "Basement "
+        }
+      ]
+    },
+    "device_storages": [
+      {
+        "non_user_config": {
+          "rn_probe_data": {
+            "is_success": true,
+            "config_data": [
+              {
+                "deviceId": "xxxxxxxxxxxx",
+                "productKey": "zsSkWpvcMIA5GJ3b",
+                "TSLVersion": "",
+                "plugInType": 1,
+                "packageName": "com.tcl.panel_dh_dem",
+                "plugInVersion": "3.0.3",
+                "plugInUrl": "https://us-h5-prod.aws.tcljd.com/zsSkWpvcMIA5GJ3b/android/3.0.3/release_android.zip",
+                "minSdkVersion": "5.4.1"
+              },

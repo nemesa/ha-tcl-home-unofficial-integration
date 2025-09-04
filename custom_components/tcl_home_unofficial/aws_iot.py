@@ -183,4 +183,10 @@ class AwsIot:
                 "clientToken": f"mobile_{int(datetime.datetime.now().timestamp())}",
             }
         )
+        
+        if self.use_fakes:
+            _LOGGER.warning("AwsIot.set_desired_state (%s) FAKES_ENABLED", device_id)
+            _LOGGER.info("AwsIot.set_desired_state (%s) payload: %s", device_id, payload)
+            return
+        
         self.client.publish(topic=getTopic(device_id), qos=1, payload=payload)

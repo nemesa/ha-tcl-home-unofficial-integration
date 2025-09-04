@@ -249,6 +249,10 @@ class Device:
                 work_mode += 1
             else:
                 self.mode_enum_to_value_mapp[DehumidifierModeEnum.CONTINUE] = 0
+    
+    def print_data(self):
+        _LOGGER.info("Device ID: %s", self.device_id)
+        _LOGGER.info("data: %s", self.data)
 
 
 def toDeviceInfo(device: Device) -> DeviceInfo:

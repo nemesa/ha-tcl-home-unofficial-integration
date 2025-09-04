@@ -21,6 +21,7 @@ class DeviceFeatureEnum(StrEnum):
     SENSOR_IS_ONLINE = "sensor.is_online"
     SENSOR_CURRENT_TEMPERATURE = "sensor.current_temperature"
     SENSOR_DEHUMIDIFIER_ENV_HUMIDITY = "sensor.dehumidifier.env_humidity"
+    SENSOR_DEHUMIDIFIER_WATER_BUCKET_FULL = "sensor.dehumidifier.is_water_bucket_full"
     SENSOR_INTERNAL_UNIT_COIL_TEMPERATURE = "sensor.internal_unit_coil_temperature"
     SENSOR_EXTERNAL_UNIT_COIL_TEMPERATURE = "sensor.external_unit_coil_temperature"
     SENSOR_EXTERNAL_UNIT_TEMPERATURE = "sensor.external_unit_temperature"
@@ -55,8 +56,10 @@ class DeviceFeatureEnum(StrEnum):
     NUMBER_TARGET_DEGREE = "number.targetDegree"
     NUMBER_TARGET_TEMPERATURE = "number.targetTemperature"
     NUMBER_TARGET_TEMPERATURE_ALLOW_HALF_DIGITS = "number.targetTemperature.allow_half_digits"
+    DIAGNOSIC_ERROR_CODES = "diagnosic.error.codes"
     BUTTON_SELF_CLEAN = "button.selfClean"
     CLIMATE = "climate"
+    HUMIDIFIER = "humidifier"
     INTERNAL_IS_AC = "internal.is.ac"
     INTERNAL_IS_DEHUMIDIFIER = "internal.is.dehumidifier"
     INTERNAL_HAS_SWING_SWITCH = "internal.hasSwingSwitch"
@@ -225,7 +228,10 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.SELECT_MODE,
                 DeviceFeatureEnum.NUMBER_DEHUMIDIFIER_HUMIDITY,
                 DeviceFeatureEnum.SENSOR_DEHUMIDIFIER_ENV_HUMIDITY,
+                DeviceFeatureEnum.SENSOR_DEHUMIDIFIER_WATER_BUCKET_FULL,
                 DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_HUMIDITY_BY_MODE,
+                DeviceFeatureEnum.DIAGNOSIC_ERROR_CODES,
+                DeviceFeatureEnum.HUMIDIFIER,
             ]
         case DeviceTypeEnum.PORTABLE_AC:
             features = [

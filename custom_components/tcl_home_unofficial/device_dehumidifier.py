@@ -19,12 +19,14 @@ class TCL_Dehumidifier_DeviceData:
         self.work_mode                  = int(try_get_value(delta, aws_thing_state, "workMode", -1))
         self.humidity                   = int(try_get_value(delta, aws_thing_state, "Humidity", -1))
         self.env_humidity               = int(try_get_value(delta, aws_thing_state, "envHumidity", -1))
+        self.error_code                 = list[int](try_get_value(delta, aws_thing_state, "errorCode", []))
 
     device_id: str
     power_switch: int | bool
     work_mode: int | bool
     humidity: int | bool
     env_humidity: int | bool
+    error_code: list[int]
     
 
 

@@ -12,6 +12,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
 from .device import Device, DeviceTypeEnum
+from .device_features import DeviceFeatureEnum
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -34,13 +35,22 @@ async def async_setup_entry(
                 device=device,
                 type="IsOnline",
                 name="Is Online",
-                icon_fn=lambda device: "mdi:cloud-check-outline"
-                if device.is_online == 1
-                else "mdi:cloud-cancel-outline",
+                icon_fn=lambda device: "mdi:cloud-check-outline" if device.is_online == 1 else "mdi:cloud-cancel-outline",
                 is_on_fn=lambda device: device.is_online,
                 is_available_fn=lambda device: True,
             )
         )
+        if DeviceFeatureEnum.SENSOR_DEHUMIDIFIER_WATER_BUCKET_FULL in device.supported_features:
+            sensors.append(
+                BinarySensorHandlerOccupancy(
+                    coordinator=coordinator,
+                    device=device,
+                    type="IsDehumidifierWaterBucketFull",
+                    name="Is Water Bucket Full",
+                    icon_fn=lambda device: "mdi:bucket" if 5 in device.data.error_code else "mdi:bucket-outline",
+                    is_on_fn=lambda device:(5 in device.data.error_code)
+                )
+            )
 
     async_add_entities(sensors)
 
@@ -72,6 +82,33 @@ class BinarySensorHandler(TclEntityBase, BinarySensorEntity):
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
         return self.is_on_fn(self.device)
 
+
+class BinarySensorHandlerOccupancy(TclEntityBase, BinarySensorEntity):
+    def __init__(
+        self,
+        coordinator: IotDeviceCoordinator,
+        device: Device,
+        type: str,
+        name: str,
+        icon_fn: lambda device: str,
+        is_on_fn: lambda device: bool,
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, type, name, device)
+        self.icon_fn = icon_fn
+        self.is_on_fn = is_on_fn
+
+    @property
+    def icon(self):
+        return self.icon_fn(self.device)
+
+    @property
+    def device_class(self) -> str:
+        return BinarySensorDeviceClass.OCCUPANCY
+
+    @property
+    def is_on(self) -> bool | None:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        return self.is_on_fn(self.device)
 
 class DynamicBinarySensorHandlerNoAutoIsOnlineCheck(
     BinarySensorHandler, BinarySensorEntity
