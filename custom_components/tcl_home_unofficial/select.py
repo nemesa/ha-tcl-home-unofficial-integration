@@ -1,4 +1,4 @@
-"""Switch setup for our Integration."""
+"""."""
 
 import logging
 
@@ -29,8 +29,6 @@ from .device_enums import (
     getPortableWindSeed,
     PortableWind4ValueSeedEnum,
     getPortableWind4ValueSeed,
-    PortableWind4ValueSeedEnum,
-    getPortableWind4ValueSeed,
     TemperatureTypeEnum,
     getTemperatureType,
     FreshAirEnum,
@@ -41,7 +39,8 @@ from .device_enums import (
     getWindFeeling,
     WindowAcWindSeedEnum,
     getWindowAcWindSeed,
-    
+    WindSpeedLowMediumHigh,
+    getWindSpeedLowMediumHigh,    
 )
 
 from .tcl_entity_base import TclEntityBase
@@ -77,7 +76,9 @@ class DesiredStateHandlerForSelect:
                 return await self.SELECT_SLEEP_MODE(value=value)
             case DeviceFeatureEnum.SELECT_MODE:
                 return await self.SELECT_MODE(value=value)
-            case DeviceFeatureEnum.SELECT_WIND_SPEED:
+            case DeviceFeatureEnum.SELECT_DEHUMIDIFIER_WIND_SPEED_LOW_MEDIUM_HEIGH:
+                return await self.SELECT_DEHUMIDIFIER_WIND_SPEED_LOW_MEDIUM_HEIGH(value=value)
+            case DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR:
                 return await self.SELECT_WIND_SPEED(value=value)
             case DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR:
                 return await self.SELECT_WIND_SPEED_7_GEAR(value=value)
@@ -105,9 +106,8 @@ class DesiredStateHandlerForSelect:
             case DeviceFeatureEnum.SELECT_SLEEP_MODE:
                 return getSleepMode(self.device.data.sleep)
             case DeviceFeatureEnum.SELECT_MODE:
-                if DeviceFeatureEnum.INTERNAL_IS_AC in self.device.supported_features:                
-                    default_dehumidifier_mode=DehumidifierModeEnum.DRY
-                    return self.device.mode_value_to_enum_mapp.get(self.device.data.work_mode,default_dehumidifier_mode)
+                if DeviceFeatureEnum.INTERNAL_IS_DEHUMIDIFIER in self.device.supported_features:
+                    return self.device.mode_value_to_enum_mapp.get(self.device.data.work_mode,DehumidifierModeEnum.DRY)
                 else:
                     default_ac_mode=ModeEnum.AUTO if DeviceFeatureEnum.MODE_AC_AUTO in self.device.supported_features else ModeEnum.COOL
                     return self.device.mode_value_to_enum_mapp.get(self.device.data.work_mode,default_ac_mode)
@@ -117,6 +117,8 @@ class DesiredStateHandlerForSelect:
                     turbo=self.device.data.turbo,
                     silence_switch=self.device.data.silence_switch,
                 )
+            case DeviceFeatureEnum.SELECT_DEHUMIDIFIER_WIND_SPEED_LOW_MEDIUM_HEIGH:
+                return getWindSpeedLowMediumHigh(self.device.data.wind_speed)
             case DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR:
                 return getWindSeed7Gear(self.device.data.wind_speed_7_gear)
             case DeviceFeatureEnum.SELECT_WINDOW_AS_WIND_SPEED:
@@ -170,6 +172,8 @@ class DesiredStateHandlerForSelect:
                 return [e.value for e in SleepModeEnum]
             case DeviceFeatureEnum.SELECT_MODE:
                 return self.device.get_supported_modes()
+            case DeviceFeatureEnum.SELECT_DEHUMIDIFIER_WIND_SPEED_LOW_MEDIUM_HEIGH:
+                return [e.value for e in WindSpeedLowMediumHigh]
             case DeviceFeatureEnum.SELECT_WIND_SPEED:
                 return [e.value for e in WindSeedEnum]
             case DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR:
@@ -387,6 +391,34 @@ class DesiredStateHandlerForSelect:
             await set_stored_data(self.hass, self.device.device_id, stored_data)
 
         desired_state = self.desired_state_SELECT_WIND_SPEED_7_GEAR(value)
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
+
+    def desired_state_SELECT_DEHUMIDIFIER_WIND_SPEED_LOW_MEDIUM_HEIGH(self, value: WindSpeedLowMediumHigh):
+        desired_state = {}
+        match value:
+            case WindSpeedLowMediumHigh.LOW:
+                desired_state = {"windSpeed": 0}
+            case WindSpeedLowMediumHigh.MEDIUM:
+                desired_state = {"windSpeed": 1}
+            case WindSpeedLowMediumHigh.HIGH:
+                desired_state = {"windSpeed": 2}
+        return desired_state
+
+    async def SELECT_DEHUMIDIFIER_WIND_SPEED_LOW_MEDIUM_HEIGH(self, value: WindSpeedLowMediumHigh):
+        stored_data = await get_stored_data(self.hass, self.device.device_id)
+        mode = self.device.mode_value_to_enum_mapp.get(
+            self.device.data.work_mode, ModeEnum.AUTO
+        )
+        stored_data, need_save = safe_set_value(
+            stored_data, "fan_speed." + mode + ".value", value, overwrite_if_exists=True
+        )
+        if need_save:
+            await set_stored_data(self.hass, self.device.device_id, stored_data)
+
+        desired_state = self.desired_state_SELECT_DEHUMIDIFIER_WIND_SPEED_LOW_MEDIUM_HEIGH(value)
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
         )
@@ -802,6 +834,19 @@ async def async_setup_entry(
                     device=device,
                     deviceFeature=DeviceFeatureEnum.SELECT_WINDOW_AS_WIND_SPEED,
                     type="WindowAcWindSpeed",
+                    name="Wind Speed",
+                    icon_fn=lambda device: "mdi:weather-windy",
+                )
+            )
+
+        if DeviceFeatureEnum.SELECT_DEHUMIDIFIER_WIND_SPEED_LOW_MEDIUM_HEIGH in device.supported_features:
+            switches.append(
+                SelectHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.SELECT_DEHUMIDIFIER_WIND_SPEED_LOW_MEDIUM_HEIGH,
+                    type="Dehumidifier.WindSpeed.LowMediumHeigh",
                     name="Wind Speed",
                     icon_fn=lambda device: "mdi:weather-windy",
                 )

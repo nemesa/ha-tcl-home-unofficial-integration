@@ -40,6 +40,7 @@ class DeviceFeatureEnum(StrEnum):
     SWITCH_SOFT_WIND = "switch.softWind"
     SWITCH_FRESH_AIR = "switch.freshAir"
     SELECT_MODE = "select.mode"
+    SELECT_DEHUMIDIFIER_WIND_SPEED_LOW_MEDIUM_HEIGH = "select.dehumidifier.windSpeed.lowMediumHigh"
     SELECT_WIND_SPEED = "select.windSpeed"
     SELECT_WIND_SPEED_7_GEAR = "select.windSpeed7Gear"
     SELECT_WIND_FEELING = "select.windFeeling"
@@ -217,7 +218,7 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE,
                 DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON,
             ]
-        case DeviceTypeEnum.DEHUMIDIFIER:
+        case DeviceTypeEnum.DEHUMIDIFIER_DEM:
             return [
                 DeviceFeatureEnum.INTERNAL_IS_DEHUMIDIFIER,
                 DeviceFeatureEnum.MODE_DEHUMIDIFIER_DRY,
@@ -230,6 +231,22 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.SENSOR_DEHUMIDIFIER_ENV_HUMIDITY,
                 DeviceFeatureEnum.SENSOR_DEHUMIDIFIER_WATER_BUCKET_FULL,
                 DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_HUMIDITY_BY_MODE,
+                DeviceFeatureEnum.DIAGNOSIC_ERROR_CODES,
+                DeviceFeatureEnum.HUMIDIFIER,
+            ]
+        case DeviceTypeEnum.DEHUMIDIFIER_DF:
+            return [
+                DeviceFeatureEnum.INTERNAL_IS_DEHUMIDIFIER,
+                DeviceFeatureEnum.MODE_DEHUMIDIFIER_DRY,
+                DeviceFeatureEnum.MODE_DEHUMIDIFIER_COMFORT,
+                DeviceFeatureEnum.SWITCH_POWER,
+                DeviceFeatureEnum.SELECT_MODE,
+                DeviceFeatureEnum.SELECT_DEHUMIDIFIER_WIND_SPEED_LOW_MEDIUM_HEIGH,
+                DeviceFeatureEnum.NUMBER_DEHUMIDIFIER_HUMIDITY,
+                DeviceFeatureEnum.SENSOR_DEHUMIDIFIER_ENV_HUMIDITY,
+                #DeviceFeatureEnum.SENSOR_DEHUMIDIFIER_WATER_BUCKET_FULL,
+                DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_HUMIDITY_BY_MODE,
+                DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE,
                 DeviceFeatureEnum.DIAGNOSIC_ERROR_CODES,
                 DeviceFeatureEnum.HUMIDIFIER,
             ]

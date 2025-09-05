@@ -1,6 +1,6 @@
-"""Demo platform that offers a fake humidifier device."""
+"""."""
 
-from __future__ import annotations
+import logging
 
 from typing import Any
 
@@ -24,6 +24,12 @@ from .number import DesiredStateHandlerForNumber
 from .switch import DesiredStateHandlerForSwitch
 from .select import DesiredStateHandlerForSelect
 
+_LOGGER = logging.getLogger(__name__)
+
+
+def get_current_mode_fn(device: Device) -> str:    
+    return device.mode_value_to_enum_mapp.get(device.data.work_mode, DehumidifierModeEnum.DRY)
+
 async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: New_NameConfigEntry,
@@ -46,6 +52,7 @@ async def async_setup_entry(
                     power_switch_feature=DeviceFeatureEnum.SWITCH_POWER,
                     humidity_set_feature=DeviceFeatureEnum.NUMBER_DEHUMIDIFIER_HUMIDITY,
                     is_on_fn=lambda device: device.data.power_switch==1,
+                    current_mode_fn= lambda device: get_current_mode_fn(device),
                     current_humidity_fn=lambda device: device.data.env_humidity,
                     target_humidity_fn=lambda device: device.data.humidity,
                     options_mode=[map_mode_to_humidifier_mode(e) for e in device.get_supported_modes()],
@@ -68,7 +75,6 @@ MODE_AUTO = "auto"
 MODE_BABY = "baby"
 
     """
-    
     match mode:
         case DehumidifierModeEnum.DRY:
             return "normal"
@@ -152,7 +158,8 @@ class DeHumidifierHandler(TclEntityBase, HumidifierEntity):
             self._attr_supported_features |= HumidifierEntityFeature.MODES            
             self._attr_available_modes = options_mode
         
-        self._attr_mode = map_humidifier_mode_to_tcl_mode(self.current_mode_fn(device))            
+        
+        self._attr_mode = map_mode_to_humidifier_mode(self.current_mode_fn(device))
         self._attr_target_humidity =self.target_humidity_fn(device)
         self._attr_current_humidity = self.current_humidity_fn(device)        
         self._attr_device_class = HumidifierDeviceClass.DEHUMIDIFIER

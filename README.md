@@ -10,6 +10,7 @@
 - Portable AC
 - Window AC
 - Dehumidifier (DEM)
+- Dehumidifier (DF)
 
 ## Notes by device types
 

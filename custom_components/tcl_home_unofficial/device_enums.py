@@ -326,3 +326,19 @@ def getGeneratorMode(generator_mode: int) -> GeneratorModeEnum:
             return GeneratorModeEnum.L3
         case 0:
             return GeneratorModeEnum.NONE
+
+class WindSpeedLowMediumHigh(StrEnum):
+    LOW = "Low"
+    MEDIUM = "Medium"
+    HIGH = "High"
+
+
+def getWindSpeedLowMediumHigh(windSpeed: int) -> GeneratorModeEnum:
+    match windSpeed:
+        case 0:
+            return WindSpeedLowMediumHigh.LOW
+        case 1:
+            return WindSpeedLowMediumHigh.MEDIUM
+        case 2:
+            return WindSpeedLowMediumHigh.HIGH
+    return GeneratorModeEnum.LOW

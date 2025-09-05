@@ -1,0 +1,50 @@
+************************************
+Tcl_thing
+{
+  "device_id": "******1",
+  "product_key": "geBEo11zghKClWae",
+  "platform": "TCLIOT",
+  "nick_name": "Basement Dehumidifier",
+  "device_name": "Dehumidifier DF",
+  "category": "DH",
+  "type": 2,
+  "device_type": "",
+  "firmware_version": "V8-R82CT20-WFMV205.5.1.21",
+  "net_type": 1,
+  "is_online": 1,
+  "room": "Basement"
+}
+************************************
+aws_things
+--------------------------------
+******1
+--------------------------------
+{
+  "Humidity": 60,
+  "authFlag": {
+    "google": true
+  },
+  "capabilities": [
+    0
+  ],
+  "envHumidity": 54,
+  "errorCode": [],
+  "faultReportEvent": {
+    "errorCode": []
+  },
+  "powerSwitch": 1,
+  "waterPumpSwitch": 0,
+  "windSpeed": 2,
+  "workMode": 0
+}
+************************************
+
+LOW    "windSpeed": 0,
+MEDIUM "windSpeed": 1,
+HIGH   "windSpeed": 2,
+
+
+DRY "workMode": 0,
+COMFORT "workMode": 2,
+
+
