@@ -41,6 +41,8 @@ class TCL_SplitAC_Fresh_Air_DeviceData:
         self.external_unit_exhaust_temperature  = float(try_get_value(delta, aws_thing_state, "externalUnitExhaustTemperature", -1))
         self.lower_temperature_limit            = int(try_get_value(delta, aws_thing_state, "lowerTemperatureLimit", 16))
         self.upper_temperature_limit            = int(try_get_value(delta, aws_thing_state, "upperTemperatureLimit", 31))
+        self.tvoc_level                         = int(try_get_value(delta, aws_thing_state, "sensorTVOC", {"level":-1, "value":0.1}).get("level", -1))
+        self.tvoc_value                         = float(try_get_value(delta, aws_thing_state, "sensorTVOC", {"level":-1, "value":0.1}).get("value", 0.1))
 
     device_id: str
     power_switch: int | bool
@@ -69,6 +71,8 @@ class TCL_SplitAC_Fresh_Air_DeviceData:
     light_sense: int
     upper_temperature_limit: int
     lower_temperature_limit: int
+    tvoc_level: int
+    tvoc_value: float
 
 
 async def get_stored_spit_ac_fresh_data(

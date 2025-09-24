@@ -26,6 +26,7 @@ class DeviceFeatureEnum(StrEnum):
     SENSOR_EXTERNAL_UNIT_COIL_TEMPERATURE = "sensor.external_unit_coil_temperature"
     SENSOR_EXTERNAL_UNIT_TEMPERATURE = "sensor.external_unit_temperature"
     SENSOR_EXTERNAL_UNIT_EXHAUST_TEMPERATURE = "sensor.external_unit_exhaust_temperature"
+    SENSOR_FRESH_AIR_TVOC = "sensor.fresh_air.TVOC"
     SWITCH_POWER = "switch.powerSwitch"
     SWITCH_BEEP = "switch.beepSwitch"
     SWITCH_ECO = "switch.eco"
@@ -158,7 +159,7 @@ def getSupportedFeatures(
 
             return features
         case DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
-            return [
+            features = [
                 DeviceFeatureEnum.INTERNAL_IS_AC,
                 DeviceFeatureEnum.MODE_AC_AUTO,
                 DeviceFeatureEnum.MODE_AC_COOL,
@@ -195,6 +196,10 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE,
                 DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON,
             ]
+            
+            if has_property(aws_thing_state_reported, "sensorTVOC"):
+                features.append(DeviceFeatureEnum.SENSOR_FRESH_AIR_TVOC)
+            return features
         case DeviceTypeEnum.WINDOW_AC:
             return [
                 DeviceFeatureEnum.INTERNAL_IS_AC,

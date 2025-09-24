@@ -102,7 +102,9 @@ async def async_setup_entry(
             aws_thing=aws_thing,
             device_storage=storage,
         )
-        
+        if configData.verbose_setup_logging:
+            _LOGGER.info("_init_.device:%s", device.print_data())
+            
         if device.device_type is not None:
             if configData.verbose_setup_logging:
                 _LOGGER.info("Setup.async_setup_entry found device:%s", device)

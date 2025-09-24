@@ -97,6 +97,27 @@ async def async_setup_entry(
                 )
             )
 
+        if DeviceFeatureEnum.SENSOR_FRESH_AIR_TVOC in device.supported_features:
+            sensors.append(
+                VolatileOrganicCompoundsSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="TVOC.Value",
+                    name="TVOC Value",
+                    value_fn=lambda device: device.data.tvoc_value,
+                )
+            )
+            sensors.append(
+                IntNumberSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="TVOC.Level",
+                    name="TVOC Level",
+                    native_unit_of_measurement="",
+                    value_fn=lambda device: device.data.tvoc_level,
+                )
+            )
+
     async_add_entities(sensors)
 
 
@@ -154,6 +175,85 @@ class HumiditySensor(TclEntityBase, SensorEntity):
     @property
     def native_unit_of_measurement(self) -> str | None:
         return PERCENTAGE
+
+    @property
+    def state_class(self) -> str | None:
+        return SensorStateClass.MEASUREMENT
+
+
+class VolatileOrganicCompoundsSensor(TclEntityBase, SensorEntity):
+    def __init__(
+        self,
+        coordinator: IotDeviceCoordinator,
+        device: Device,
+        type: str,
+        name: str,
+        value_fn,
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, type, name, device)
+        self.value_fn = value_fn
+        
+        self.CONCENTRATION_MICROGRAMS_PER_CUBIC_METER = "µg/m³"
+        self.CONCENTRATION_MILLIGRAMS_PER_CUBIC_METER = "mg/m³"
+        self.CONCENTRATION_MICROGRAMS_PER_CUBIC_FOOT = "μg/ft³"
+        self.CONCENTRATION_PARTS_PER_CUBIC_METER = "p/m³"
+        self.CONCENTRATION_PARTS_PER_MILLION = "ppm"
+        self.CONCENTRATION_PARTS_PER_BILLION = "ppb"
+
+    @property
+    def device_class(self) -> str:
+        return SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS
+
+    @property
+    def native_value(self) -> int | float:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        return float(self.value_fn(self.device))
+
+    @property
+    def native_unit_of_measurement(self) -> str | None:
+        #??? don't know the unit of measurement we only know the value
+        return self.CONCENTRATION_PARTS_PER_MILLION
+
+    @property
+    def state_class(self) -> str | None:
+        return SensorStateClass.MEASUREMENT
+    
+    @property
+    def icon(self):
+        return "mdi:dots-hexagon"
+
+
+class IntNumberSensor(TclEntityBase, SensorEntity):
+    def __init__(
+        self,
+        coordinator: IotDeviceCoordinator,
+        device: Device,
+        type: str,
+        name: str,
+        value_fn,
+        native_unit_of_measurement: str,
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, type, name, device)
+        self.value_fn = value_fn
+        self.input_native_unit_of_measurement=native_unit_of_measurement
+
+    @property
+    def icon(self):
+        return "mdi:dots-hexagon"
+    
+    @property
+    def device_class(self) -> str:
+        return SensorDeviceClass.DATA_SIZE
+
+    @property
+    def native_value(self) -> int | float:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        return int(self.value_fn(self.device))
+
+    @property
+    def native_unit_of_measurement(self) -> str | None:
+        #??? don't know the unit of measurement we only know the value
+        return self.input_native_unit_of_measurement
 
     @property
     def state_class(self) -> str | None:
