@@ -1,0 +1,103 @@
+{
+          "deviceId": "**************",
+          "reported": {
+            "beepSwitch": 1,
+            "workMode": 4,
+            "powerSwitch": 1,
+            "screen": 1,
+            "targetTemperature": 24.0,
+            "windSpeed": 0,
+            "antiMoldew": 0,
+            "healthy": 0,
+            "acType": 1,
+            "capabilities": [3,7,8,9,11,12,13,21],
+            "constantTemp": 26,
+            "ECO": 1,
+            "turbo": 0,
+            "PTC": 0,
+            "3DAirSurply": 0,
+            "horizontalSwitch": 0,
+            "verticalSwitch": 0,
+            "selfLearn": 0,
+            "infrDirect": 0,
+            "temperatureType": 0,
+            "sleep": 0,
+            "eightAddHot": 0,
+            "highTemperatureWind": 0,
+            "feelTheWind": 0,
+            "LRWideAngleFreeze": 0,
+            "advancedECOMode": 0,
+            "silenceSwitch": 0,
+            "errorCode": [],
+            "generatorMode": 0,
+            "horizontalWind": 0,
+            "verticalWind": 0,
+            "lightSense": 0,
+            "filterBlockStatus": 0,
+            "filterBlockSwitch": 0,
+            "selfClean": 0,
+            "softWind": 0,
+            "verticalDirection": 13,
+            "horizontalDirection": 9,
+            "targetElectric": 0,
+            "rightHorizontalDirection": 14,
+            "rightHorizontalSwitch": 0,
+            "rightWindSpeed": 0,
+            "temperatureHumidityControlling": 0,
+            "constTemperatureDehumidification": 0,
+            "aiFunction": 0,
+            "rightTurbo": 0,
+            "rightSilenceSwitch": 0,
+            "infrPower": 0,
+            "twoTemperature": 0,
+            "polarityFreeze": 0,
+            "surroundWind": 0,
+            "twoTemperatureSkew": 0,
+            "currentTemperature": 30,
+            "leftWindSpeed": 0,
+            "authFlag": {
+              "google": true
+            }
+          }
+
+
+tcl_things": [
+        {
+          "device_id": "*******************",
+          "product_key": "hbRqOkoXPsQGinKQ",
+          "platform": "TCLIOT",
+          "nick_name": "Miracle 2",
+          "device_name": "Split AC",
+          "category": "AC",
+          "type": 2,
+          "device_type": "",
+          "firmware_version": "V8-R820C01-LF1V045",
+          "net_type": 1,
+          "is_online": 1,
+          "room": "Living Room"
+        }
+
+              {
+                "deviceId": "**************",
+                "productKey": "hbRqOkoXPsQGinKQ",
+                "TSLVersion": "",
+                "plugInType": 1,
+                "packageName": "com.tcl.panel_smart_ac_overseas",
+                "plugInVersion": "3.0.5",
+                "plugInUrl": "https://eu-h5-prod.aws.tcljd.com/hbRqOkoXPsQGinKQ/android/3.0.5/release_android.zip",
+                "minSdkVersion": "5.4.1"
+              },
+            "probing_messages": [],
+            "data": {
+              "fan_speed_mapping": [
+                "FAN_SPEED_TURBO",
+                "FAN_SPEED_HIGH",
+                "FAN_SPEED_MEDIUM_FAST",
+                "FAN_SPEED_MEDIUM",
+                "FAN_SPEED_MEDIUM_LOW",
+                "FAN_SPEED_LOW",
+                "FAN_SPEED_MUTE",
+                "FAN_SPEED_AUTO"
+              ]
+            }
+          },

@@ -71,6 +71,7 @@ class DesiredStateHandlerForSelect:
         self.device = device
 
     async def call_select_option(self, value: str) -> str:
+        _LOGGER.info("SelectHandler.async_select_option: %s - %s", value,self.deviceFeature)
         match self.deviceFeature:
             case DeviceFeatureEnum.SELECT_SLEEP_MODE:
                 return await self.SELECT_SLEEP_MODE(value=value)
@@ -78,7 +79,7 @@ class DesiredStateHandlerForSelect:
                 return await self.SELECT_MODE(value=value)
             case DeviceFeatureEnum.SELECT_DEHUMIDIFIER_WIND_SPEED_LOW_MEDIUM_HEIGH:
                 return await self.SELECT_DEHUMIDIFIER_WIND_SPEED_LOW_MEDIUM_HEIGH(value=value)
-            case DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR:
+            case DeviceFeatureEnum.SELECT_WIND_SPEED:
                 return await self.SELECT_WIND_SPEED(value=value)
             case DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR:
                 return await self.SELECT_WIND_SPEED_7_GEAR(value=value)
@@ -1040,6 +1041,7 @@ class SelectHandler(TclEntityBase, SelectEntity):
         return self.iot_handler.current_state()
 
     async def async_select_option(self, option: str) -> None:
+        #_LOGGER.info("SelectHandler.async_select_option: %s", option)
         await self.iot_handler.call_select_option(option)
         await self.coordinator.async_refresh()
 
@@ -1079,4 +1081,4 @@ class DynamicSelectHandler(SelectHandler, SelectEntity):
     def available(self) -> bool:
         if self.device.is_online:
             return self.available_fn(self.device)
-        return False
+        return False   

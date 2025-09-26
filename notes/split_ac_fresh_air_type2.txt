@@ -1,0 +1,110 @@
+ {
+          "deviceId": "********",
+          "reported": {
+            "externalUnitVoltage": 95,
+            "powerSwitch": 1,
+            "targetTemperature": 22.0,
+            "currentTemperature": 26.3,
+            "temperatureType": 0,
+            "windSpeed7Gear": 0,
+            "verticalWind": 1,
+            "horizontalWind": 0,
+            "horizontalDirection": 11,
+            "verticalDirection": 2,
+            "workMode": 1,
+            "ECO": 0,
+            "selfClean": 0,
+            "screen": 1,
+            "lightSense": 1,
+            "sleep": 0,
+            "beepSwitch": 1,
+            "softWind": 0,
+            "antiMoldew": 0,
+            "generatorMode": 0,
+            "filterBlockStatus": 0,
+            "errorCode": [],
+            "internalUnitCoilTemperature": 24,
+            "internalUnitFanSpeed": 877,
+            "PTCStatus": 0,
+            "internalUnitFanCurrentGear": 2,
+            "externalUnitTemperature": 25,
+            "externalUnitCoilTemperature": 24,
+            "externalUnitExhaustTemperature": 25,
+            "externalUnitFanGear": 0,
+            "externalUnitFanSpeed": 0,
+            "compressorFrequency": 0,
+            "fourWayValveStatus": 0,
+            "externalUnitElectricCurrent": 0,
+            "expansionValve": 403,
+            "newWindSwitch": 1,
+            "lightSenserStatus": 0,
+            "newWindPercentage": 100,
+            "newWindAutoSwitch": 0,
+            "windSpeedPercentage": 0,
+            "windSpeedAutoSwitch": 1,
+            "selfCleanStatus": 6,
+            "FreshAirStatus": 0,
+            "sensorTVOC": {
+              "level": 2,
+              "value": 0.78
+            },
+            "newWindStrength": 3,
+            "newWindSetMode": 3,
+            "newWindRunMode": 3,
+            "newWindAntiCondensation": 0,
+            "authFlag": {
+              "alice": true
+            },
+            "beepTempEn": 1,
+            "highTemperatureWind": 0,
+            "turbo": 0,
+            "silenceSwitch": 0,
+            "windSpeed": 0
+          }
+        }
+
+
+"tcl": {
+      "things_response_code": 0,
+      "things_response_message": "SUCCESS",
+      "tcl_things": [
+        {
+          "device_id": "********",
+          "product_key": "********",
+          "platform": "TCLIOT",
+          "nick_name": "TCL",
+          "device_name": "Split AC Fresh air",
+          "category": "AC",
+          "type": 2,
+          "device_type": "",
+          "firmware_version": "V8-R82CT08-WFMV025.3.3.10",
+          "net_type": 1,
+          "is_online": 1,
+          "room": "Bedroom"
+        }
+      ]
+    },
+    "device_storages": [
+      {
+        "non_user_config": {
+          "native_temp_step": 0.5,
+          "rn_probe_data": {
+            "is_success": true,
+            "config_data": [
+              {
+                "deviceId": "******",
+                "productKey": "*******",
+                "TSLVersion": "",
+                "plugInType": 1,
+                "packageName": "com.tcl.panel_ac_p3_oversea",
+                "plugInVersion": "0.0.8",
+                "plugInUrl": "https://eu-h5-prod.aws.tcljd.com/1212012000N/android/0.0.8/release_android.zip",
+                "minSdkVersion": "5.4.1"
+              }
+            ],
+            "probing_messages": [],
+            "data": {
+              "fan_speed_mapping": null
+            }
+          }
+        },        
