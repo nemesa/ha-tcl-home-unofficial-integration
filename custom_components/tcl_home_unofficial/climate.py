@@ -84,8 +84,8 @@ def get_vertical_air_direction_feature(device: Device) -> str:
 
 
 def get_horizonta_air_direction_feature(device: Device) -> str:
-    if DeviceFeatureEnum.SELECT_VERTICAL_DIRECTION in device.supported_features:
-        return DeviceFeatureEnum.SELECT_VERTICAL_DIRECTION
+    if DeviceFeatureEnum.SELECT_HORIZONTAL_DIRECTION in device.supported_features:
+        return DeviceFeatureEnum.SELECT_HORIZONTAL_DIRECTION
     return None
 
 
