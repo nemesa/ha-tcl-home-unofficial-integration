@@ -212,7 +212,7 @@ class VolatileOrganicCompoundsSensor(TclEntityBase, SensorEntity):
     @property
     def native_unit_of_measurement(self) -> str | None:
         #??? don't know the unit of measurement we only know the value
-        return self.CONCENTRATION_PARTS_PER_MILLION
+        return ""
 
     @property
     def state_class(self) -> str | None:
