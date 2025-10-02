@@ -2,6 +2,37 @@ test data was puled at 2025.10.01 (Wendnesday)
 
 data is in KWh
 
+day:
+(on 20251002)
+getPowerData url:https://prod-sgp.aws.tcljd.com/v3/ac/***/power/consumption/info/?week=20250929-20250929
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "20250929-20250929",
+    "currStatisticsRes": {
+      "offlineElectricity": 0,
+      "date": "20250929-20250929",
+      "totalElectricity": 5.194181740492809,
+      "onlineElectricity": 5.194181740492809,
+      "aiElectricity": 0
+    },
+    "beforeStatisticsRes": {},
+    "consumptionDetails": [
+      {
+        "date": "2025-09-29",
+        "consumption": 5.194181740492809,
+        "aiConsumption": 0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
+}
+
+
+
 week
 https://prod-sgp.aws.tcljd.com/v3/ac/***/power/consumption/info/?week=20250928-20251004
 {
@@ -187,4 +218,105 @@ export const getPowerData = async (cloud_url: string, saasToken: string, deviceI
     if (r.status !== 200) throw new Error("b")
 
     return response as PowerConsumptionResponse
+}
+
+
+
+
+
+
+
+
+other
+getPowerData url:https://prod-sgp.aws.tcljd.com/v3/ac/***/power/consumption/info/?week=20250928-20250929
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "20250928-20250929",
+    "currStatisticsRes": {
+      "offlineElectricity": 0,
+      "date": "20250928-20250929",
+      "totalElectricity": 9.681448849678894,
+      "onlineElectricity": 9.681448849678894,
+      "aiElectricity": 0
+    },
+    "beforeStatisticsRes": {},
+    "consumptionDetails": [
+      {
+        "date": "2025-09-28",
+        "consumption": 4.487267109186084,
+        "aiConsumption": 0
+      },
+      {
+        "date": "2025-09-29",
+        "consumption": 5.194181740492809,
+        "aiConsumption": 0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
+}
+
+(on 20251002)
+getPowerData url:https://prod-sgp.aws.tcljd.com/v3/ac/***/power/consumption/info/?week=20251001-20251003
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "20251001-20251003",
+    "currStatisticsRes": {
+      "offlineElectricity": 0,
+      "date": "20251001-20251003",
+      "totalElectricity": 8.872509566538481,
+      "onlineElectricity": 8.872509566538481,
+      "aiElectricity": 0
+    },
+    "beforeStatisticsRes": {},
+    "consumptionDetails": [
+      {
+        "date": "2025-10-01",
+        "consumption": 4.348812135023501,
+        "aiConsumption": 0
+      },
+      {
+        "date": "2025-10-02",
+        "consumption": 4.52369743151498,
+        "aiConsumption": 0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
+}
+
+(on 20251002)
+getPowerData url:https://prod-sgp.aws.tcljd.com/v3/ac/***/power/consumption/info/?week=20251002-20251002
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "20251002-20251002",
+    "currStatisticsRes": {
+      "offlineElectricity": 0,
+      "date": "20251002-20251002",
+      "totalElectricity": 4.52369743151498,
+      "onlineElectricity": 4.52369743151498,
+      "aiElectricity": 0
+    },
+    "beforeStatisticsRes": {},
+    "consumptionDetails": [
+      {
+        "date": "2025-10-02",
+        "consumption": 4.52369743151498,
+        "aiConsumption": 0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
 }

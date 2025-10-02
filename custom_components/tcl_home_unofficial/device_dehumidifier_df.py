@@ -42,6 +42,9 @@ async def get_stored_dehumidifier_df_data(
         stored_data = {}
         need_save = True
     
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.has_power_consumption_data", True)
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.has_work_time_data", True)
+    
     stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.memorize_humidity_by_mode", False)
     stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.memorize_fan_speed_by_mode", False)
 

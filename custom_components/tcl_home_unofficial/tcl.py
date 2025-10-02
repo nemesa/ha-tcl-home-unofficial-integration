@@ -1,5 +1,4 @@
 """."""
-
 from dataclasses import dataclass
 import datetime
 import hashlib
@@ -26,6 +25,14 @@ def getValue(data: dict, keys: list[str]) -> str:
 
     return value
 
+def safeGetValue(data: dict, keys: list[str], defaultValue) -> str:
+    """Get value from dictionary with fallback."""
+    value = getValue(data, keys)
+    
+    if value is None:
+        value = defaultValue
+
+    return value
 
 @dataclass
 class DoAccountAuthResponseUser:
@@ -195,9 +202,10 @@ class GetAwsCredentialsResponse:
 @dataclass
 class GetWorkTimeResponseDataItem:
     def __init__(self, data: dict) -> None:
-        self.date = getValue(data, ["date"])
-        self.work_time = getValue(data, ["work_time", "workTime"])
-        self.ai_work_time = getValue(data, ["ai_work_time", "aiWorkTime"])
+        if data:
+            self.date = getValue(data, ["date"])
+            self.work_time = getValue(data, ["work_time", "workTime"])
+            self.ai_work_time = getValue(data, ["ai_work_time", "aiWorkTime"])
 
     date: str
     work_time: float
@@ -206,13 +214,14 @@ class GetWorkTimeResponseDataItem:
 @dataclass
 class GetWorkTimeResponseData:
     def __init__(self, data: dict) -> None:
-        self.device_id = getValue(data, ["device_id", "deviceId"])
-        self.date = getValue(data, ["date"])
-        self.time_zone = getValue(data, ["time_zone", "timeZone"])
-        self.time_offset = getValue(data, ["time_offset", "timeOffset"])
-        self.current_total_work_time = GetWorkTimeResponseDataItem(getValue(data, ["current_total_work_time","currentTotalWorkTime"]))
-        self.before_total_work_time = GetWorkTimeResponseDataItem(getValue(data, ["before_total_work_time","beforeTotalWorkTime"]))
-        self.work_time_details = [GetWorkTimeResponseDataItem(item) for item in getValue(data, ["work_time_details","workTimeDetails"])]
+        if data:
+            self.device_id = getValue(data, ["device_id", "deviceId"])
+            self.date = getValue(data, ["date"])
+            self.time_zone = getValue(data, ["time_zone", "timeZone"])
+            self.time_offset = getValue(data, ["time_offset", "timeOffset"])
+            self.current_total_work_time = GetWorkTimeResponseDataItem(safeGetValue(data, ["current_total_work_time","currentTotalWorkTime"],None))
+            self.before_total_work_time = GetWorkTimeResponseDataItem(safeGetValue(data, ["before_total_work_time","beforeTotalWorkTime"],None))
+            self.work_time_details = [GetWorkTimeResponseDataItem(item) for item in safeGetValue(data, ["work_time_details","workTimeDetails"],[])]
         
     device_id: str
     date: str
@@ -224,10 +233,10 @@ class GetWorkTimeResponseData:
     
 @dataclass
 class GetWorkTimeResponse:
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: dict) -> None:        
         self.code = getValue(data, ["code"])
         self.message = getValue(data, ["message"])
-        self.data = GetThingsResponseData(getValue(data, ["data"]))
+        self.data = GetWorkTimeResponseData(safeGetValue(data, ["data"],{}))
 
     code: int
     message: str
@@ -238,9 +247,10 @@ class GetWorkTimeResponse:
 @dataclass
 class GetEnergyConsumptioneResponseDataItem:
     def __init__(self, data: dict) -> None:
-        self.date = getValue(data, ["date"])
-        self.consumption = getValue(data, ["consumption"])
-        self.ai_consumption = getValue(data, ["ai_consumption", "aiConsumption"])
+        if data:
+            self.date = getValue(data, ["date"])
+            self.consumption = getValue(data, ["consumption"])
+            self.ai_consumption = getValue(data, ["ai_consumption", "aiConsumption"])
 
     date: str
     consumption: float
@@ -249,11 +259,12 @@ class GetEnergyConsumptioneResponseDataItem:
 @dataclass
 class GetEnergyConsumptioneResponseDataResult:
     def __init__(self, data: dict) -> None:
-        self.date = getValue(data, ["date"])
-        self.offline_electricity = getValue(data, ["offline_electricity", "offlineElectricity"])
-        self.total_electricity = getValue(data, ["total_electricity", "totalElectricity"])
-        self.online_electricity = getValue(data, ["online_electricity", "onlineElectricity"])
-        self.ai_electricity = getValue(data, ["ai_electricity", "aiElectricity"])
+        if data:
+            self.date = getValue(data, ["date"])
+            self.offline_electricity = getValue(data, ["offline_electricity", "offlineElectricity"])
+            self.total_electricity = getValue(data, ["total_electricity", "totalElectricity"])
+            self.online_electricity = getValue(data, ["online_electricity", "onlineElectricity"])
+            self.ai_electricity = getValue(data, ["ai_electricity", "aiElectricity"])
 
     date: str
     offline_electricity: float
@@ -264,14 +275,14 @@ class GetEnergyConsumptioneResponseDataResult:
 
 @dataclass
 class GetEnergyConsumptioneResponseData:
-    def __init__(self, data: dict) -> None:
+    def __init__(self, data: dict) -> None:    
         self.device_id = getValue(data, ["device_id", "deviceId"])
         self.date = getValue(data, ["date"])
         self.time_zone = getValue(data, ["time_zone", "timeZone"])
         self.time_offset = getValue(data, ["time_offset", "timeOffset"])
-        self.curr_statistics_res = GetEnergyConsumptioneResponseDataResult(getValue(data, ["curr_statistics_res","currStatisticsRes"]))
-        self.before_statistics_res = GetEnergyConsumptioneResponseDataResult(getValue(data, ["before_statistics_res","beforeStatisticsRes"]))
-        self.consumption_details = [GetEnergyConsumptioneResponseDataItem(item) for item in getValue(data, ["consumption_details","consumptionDetails"])]
+        self.curr_statistics_res = GetEnergyConsumptioneResponseDataResult(safeGetValue(data, ["curr_statistics_res","currStatisticsRes"],None))
+        self.before_statistics_res = GetEnergyConsumptioneResponseDataResult(safeGetValue(data, ["before_statistics_res","beforeStatisticsRes"],None))
+        self.consumption_details = [GetEnergyConsumptioneResponseDataItem(item) for item in safeGetValue(data, ["consumption_details","consumptionDetails"],[])]
         
     device_id: str
     date: str
@@ -286,7 +297,7 @@ class GetEnergyConsumptioneResponse:
     def __init__(self, data: dict) -> None:
         self.code = getValue(data, ["code"])
         self.message = getValue(data, ["message"])
-        self.data = GetEnergyConsumptioneResponseData(getValue(data, ["data"]))
+        self.data = GetEnergyConsumptioneResponseData(safeGetValue(data, ["data"],{}))
 
     code: int
     message: str
@@ -696,3 +707,7 @@ def check_if_expired(exp) -> bool:
     now = datetime.datetime.now().timestamp()
     is_expired = exp < now
     return is_expired
+
+def get_today_for_filer() -> str:
+    """Get today's date filter in YYYYMMDD format."""
+    return datetime.datetime.now().strftime("%Y%m%d")

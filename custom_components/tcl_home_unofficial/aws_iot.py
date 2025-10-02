@@ -13,7 +13,7 @@ from homeassistant.core import HomeAssistant
 from .config_entry import New_NameConfigEntry
 from .data_storage import get_stored_data
 from .session_manager import SessionManager
-from .tcl import GetThingsResponse, get_things
+from .tcl import GetThingsResponse, GetWorkTimeResponse,GetEnergyConsumptioneResponse, get_things,get_energy_consumption, get_work_time, get_today_for_filer
 from .fakes_for_debug import aws_iot_get_all_things, aws_iot_get_thing
 
 _LOGGER = logging.getLogger(__name__)
@@ -84,6 +84,51 @@ class AwsIot:
         )
 
         return things
+    
+    async def get_energy_consumption(self,device_id: str) -> GetEnergyConsumptioneResponse:
+        if self.session_manager.is_verbose_device_logging():
+            _LOGGER.info("AwsIot.get_energy_consumption")  
+        if self.use_fakes:
+            _LOGGER.warning("AwsIot.get_energy_consumption.FAKES_ENABLED")            
+            return GetEnergyConsumptioneResponse({"code":10003,"message":"FAKES_ENABLED","data":{}})
+        refreshTokensResult = await self.session_manager.async_refresh_tokens()
+        saas_token = refreshTokensResult.data.saas_token
+
+        clud_urls = await self.session_manager.async_aws_cloud_urls()
+
+        response = await get_energy_consumption(
+            hass=self.hass,
+            device_url=clud_urls.data.device_url,
+            saas_token=saas_token,
+            deviceId=device_id,
+            date_filter= f"?week={get_today_for_filer()}-{get_today_for_filer()}",
+            verbose_logging=self.session_manager.is_verbose_device_logging(),
+        )
+
+        return response
+
+    
+    async def get_work_time(self,device_id: str) -> GetWorkTimeResponse:
+        if self.session_manager.is_verbose_device_logging():
+            _LOGGER.info("AwsIot.get_work_time")
+        if self.use_fakes:
+            _LOGGER.warning("AwsIot.get_work_time.FAKES_ENABLED")            
+            return GetWorkTimeResponse({"code":10003,"message":"FAKES_ENABLED","data":{}})               
+        refreshTokensResult = await self.session_manager.async_refresh_tokens()
+        saas_token = refreshTokensResult.data.saas_token
+
+        clud_urls = await self.session_manager.async_aws_cloud_urls()
+
+        response = await get_work_time(
+            hass=self.hass,
+            device_url=clud_urls.data.device_url,
+            saas_token=saas_token,
+            deviceId=device_id,
+            date_filter= f"?week={get_today_for_filer()}-{get_today_for_filer()}",
+            verbose_logging=self.session_manager.is_verbose_device_logging(),
+        )
+
+        return response
 
     async def execute_and_re_try_call_with_device_id(
         self,
