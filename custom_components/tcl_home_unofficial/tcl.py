@@ -192,6 +192,106 @@ class GetAwsCredentialsResponse:
     Credentials: GetAwsCredentialsResponseCredentials
 
 
+@dataclass
+class GetWorkTimeResponseDataItem:
+    def __init__(self, data: dict) -> None:
+        self.date = getValue(data, ["date"])
+        self.work_time = getValue(data, ["work_time", "workTime"])
+        self.ai_work_time = getValue(data, ["ai_work_time", "aiWorkTime"])
+
+    date: str
+    work_time: float
+    ai_work_time: float
+
+@dataclass
+class GetWorkTimeResponseData:
+    def __init__(self, data: dict) -> None:
+        self.device_id = getValue(data, ["device_id", "deviceId"])
+        self.date = getValue(data, ["date"])
+        self.time_zone = getValue(data, ["time_zone", "timeZone"])
+        self.time_offset = getValue(data, ["time_offset", "timeOffset"])
+        self.current_total_work_time = GetWorkTimeResponseDataItem(getValue(data, ["current_total_work_time","currentTotalWorkTime"]))
+        self.before_total_work_time = GetWorkTimeResponseDataItem(getValue(data, ["before_total_work_time","beforeTotalWorkTime"]))
+        self.work_time_details = [GetWorkTimeResponseDataItem(item) for item in getValue(data, ["work_time_details","workTimeDetails"])]
+        
+    device_id: str
+    date: str
+    time_zone: str
+    time_offset: str
+    current_total_work_time: GetWorkTimeResponseDataItem
+    before_total_work_time: GetWorkTimeResponseDataItem
+    work_time_details: list[GetWorkTimeResponseDataItem]
+    
+@dataclass
+class GetWorkTimeResponse:
+    def __init__(self, data: dict) -> None:
+        self.code = getValue(data, ["code"])
+        self.message = getValue(data, ["message"])
+        self.data = GetThingsResponseData(getValue(data, ["data"]))
+
+    code: int
+    message: str
+    data: GetWorkTimeResponseData
+    
+
+
+@dataclass
+class GetEnergyConsumptioneResponseDataItem:
+    def __init__(self, data: dict) -> None:
+        self.date = getValue(data, ["date"])
+        self.consumption = getValue(data, ["consumption"])
+        self.ai_consumption = getValue(data, ["ai_consumption", "aiConsumption"])
+
+    date: str
+    consumption: float
+    ai_consumption: float
+
+@dataclass
+class GetEnergyConsumptioneResponseDataResult:
+    def __init__(self, data: dict) -> None:
+        self.date = getValue(data, ["date"])
+        self.offline_electricity = getValue(data, ["offline_electricity", "offlineElectricity"])
+        self.total_electricity = getValue(data, ["total_electricity", "totalElectricity"])
+        self.online_electricity = getValue(data, ["online_electricity", "onlineElectricity"])
+        self.ai_electricity = getValue(data, ["ai_electricity", "aiElectricity"])
+
+    date: str
+    offline_electricity: float
+    total_electricity: float
+    online_electricity: float
+    ai_electricity: float
+
+
+@dataclass
+class GetEnergyConsumptioneResponseData:
+    def __init__(self, data: dict) -> None:
+        self.device_id = getValue(data, ["device_id", "deviceId"])
+        self.date = getValue(data, ["date"])
+        self.time_zone = getValue(data, ["time_zone", "timeZone"])
+        self.time_offset = getValue(data, ["time_offset", "timeOffset"])
+        self.curr_statistics_res = GetEnergyConsumptioneResponseDataResult(getValue(data, ["curr_statistics_res","currStatisticsRes"]))
+        self.before_statistics_res = GetEnergyConsumptioneResponseDataResult(getValue(data, ["before_statistics_res","beforeStatisticsRes"]))
+        self.consumption_details = [GetEnergyConsumptioneResponseDataItem(item) for item in getValue(data, ["consumption_details","consumptionDetails"])]
+        
+    device_id: str
+    date: str
+    time_zone: str
+    time_offset: str
+    curr_statistics_res: GetEnergyConsumptioneResponseDataResult
+    before_statistics_res: GetEnergyConsumptioneResponseDataResult
+    work_time_details: list[GetEnergyConsumptioneResponseDataItem]
+    
+@dataclass
+class GetEnergyConsumptioneResponse:
+    def __init__(self, data: dict) -> None:
+        self.code = getValue(data, ["code"])
+        self.message = getValue(data, ["message"])
+        self.data = GetEnergyConsumptioneResponseData(getValue(data, ["data"]))
+
+    code: int
+    message: str
+    data: GetEnergyConsumptioneResponseData    
+
 async def do_account_auth(
     hass: HomeAssistant,
     username: str,
@@ -372,6 +472,104 @@ async def get_things(
         _LOGGER.info("TCL-Service.get_things response: %s", response_obj)
     return GetThingsResponse(response_obj)
 
+
+
+
+async def get_work_time(
+    hass: HomeAssistant,
+    device_url: str,
+    saas_token: str,
+    deviceId: str,
+    date_filter: str,
+    verbose_logging: bool = False,
+) -> GetWorkTimeResponse:
+    """
+    date filter samples: 
+        week:  ?week=20250928-20251004
+        month: /2025/10
+        year:  /2025
+        
+    """
+    url = f"{device_url}//v3/ac/{deviceId}/work-time/info{date_filter}"
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.get_work_time: %s", url)
+    timestamp = str(int(time.time() * 1000))
+    nonce = "".join(
+        random.choices(string.ascii_lowercase + string.digits, k=16)
+    )  # similar to Math.random().toString(36)
+    sign = calculate_md5_hash_bytes(timestamp + nonce + saas_token)
+
+    headers = {
+        "accept-encoding": "gzip",
+        "accept-language": "en",
+        "accesstoken": saas_token,
+        "appversion": "5.4.1",
+        "user-agent": "Android",
+        "timestamp": timestamp,
+        "nonce": nonce,
+        "sign": sign,
+        "platform": "android"
+    }    
+
+    httpx_client = get_async_client(hass)
+
+    response = await httpx_client.post(url, json={}, headers=headers)
+    if response.status_code != 200:
+        raise Exception("Error at get_work_time: " + response.text)
+    response_obj = response.json()
+    # _LOGGER.info("TCL-Service.get_work_time: %s", response_obj)
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.get_work_time response: %s", response_obj)
+    return GetWorkTimeResponse(response_obj)
+
+
+
+async def get_energy_consumption(
+    hass: HomeAssistant,
+    device_url: str,
+    saas_token: str,
+    deviceId: str,
+    date_filter: str,
+    verbose_logging: bool = False,
+) -> GetWorkTimeResponse:
+    """
+    date filter samples: 
+        week:  ?week=20250928-20251004
+        month: /2025/10
+        year:  /2025
+        
+    """
+    url = f"{device_url}//v3/ac/{deviceId}/power/consumption/info/{date_filter}"
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.get_energy_consumption: %s", url)
+    timestamp = str(int(time.time() * 1000))
+    nonce = "".join(
+        random.choices(string.ascii_lowercase + string.digits, k=16)
+    )  # similar to Math.random().toString(36)
+    sign = calculate_md5_hash_bytes(timestamp + nonce + saas_token)
+
+    headers = {
+        "accept-encoding": "gzip",
+        "accept-language": "en",
+        "accesstoken": saas_token,
+        "appversion": "5.4.1",
+        "user-agent": "Android",
+        "timestamp": timestamp,
+        "nonce": nonce,
+        "sign": sign,
+        "platform": "android"
+    }    
+
+    httpx_client = get_async_client(hass)
+
+    response = await httpx_client.post(url, json={}, headers=headers)
+    if response.status_code != 200:
+        raise Exception("Error at get_energy_consumption: " + response.text)
+    response_obj = response.json()
+    # _LOGGER.info("TCL-Service.get_energy_consumption: %s", response_obj)
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.get_energy_consumption response: %s", response_obj)
+    return GetWorkTimeResponse(response_obj)
 
 @dataclass
 class ConfigGetResponse:
