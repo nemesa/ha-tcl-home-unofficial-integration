@@ -99,27 +99,29 @@ async def async_setup_entry(
         )
         storage_data = await store_rn_prode_data(hass, device_id, probe_result)
         
-        power_consumption_data_enabled= safe_get_value(storage_data, "non_user_config.power_consumption.enabled", True)
+        power_consumption_init_done= safe_get_value(storage_data, "non_user_config.power_consumption.init_done", False)
         if configData.verbose_setup_logging:
-            _LOGGER.info("_init_.power_consumption_data_enabled - %s",power_consumption_data_enabled)
-        if power_consumption_data_enabled:
+            _LOGGER.info("_init_.power_consumption_init_done - %s",power_consumption_init_done)
+        if not power_consumption_init_done:
             response = await aws_iot.get_last_two_today_energy_consumption(device_id)
             if configData.verbose_setup_logging:
-                _LOGGER.info("_init_.power_consumption_data_enabled check - %s",response.message)
+                _LOGGER.info("_init_.power_consumption check - %s",response.message)
                         
+            storage_data, need_save = safe_set_value(storage_data, "non_user_config.power_consumption.init_done", True,True)
             storage_data, need_save = safe_set_value(storage_data, "non_user_config.power_consumption.enabled", True if response.code==0 else False, True)
             if need_save:
                 storage_data=await set_stored_data(hass, device_id, storage_data)
             
         
-        work_time_data_enabled= safe_get_value(storage_data, "non_user_config.work_time.enabled", True)
+        work_time_init_done= safe_get_value(storage_data, "non_user_config.work_time.init_done", False)
         if configData.verbose_setup_logging:
-            _LOGGER.info("_init_.work_time_data_enabled - %s",work_time_data_enabled)
-        if work_time_data_enabled:
+            _LOGGER.info("_init_.work_time_init_done - %s",work_time_init_done)
+        if not work_time_init_done:
             response = await aws_iot.get_last_two_today_work_time(device_id)
             if configData.verbose_setup_logging:
                 _LOGGER.info("_init_.work_time_data_enabled check - %s",response.message)
                 
+            storage_data, need_save = safe_set_value(storage_data, "non_user_config.work_time.init_done", True,True)
             storage_data, need_save = safe_set_value(storage_data, "non_user_config.work_time.enabled", True if response.code==0 else False, True)
             if need_save:
                 storage_data= await set_stored_data(hass, device_id, storage_data)

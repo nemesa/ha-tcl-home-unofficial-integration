@@ -150,8 +150,9 @@ class AwsIot:
         if power_consumption_data_enabled:
             power_consumption_polling_interval= safe_get_value(device_storage, "non_user_config.power_consumption.polling_interval_in_minutes", 60)
             power_consumption_last_time= safe_get_value(device_storage, "non_user_config.power_consumption.last_response.timestamp", 1759400000)
-            response= safe_get_value(device_storage, "non_user_config.power_consumption.last_response.data", {"code":-1})
-            if int(now_timestamp-power_consumption_last_time/60)>=power_consumption_polling_interval:
+            response= GetEnergyConsumptioneResponse(safe_get_value(device_storage, "non_user_config.power_consumption.last_response.data", {"code":-1,"message":"NO_DATA","data":{}}))
+            delta=int((now_timestamp-power_consumption_last_time)/60)            
+            if delta>=power_consumption_polling_interval:
                 response = await self.get_last_two_today_energy_consumption(device_id)
                 if response.code==0:                        
                     stored_data, need_save = safe_set_value(stored_data, "non_user_config.power_consumption.last_response.timestamp", now_timestamp, True)
@@ -161,7 +162,7 @@ class AwsIot:
                     if day.date==get_day_for_data():
                         today_total_electricity=day.consumption
                     if day.date==get_day_for_data(-1):
-                        yesterday_total_electricity=day.consumption                              
+                        yesterday_total_electricity=day.consumption
 
         today_work_time=0
         yesterday_work_time=0
@@ -169,12 +170,13 @@ class AwsIot:
         if work_time_data_enabled:
             work_time_polling_interval= safe_get_value(device_storage, "non_user_config.work_time.polling_interval_in_minutes", 60)
             work_time_last_time= safe_get_value(device_storage, "non_user_config.work_time.last_response.timestamp", 1759400000)
-            response= safe_get_value(device_storage, "non_user_config.work_time.last_response.data", {"code":-1})
-            if int(now_timestamp-work_time_last_time/60)>=work_time_polling_interval:
+            response= GetWorkTimeResponse(safe_get_value(device_storage, "non_user_config.work_time.last_response.data", {"code":-1,"message":"NO_DATA","data":{}}))
+            delta=int((now_timestamp-work_time_last_time)/60)            
+            if delta>=work_time_polling_interval:
                 response = await self.get_last_two_today_work_time(device_id)
                 if response.code==0:
                     stored_data, need_save = safe_set_value(stored_data, "non_user_config.work_time.last_response.timestamp", now_timestamp, True)
-                    stored_data, need_save = safe_set_value(stored_data, "non_user_config.work_time.last_response.data", response, True)  
+                    stored_data, need_save = safe_set_value(stored_data, "non_user_config.work_time.last_response.data", response, True)              
             if response.code==0:    
                 for day in response.data.work_time_details:
                     if day.date==get_day_for_data():

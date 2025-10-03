@@ -552,9 +552,8 @@ async def get_energy_consumption(
     """
     url = f"{device_url}/v3/ac/{deviceId}/power/consumption/info/{date_filter}"
     if verbose_logging:
-        _LOGGER.info("TCL-Service.get_energy_consumption: %s", url)
-        
-    #_LOGGER.info("TCL-Service.get_energy_consumption: %s", url)
+        _LOGGER.info("TCL-Service.get_energy_consumption: %s", url)        
+    
     timestamp = str(int(time.time() * 1000))
     nonce = "".join(
         random.choices(string.ascii_lowercase + string.digits, k=16)
