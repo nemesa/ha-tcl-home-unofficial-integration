@@ -143,3 +143,14 @@ def safe_get_value(data: dict[str, any] | None, path: str, defaul_value: any) ->
                 pointer = pointer[part]
 
     return return_value
+
+def setup_common_init_values(stored_data):
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.power_consumption.enabled", True)
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.power_consumption.polling_interval_in_minutes", 60)
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.power_consumption.last_response.timestamp", 1759400000)
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.power_consumption.last_response.data", {})
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.work_time.enabled", True)
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.work_time.polling_interval_in_minute", 60)
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.work_time.last_response.timestamp", 1759400000)
+    stored_data, need_save = safe_set_value(stored_data, "non_user_config.work_time.last_response.data", {})
+    return stored_data, need_save

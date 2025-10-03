@@ -501,7 +501,7 @@ async def get_work_time(
         year:  /2025
         
     """
-    url = f"{device_url}//v3/ac/{deviceId}/work-time/info{date_filter}"
+    url = f"{device_url}/v3/ac/{deviceId}/work-time/info{date_filter}"
     if verbose_logging:
         _LOGGER.info("TCL-Service.get_work_time: %s", url)
     timestamp = str(int(time.time() * 1000))
@@ -511,20 +511,20 @@ async def get_work_time(
     sign = calculate_md5_hash_bytes(timestamp + nonce + saas_token)
 
     headers = {
-        "accept-encoding": "gzip",
-        "accept-language": "en",
-        "accesstoken": saas_token,
-        "appversion": "5.4.1",
-        "user-agent": "Android",
+        "platform": "android",
         "timestamp": timestamp,
         "nonce": nonce,
         "sign": sign,
-        "platform": "android"
+        "user-agent": "Android",
+        "appversion": "5.4.1",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "en",
+        "accesstoken": saas_token,        
     }    
 
     httpx_client = get_async_client(hass)
 
-    response = await httpx_client.post(url, json={}, headers=headers)
+    response = await httpx_client.get(url, headers=headers)
     if response.status_code != 200:
         raise Exception("Error at get_work_time: " + response.text)
     response_obj = response.json()
@@ -542,7 +542,7 @@ async def get_energy_consumption(
     deviceId: str,
     date_filter: str,
     verbose_logging: bool = False,
-) -> GetWorkTimeResponse:
+) -> GetEnergyConsumptioneResponse:
     """
     date filter samples: 
         week:  ?week=20250928-20251004
@@ -550,9 +550,11 @@ async def get_energy_consumption(
         year:  /2025
         
     """
-    url = f"{device_url}//v3/ac/{deviceId}/power/consumption/info/{date_filter}"
+    url = f"{device_url}/v3/ac/{deviceId}/power/consumption/info/{date_filter}"
     if verbose_logging:
         _LOGGER.info("TCL-Service.get_energy_consumption: %s", url)
+        
+    #_LOGGER.info("TCL-Service.get_energy_consumption: %s", url)
     timestamp = str(int(time.time() * 1000))
     nonce = "".join(
         random.choices(string.ascii_lowercase + string.digits, k=16)
@@ -560,27 +562,27 @@ async def get_energy_consumption(
     sign = calculate_md5_hash_bytes(timestamp + nonce + saas_token)
 
     headers = {
-        "accept-encoding": "gzip",
-        "accept-language": "en",
-        "accesstoken": saas_token,
-        "appversion": "5.4.1",
-        "user-agent": "Android",
+        "platform": "android",
         "timestamp": timestamp,
         "nonce": nonce,
         "sign": sign,
-        "platform": "android"
+        "user-agent": "Android",
+        "appversion": "5.4.1",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "en",
+        "accesstoken": saas_token,   
     }    
 
     httpx_client = get_async_client(hass)
 
-    response = await httpx_client.post(url, json={}, headers=headers)
+    response = await httpx_client.get(url, headers=headers)
     if response.status_code != 200:
         raise Exception("Error at get_energy_consumption: " + response.text)
     response_obj = response.json()
     # _LOGGER.info("TCL-Service.get_energy_consumption: %s", response_obj)
     if verbose_logging:
         _LOGGER.info("TCL-Service.get_energy_consumption response: %s", response_obj)
-    return GetWorkTimeResponse(response_obj)
+    return GetEnergyConsumptioneResponse(response_obj)
 
 @dataclass
 class ConfigGetResponse:
@@ -708,6 +710,10 @@ def check_if_expired(exp) -> bool:
     is_expired = exp < now
     return is_expired
 
-def get_today_for_filer() -> str:
-    """Get today's date filter in YYYYMMDD format."""
-    return datetime.datetime.now().strftime("%Y%m%d")
+def get_day_for_filer(addDays=0) -> str:    
+    time=datetime.datetime.now()+ datetime.timedelta(days=addDays)    
+    return time.strftime("%Y%m%d")
+
+def get_day_for_data(addDays=0) -> str:    
+    time=datetime.datetime.now()+ datetime.timedelta(days=addDays)    
+    return time.strftime("%Y-%m-%d")

@@ -92,8 +92,8 @@ def getSupportedFeatures(
     if device_storage is not None:
         has_rn_probe_data= device_storage.get("non_user_config", {}).get("rn_probe_data", {}).get("is_success", False)
         rn_probe_data=device_storage.get("non_user_config", {}).get("rn_probe_data", {}).get("data", {})
-        has_power_consumption_data=device_storage.get("non_user_config", {}).get("has_power_consumption_data", False)
-        has_work_time_data=device_storage.get("non_user_config", {}).get("has_work_time_data", False)
+        has_power_consumption_data=device_storage.get("non_user_config", {}).get("power_consumption", {}).get("enabled", False)
+        has_work_time_data=device_storage.get("non_user_config", {}).get("work_time", {}).get("enabled", False)        
 
     match device_type:
         case DeviceTypeEnum.SPLIT_AC:

@@ -226,10 +226,8 @@ class Reset_Has_Power_Consumption_Button(TclNonPollingEntityBase, ButtonEntity):
         return "mdi:transmission-tower-export"
 
     async def async_press(self) -> None:        
-        storage_data=await get_stored_data(self.hass, self.device.device_id)    
-        _LOGGER.info("Reset_Has_Power_Consumption_Button storage_data=%s",storage_data)       
-        storage_data, need_save= safe_set_value(storage_data, "non_user_config.has_power_consumption_data", True, True)    
-        _LOGGER.info("Reset_Has_Power_Consumption_Button need_save=%s",need_save)      
+        storage_data=await get_stored_data(self.hass, self.device.device_id)            
+        storage_data, need_save= safe_set_value(storage_data, "non_user_config.power_consumption.enabled", True, True)            
         if need_save:
             await set_stored_data(self.hass, self.device.device_id, storage_data)
             await self.coordinator.async_refresh()
@@ -258,8 +256,7 @@ class Reset_Has_Work_Time_Button(TclNonPollingEntityBase, ButtonEntity):
 
     async def async_press(self) -> None:
         storage_data=await get_stored_data(self.hass, self.device.device_id)                
-        storage_data, need_save= safe_set_value(storage_data, "non_user_config.has_work_time_data", True, True)    
-        _LOGGER.info("Reset_Has_Work_Time_Button need_save=%s",need_save)  
+        storage_data, need_save= safe_set_value(storage_data, "non_user_config.work_time.enabled", True, True)            
         if need_save:  
             await set_stored_data(self.hass, self.device.device_id, storage_data)
             await self.coordinator.async_refresh()

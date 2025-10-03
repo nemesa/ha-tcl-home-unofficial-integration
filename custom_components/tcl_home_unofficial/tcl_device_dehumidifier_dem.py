@@ -4,9 +4,8 @@ from dataclasses import dataclass
 
 from homeassistant.core import HomeAssistant
 
-from .calculations import celsius_to_fahrenheit
 from .calculations import try_get_value
-from .data_storage import get_stored_data, safe_set_value, set_stored_data
+from .data_storage import get_stored_data, safe_set_value, set_stored_data,setup_common_init_values
 from .device_enums import DehumidifierModeEnum
 from .device_features import DeviceFeatureEnum
 
@@ -39,8 +38,7 @@ async def get_stored_dehumidifier_dem_data(
         stored_data = {}
         need_save = True
     
-    stored_data, need_save = safe_set_value(stored_data, "non_user_config.has_power_consumption_data", True)
-    stored_data, need_save = safe_set_value(stored_data, "non_user_config.has_work_time_data", True)
+    stored_data, need_save = setup_common_init_values(stored_data)
     
     stored_data, need_save = safe_set_value(stored_data, "user_config.behavior.memorize_humidity_by_mode", False)
 

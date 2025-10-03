@@ -99,35 +99,38 @@ async def async_setup_entry(
         )
         storage_data = await store_rn_prode_data(hass, device_id, probe_result)
         
-        has_power_consumption_data= safe_get_value(storage_data, "non_user_config.has_power_consumption_data", True)
+        power_consumption_data_enabled= safe_get_value(storage_data, "non_user_config.power_consumption.enabled", True)
         if configData.verbose_setup_logging:
-            _LOGGER.info("_init_.has_power_consumption_data - %s",has_power_consumption_data)
-        if has_power_consumption_data:
-            response = await aws_iot.get_energy_consumption(device_id)
+            _LOGGER.info("_init_.power_consumption_data_enabled - %s",power_consumption_data_enabled)
+        if power_consumption_data_enabled:
+            response = await aws_iot.get_last_two_today_energy_consumption(device_id)
             if configData.verbose_setup_logging:
-                _LOGGER.info("_init_.has_power_consumption_data check - %s",response.message)
+                _LOGGER.info("_init_.power_consumption_data_enabled check - %s",response.message)
                         
-            stored_data, need_save = safe_set_value(storage_data, "non_user_config.has_power_consumption_data", True if response.code==0 else False, True)
+            storage_data, need_save = safe_set_value(storage_data, "non_user_config.power_consumption.enabled", True if response.code==0 else False, True)
             if need_save:
-                await set_stored_data(hass, device_id, stored_data)
+                storage_data=await set_stored_data(hass, device_id, storage_data)
             
         
-        has_work_time_data= safe_get_value(storage_data, "non_user_config.has_work_time_data", True)
+        work_time_data_enabled= safe_get_value(storage_data, "non_user_config.work_time.enabled", True)
         if configData.verbose_setup_logging:
-            _LOGGER.info("_init_.has_work_time_data - %s",has_work_time_data)
-        if has_work_time_data:
-            response = await aws_iot.get_work_time(device_id)
+            _LOGGER.info("_init_.work_time_data_enabled - %s",work_time_data_enabled)
+        if work_time_data_enabled:
+            response = await aws_iot.get_last_two_today_work_time(device_id)
             if configData.verbose_setup_logging:
-                _LOGGER.info("_init_.has_work_time_data check - %s",response.message)
+                _LOGGER.info("_init_.work_time_data_enabled check - %s",response.message)
                 
-            stored_data, need_save = safe_set_value(storage_data, "non_user_config.has_work_time_data", True if response.code==0 else False, True)
+            storage_data, need_save = safe_set_value(storage_data, "non_user_config.work_time.enabled", True if response.code==0 else False, True)
             if need_save:
-                await set_stored_data(hass, device_id, stored_data)
+                storage_data= await set_stored_data(hass, device_id, storage_data)
+
+        extra_tcl_data = await aws_iot.get_extra_tcl_data(storage_data,device_id)
 
         device = Device(
             tcl_thing=thing,
             aws_thing=aws_thing,
             device_storage=storage_data,
+            extra_tcl_data=extra_tcl_data
         )
         if configData.verbose_setup_logging:
             _LOGGER.info("_init_.device:%s", device.print_data())
