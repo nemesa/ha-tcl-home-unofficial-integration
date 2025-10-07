@@ -335,7 +335,7 @@ async def do_account_auth(
     }
 
     httpx_client = get_async_client(hass)
-    response = await httpx_client.post(login_url, json=payload, headers=headers)
+    response = await httpx_client.post(login_url, json=payload, headers=headers, timeout=15)
 
     response_obj = response.json()
     if verbose_logging:
@@ -365,7 +365,7 @@ async def get_cloud_urls(
     }
 
     httpx_client = get_async_client(hass)
-    response = await httpx_client.post(cloud_urls, json=payload, headers=headers)
+    response = await httpx_client.post(cloud_urls, json=payload, headers=headers, timeout=15)
     response_obj = response.json()
     if verbose_logging:
         _LOGGER.info("TCL-Service.get_cloud_urls response: %s", response_obj)
@@ -399,7 +399,7 @@ async def refreshTokens(
     }
 
     httpx_client = get_async_client(hass)
-    response = await httpx_client.post(url, json=payload, headers=headers)
+    response = await httpx_client.post(url, json=payload, headers=headers, timeout=15)
     response_obj = response.json()
     if verbose_logging:
         _LOGGER.info("TCL-Service.refreshTokens response: %s", response_obj)
@@ -432,7 +432,7 @@ async def get_aws_credentials(
     }
 
     httpx_client = get_async_client(hass)
-    response = await httpx_client.post(url, json=payload, headers=headers)
+    response = await httpx_client.post(url, json=payload, headers=headers, timeout=15)
     response_obj = response.json()
     if verbose_logging:
         _LOGGER.info("TCL-Service.get_aws_credentials response: %s", response_obj)
@@ -474,7 +474,7 @@ async def get_things(
 
     httpx_client = get_async_client(hass)
 
-    response = await httpx_client.post(url, json={}, headers=headers)
+    response = await httpx_client.post(url, json={}, headers=headers, timeout=15)
     if response.status_code != 200:
         raise Exception("Error at get_things: " + response.text)
     response_obj = response.json()
@@ -524,7 +524,7 @@ async def get_work_time(
 
     httpx_client = get_async_client(hass)
 
-    response = await httpx_client.get(url, headers=headers)
+    response = await httpx_client.get(url, headers=headers, timeout=15)
     if response.status_code != 200:
         raise Exception("Error at get_work_time: " + response.text)
     response_obj = response.json()
@@ -574,7 +574,7 @@ async def get_energy_consumption(
 
     httpx_client = get_async_client(hass)
 
-    response = await httpx_client.get(url, headers=headers)
+    response = await httpx_client.get(url, headers=headers, timeout=15)
     if response.status_code != 200:
         raise Exception("Error at get_energy_consumption: " + response.text)
     response_obj = response.json()
@@ -638,7 +638,7 @@ async def get_config(
     }
 
     httpx_client = get_async_client(hass)
-    response = await httpx_client.post(url, json=payload, headers=headers)
+    response = await httpx_client.post(url, json=payload, headers=headers, timeout=15)
     if response.status_code != 200:
         if verbose_logging:
             _LOGGER.error(
