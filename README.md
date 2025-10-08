@@ -1,9 +1,6 @@
 # ha-tcl-home-unofficial-integration  
 **TCL Home - Home Assistant integration (unofficial)**
 
-## Known issues
-- Split AC Fresh air - power statics not implemented
-
 ## Supported device types
 - Split AC
 - Split AC Fresh air
@@ -90,6 +87,26 @@ In the "..." menu select the "Download diagnostics"
 Same path as for the "Config diagnostic" select the device, then user
 the "DOWNLOAD DIAGNOSTICS" link
 <img src="./device_diagnostic.jpg" width="400"/>
+
+## Power and work hours data
+The integration will assume all devices have this data available. In the _init_ phase, it will try to get this data, and if it fails, it won't try again ever.  
+To force the integration to re-setup at the next reload, we can use these functions under the "Diagnostic" section:  
+- "Try get Power Consumption Data" button  
+- "Try get Work Time Data" button  
+
+Both are disabled by default. Just enable the buttons, and press them if you think your device has power or work hours data and they don't show up under the "Sensors" section.
+
+### Sensors
+- Today Energy Consumption  
+- Yesterday Energy Consumption  
+- Today Work Time  
+- Yesterday Work Time  
+
+All sensors will be updated **once every hour**, as we don't know how the TCL APIs scale to serve this data. In the "TCL Home" app, we can only access this data on demand, and it is not auto-refreshed. Because of this, the value may not be refreshed before the counter resets back to 0, so we don't recommend using the "Today Energy Consumption" in the "Energy" module in HA. The "Yesterday Energy Consumption" should be more suitable for this, as it only changes once a day and will always show the correct value.
+
+However, the "Sync with TCL Home" button in the "Diagnostics" section does refresh it and resets the 1-hour countdown for the next refresh. So if needed, one can manually sync the counter reset with the poll interval, and should get a good enough "Today Energy Consumption" value if needed.  
+The integration doesn't do this automatically as it involves time zones, and it could be a different time by device.  
+(Happy to review any code contributions to make this part nicer)
 
 
 ## Functions map

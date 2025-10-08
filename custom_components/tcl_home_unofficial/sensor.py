@@ -7,7 +7,7 @@ from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
 )
-from homeassistant.const import UnitOfTemperature, PERCENTAGE
+from homeassistant.const import UnitOfEnergy, UnitOfTemperature, UnitOfTime, PERCENTAGE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -113,8 +113,59 @@ async def async_setup_entry(
                     device=device,
                     type="TVOC.Level",
                     name="TVOC Level",
+                    device_classification=SensorDeviceClass.DATA_SIZE,
+                    state_classification=SensorStateClass.MEASUREMENT,
+                    icon_fn=lambda device: "mdi:dots-hexagon",
                     native_unit_of_measurement="",
                     value_fn=lambda device: device.data.tvoc_level,
+                )
+            )
+
+        if DeviceFeatureEnum.SENSOR_POWER_CONSUMPTION_DAILY in device.supported_features:
+            sensors.append(
+                EnergyConsumptionSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="TodayEnergyConsumption",
+                    name="Today Energy Consumption",
+                    value_fn=lambda device: round(device.extra_tcl_data.get("today_total_electricity",0),2),
+                )
+            )
+            sensors.append(
+                EnergyConsumptionSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="YesterdayEnergyConsumption",
+                    name="Yesterday Energy Consumption",
+                    value_fn=lambda device: round(device.extra_tcl_data.get("yesterday_total_electricity",0),2),
+                )
+            )
+
+        if DeviceFeatureEnum.SENSOR_WORK_TIME_DAILY in device.supported_features:            
+            sensors.append(
+                IntNumberSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="TodayWorkTime",
+                    name="Today Work Time",
+                    device_classification=SensorDeviceClass.DURATION,
+                    state_classification=SensorStateClass.TOTAL_INCREASING,
+                    native_unit_of_measurement=UnitOfTime.HOURS,
+                    icon_fn=lambda device: "mdi:clock-time-eight-outline",
+                    value_fn=lambda device: round((device.extra_tcl_data.get("today_work_time",0)/60),2),
+                )
+            )
+            sensors.append(
+                IntNumberSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="YesterdayWorkTime",
+                    name="Yesterday Work Time",
+                    device_classification=SensorDeviceClass.DURATION,
+                    state_classification=SensorStateClass.TOTAL_INCREASING,
+                    native_unit_of_measurement=UnitOfTime.HOURS,
+                    icon_fn=lambda device: "mdi:clock-time-eight-outline",
+                    value_fn=lambda device: round((device.extra_tcl_data.get("yesterday_work_time",0)/60),2),
                 )
             )
 
@@ -212,7 +263,7 @@ class VolatileOrganicCompoundsSensor(TclEntityBase, SensorEntity):
     @property
     def native_unit_of_measurement(self) -> str | None:
         #??? don't know the unit of measurement we only know the value
-        return self.CONCENTRATION_PARTS_PER_MILLION
+        return ""
 
     @property
     def state_class(self) -> str | None:
@@ -231,19 +282,25 @@ class IntNumberSensor(TclEntityBase, SensorEntity):
         type: str,
         name: str,
         value_fn,
+        icon_fn: lambda device: str,
+        device_classification: str,
+        state_classification: str,
         native_unit_of_measurement: str,
     ) -> None:
         TclEntityBase.__init__(self, coordinator, type, name, device)
         self.value_fn = value_fn
+        self.state_classification=state_classification
+        self.device_classification=device_classification
+        self.icon_fn = icon_fn
         self.input_native_unit_of_measurement=native_unit_of_measurement
 
     @property
     def icon(self):
-        return "mdi:dots-hexagon"
+        return self.icon_fn(self.device)
     
     @property
     def device_class(self) -> str:
-        return SensorDeviceClass.DATA_SIZE
+        return self.device_classification
 
     @property
     def native_value(self) -> int | float:
@@ -257,4 +314,34 @@ class IntNumberSensor(TclEntityBase, SensorEntity):
 
     @property
     def state_class(self) -> str | None:
-        return SensorStateClass.MEASUREMENT
+        return self.state_classification
+    
+    
+class EnergyConsumptionSensor(TclEntityBase, SensorEntity):
+    def __init__(
+        self,
+        coordinator: IotDeviceCoordinator,
+        device: Device,
+        type: str,
+        name: str,
+        value_fn,
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, type, name, device)
+        self.value_fn = value_fn
+
+    @property
+    def device_class(self) -> str:
+        return SensorDeviceClass.ENERGY
+
+    @property
+    def native_value(self) -> int | float:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        return float(self.value_fn(self.device))
+
+    @property
+    def native_unit_of_measurement(self) -> str | None:
+        return UnitOfEnergy.KILO_WATT_HOUR
+
+    @property
+    def state_class(self) -> str | None:
+        return SensorStateClass.TOTAL_INCREASING

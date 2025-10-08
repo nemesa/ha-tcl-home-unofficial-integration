@@ -27,6 +27,8 @@ class DeviceFeatureEnum(StrEnum):
     SENSOR_EXTERNAL_UNIT_TEMPERATURE = "sensor.external_unit_temperature"
     SENSOR_EXTERNAL_UNIT_EXHAUST_TEMPERATURE = "sensor.external_unit_exhaust_temperature"
     SENSOR_FRESH_AIR_TVOC = "sensor.fresh_air.TVOC"
+    SENSOR_POWER_CONSUMPTION_DAILY = "sensor.power_consumption.daily"
+    SENSOR_WORK_TIME_DAILY = "sensor.work_time.daily"
     SWITCH_POWER = "switch.powerSwitch"
     SWITCH_BEEP = "switch.beepSwitch"
     SWITCH_ECO = "switch.eco"
@@ -83,11 +85,15 @@ def getSupportedFeatures(
     device_type: DeviceTypeEnum, aws_thing_state_reported: dict[str, any], device_storage: dict[str, any] | None = None,
 ) -> list[DeviceFeatureEnum]:
     capabilities = aws_thing_state_reported.get("capabilities", [])
+    has_power_consumption_data= False
+    has_work_time_data= False
     has_rn_probe_data= False
     rn_probe_data={}
     if device_storage is not None:
         has_rn_probe_data= device_storage.get("non_user_config", {}).get("rn_probe_data", {}).get("is_success", False)
         rn_probe_data=device_storage.get("non_user_config", {}).get("rn_probe_data", {}).get("data", {})
+        has_power_consumption_data=device_storage.get("non_user_config", {}).get("power_consumption", {}).get("enabled", False)
+        has_work_time_data=device_storage.get("non_user_config", {}).get("work_time", {}).get("enabled", False)        
 
     match device_type:
         case DeviceTypeEnum.SPLIT_AC:
@@ -117,6 +123,10 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE,
                 DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON,
             ]
+            if has_power_consumption_data:
+                features.append(DeviceFeatureEnum.SENSOR_POWER_CONSUMPTION_DAILY)
+            if has_work_time_data:
+                features.append(DeviceFeatureEnum.SENSOR_WORK_TIME_DAILY)
             if len(capabilities) > 0:
                 if DeviceCapabilityEnum.CAPABILITY_SOFT_WIND in capabilities:
                     features.append(DeviceFeatureEnum.SWITCH_SOFT_WIND)
@@ -196,12 +206,16 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE,
                 DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON,
             ]
+            if has_power_consumption_data:
+                features.append(DeviceFeatureEnum.SENSOR_POWER_CONSUMPTION_DAILY)
+            if has_work_time_data:
+                features.append(DeviceFeatureEnum.SENSOR_WORK_TIME_DAILY)
             
             if has_property(aws_thing_state_reported, "sensorTVOC"):
                 features.append(DeviceFeatureEnum.SENSOR_FRESH_AIR_TVOC)
             return features
         case DeviceTypeEnum.WINDOW_AC:
-            return [
+            features= [
                 DeviceFeatureEnum.INTERNAL_IS_AC,
                 DeviceFeatureEnum.MODE_AC_AUTO,
                 DeviceFeatureEnum.MODE_AC_COOL,
@@ -223,8 +237,13 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE,
                 DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON,
             ]
+            if has_power_consumption_data:
+                features.append(DeviceFeatureEnum.SENSOR_POWER_CONSUMPTION_DAILY)
+            if has_work_time_data:
+                features.append(DeviceFeatureEnum.SENSOR_WORK_TIME_DAILY)
+            return features
         case DeviceTypeEnum.DEHUMIDIFIER_DEM:
-            return [
+            features= [
                 DeviceFeatureEnum.INTERNAL_IS_DEHUMIDIFIER,
                 DeviceFeatureEnum.MODE_DEHUMIDIFIER_DRY,
                 DeviceFeatureEnum.MODE_DEHUMIDIFIER_TURBO,
@@ -239,8 +258,13 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.DIAGNOSIC_ERROR_CODES,
                 DeviceFeatureEnum.HUMIDIFIER,
             ]
+            if has_power_consumption_data:
+                features.append(DeviceFeatureEnum.SENSOR_POWER_CONSUMPTION_DAILY)
+            if has_work_time_data:
+                features.append(DeviceFeatureEnum.SENSOR_WORK_TIME_DAILY)
+            return features
         case DeviceTypeEnum.DEHUMIDIFIER_DF:
-            return [
+            features = [
                 DeviceFeatureEnum.INTERNAL_IS_DEHUMIDIFIER,
                 DeviceFeatureEnum.MODE_DEHUMIDIFIER_DRY,
                 DeviceFeatureEnum.MODE_DEHUMIDIFIER_COMFORT,
@@ -255,6 +279,11 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.DIAGNOSIC_ERROR_CODES,
                 DeviceFeatureEnum.HUMIDIFIER,
             ]
+            if has_power_consumption_data:
+                features.append(DeviceFeatureEnum.SENSOR_POWER_CONSUMPTION_DAILY)
+            if has_work_time_data:
+                features.append(DeviceFeatureEnum.SENSOR_WORK_TIME_DAILY)
+            return features
         case DeviceTypeEnum.PORTABLE_AC:
             features = [
                 DeviceFeatureEnum.INTERNAL_IS_AC,
@@ -267,6 +296,10 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.NUMBER_TARGET_DEGREE,
                 DeviceFeatureEnum.SENSOR_IS_ONLINE,
             ]
+            if has_power_consumption_data:
+                features.append(DeviceFeatureEnum.SENSOR_POWER_CONSUMPTION_DAILY)
+            if has_work_time_data:
+                features.append(DeviceFeatureEnum.SENSOR_WORK_TIME_DAILY)            
             
             if has_rn_probe_data:
                 fan_speed_mapping = rn_probe_data.get("fan_speed_mapping", [])

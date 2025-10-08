@@ -1,5 +1,4 @@
 """."""
-
 from dataclasses import dataclass
 import datetime
 import hashlib
@@ -26,6 +25,14 @@ def getValue(data: dict, keys: list[str]) -> str:
 
     return value
 
+def safeGetValue(data: dict, keys: list[str], defaultValue) -> str:
+    """Get value from dictionary with fallback."""
+    value = getValue(data, keys)
+    
+    if value is None:
+        value = defaultValue
+
+    return value
 
 @dataclass
 class DoAccountAuthResponseUser:
@@ -192,6 +199,110 @@ class GetAwsCredentialsResponse:
     Credentials: GetAwsCredentialsResponseCredentials
 
 
+@dataclass
+class GetWorkTimeResponseDataItem:
+    def __init__(self, data: dict) -> None:
+        if data:
+            self.date = getValue(data, ["date"])
+            self.work_time = getValue(data, ["work_time", "workTime"])
+            self.ai_work_time = getValue(data, ["ai_work_time", "aiWorkTime"])
+
+    date: str
+    work_time: float
+    ai_work_time: float
+
+@dataclass
+class GetWorkTimeResponseData:
+    def __init__(self, data: dict) -> None:
+        if data:
+            self.device_id = getValue(data, ["device_id", "deviceId"])
+            self.date = getValue(data, ["date"])
+            self.time_zone = getValue(data, ["time_zone", "timeZone"])
+            self.time_offset = getValue(data, ["time_offset", "timeOffset"])
+            self.current_total_work_time = GetWorkTimeResponseDataItem(safeGetValue(data, ["current_total_work_time","currentTotalWorkTime"],None))
+            self.before_total_work_time = GetWorkTimeResponseDataItem(safeGetValue(data, ["before_total_work_time","beforeTotalWorkTime"],None))
+            self.work_time_details = [GetWorkTimeResponseDataItem(item) for item in safeGetValue(data, ["work_time_details","workTimeDetails"],[])]
+        
+    device_id: str
+    date: str
+    time_zone: str
+    time_offset: str
+    current_total_work_time: GetWorkTimeResponseDataItem
+    before_total_work_time: GetWorkTimeResponseDataItem
+    work_time_details: list[GetWorkTimeResponseDataItem]
+    
+@dataclass
+class GetWorkTimeResponse:
+    def __init__(self, data: dict) -> None:        
+        self.code = getValue(data, ["code"])
+        self.message = getValue(data, ["message"])
+        self.data = GetWorkTimeResponseData(safeGetValue(data, ["data"],{}))
+
+    code: int
+    message: str
+    data: GetWorkTimeResponseData
+    
+
+
+@dataclass
+class GetEnergyConsumptioneResponseDataItem:
+    def __init__(self, data: dict) -> None:
+        if data:
+            self.date = getValue(data, ["date"])
+            self.consumption = getValue(data, ["consumption"])
+            self.ai_consumption = getValue(data, ["ai_consumption", "aiConsumption"])
+
+    date: str
+    consumption: float
+    ai_consumption: float
+
+@dataclass
+class GetEnergyConsumptioneResponseDataResult:
+    def __init__(self, data: dict) -> None:
+        if data:
+            self.date = getValue(data, ["date"])
+            self.offline_electricity = getValue(data, ["offline_electricity", "offlineElectricity"])
+            self.total_electricity = getValue(data, ["total_electricity", "totalElectricity"])
+            self.online_electricity = getValue(data, ["online_electricity", "onlineElectricity"])
+            self.ai_electricity = getValue(data, ["ai_electricity", "aiElectricity"])
+
+    date: str
+    offline_electricity: float
+    total_electricity: float
+    online_electricity: float
+    ai_electricity: float
+
+
+@dataclass
+class GetEnergyConsumptioneResponseData:
+    def __init__(self, data: dict) -> None:    
+        self.device_id = getValue(data, ["device_id", "deviceId"])
+        self.date = getValue(data, ["date"])
+        self.time_zone = getValue(data, ["time_zone", "timeZone"])
+        self.time_offset = getValue(data, ["time_offset", "timeOffset"])
+        self.curr_statistics_res = GetEnergyConsumptioneResponseDataResult(safeGetValue(data, ["curr_statistics_res","currStatisticsRes"],None))
+        self.before_statistics_res = GetEnergyConsumptioneResponseDataResult(safeGetValue(data, ["before_statistics_res","beforeStatisticsRes"],None))
+        self.consumption_details = [GetEnergyConsumptioneResponseDataItem(item) for item in safeGetValue(data, ["consumption_details","consumptionDetails"],[])]
+        
+    device_id: str
+    date: str
+    time_zone: str
+    time_offset: str
+    curr_statistics_res: GetEnergyConsumptioneResponseDataResult
+    before_statistics_res: GetEnergyConsumptioneResponseDataResult
+    work_time_details: list[GetEnergyConsumptioneResponseDataItem]
+    
+@dataclass
+class GetEnergyConsumptioneResponse:
+    def __init__(self, data: dict) -> None:
+        self.code = getValue(data, ["code"])
+        self.message = getValue(data, ["message"])
+        self.data = GetEnergyConsumptioneResponseData(safeGetValue(data, ["data"],{}))
+
+    code: int
+    message: str
+    data: GetEnergyConsumptioneResponseData    
+
 async def do_account_auth(
     hass: HomeAssistant,
     username: str,
@@ -224,7 +335,7 @@ async def do_account_auth(
     }
 
     httpx_client = get_async_client(hass)
-    response = await httpx_client.post(login_url, json=payload, headers=headers)
+    response = await httpx_client.post(login_url, json=payload, headers=headers, timeout=15)
 
     response_obj = response.json()
     if verbose_logging:
@@ -254,7 +365,7 @@ async def get_cloud_urls(
     }
 
     httpx_client = get_async_client(hass)
-    response = await httpx_client.post(cloud_urls, json=payload, headers=headers)
+    response = await httpx_client.post(cloud_urls, json=payload, headers=headers, timeout=15)
     response_obj = response.json()
     if verbose_logging:
         _LOGGER.info("TCL-Service.get_cloud_urls response: %s", response_obj)
@@ -288,7 +399,7 @@ async def refreshTokens(
     }
 
     httpx_client = get_async_client(hass)
-    response = await httpx_client.post(url, json=payload, headers=headers)
+    response = await httpx_client.post(url, json=payload, headers=headers, timeout=15)
     response_obj = response.json()
     if verbose_logging:
         _LOGGER.info("TCL-Service.refreshTokens response: %s", response_obj)
@@ -321,7 +432,7 @@ async def get_aws_credentials(
     }
 
     httpx_client = get_async_client(hass)
-    response = await httpx_client.post(url, json=payload, headers=headers)
+    response = await httpx_client.post(url, json=payload, headers=headers, timeout=15)
     response_obj = response.json()
     if verbose_logging:
         _LOGGER.info("TCL-Service.get_aws_credentials response: %s", response_obj)
@@ -363,7 +474,7 @@ async def get_things(
 
     httpx_client = get_async_client(hass)
 
-    response = await httpx_client.post(url, json={}, headers=headers)
+    response = await httpx_client.post(url, json={}, headers=headers, timeout=15)
     if response.status_code != 200:
         raise Exception("Error at get_things: " + response.text)
     response_obj = response.json()
@@ -372,6 +483,105 @@ async def get_things(
         _LOGGER.info("TCL-Service.get_things response: %s", response_obj)
     return GetThingsResponse(response_obj)
 
+
+
+
+async def get_work_time(
+    hass: HomeAssistant,
+    device_url: str,
+    saas_token: str,
+    deviceId: str,
+    date_filter: str,
+    verbose_logging: bool = False,
+) -> GetWorkTimeResponse:
+    """
+    date filter samples: 
+        week:  ?week=20250928-20251004
+        month: /2025/10
+        year:  /2025
+        
+    """
+    url = f"{device_url}/v3/ac/{deviceId}/work-time/info{date_filter}"
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.get_work_time: %s", url)
+    timestamp = str(int(time.time() * 1000))
+    nonce = "".join(
+        random.choices(string.ascii_lowercase + string.digits, k=16)
+    )  # similar to Math.random().toString(36)
+    sign = calculate_md5_hash_bytes(timestamp + nonce + saas_token)
+
+    headers = {
+        "platform": "android",
+        "timestamp": timestamp,
+        "nonce": nonce,
+        "sign": sign,
+        "user-agent": "Android",
+        "appversion": "5.4.1",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "en",
+        "accesstoken": saas_token,        
+    }    
+
+    httpx_client = get_async_client(hass)
+
+    response = await httpx_client.get(url, headers=headers, timeout=15)
+    if response.status_code != 200:
+        raise Exception("Error at get_work_time: " + response.text)
+    response_obj = response.json()
+    # _LOGGER.info("TCL-Service.get_work_time: %s", response_obj)
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.get_work_time response: %s", response_obj)
+    return GetWorkTimeResponse(response_obj)
+
+
+
+async def get_energy_consumption(
+    hass: HomeAssistant,
+    device_url: str,
+    saas_token: str,
+    deviceId: str,
+    date_filter: str,
+    verbose_logging: bool = False,
+) -> GetEnergyConsumptioneResponse:
+    """
+    date filter samples: 
+        week:  ?week=20250928-20251004
+        month: /2025/10
+        year:  /2025
+        
+    """
+    url = f"{device_url}/v3/ac/{deviceId}/power/consumption/info/{date_filter}"
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.get_energy_consumption: %s", url)        
+    
+    timestamp = str(int(time.time() * 1000))
+    nonce = "".join(
+        random.choices(string.ascii_lowercase + string.digits, k=16)
+    )  # similar to Math.random().toString(36)
+    sign = calculate_md5_hash_bytes(timestamp + nonce + saas_token)
+
+    headers = {
+        "platform": "android",
+        "timestamp": timestamp,
+        "nonce": nonce,
+        "sign": sign,
+        "user-agent": "Android",
+        "appversion": "5.4.1",
+        "accept-encoding": "gzip, deflate, br",
+        "accept-language": "en",
+        "accesstoken": saas_token,   
+    }    
+
+    httpx_client = get_async_client(hass)
+
+    response = await httpx_client.get(url, headers=headers, timeout=15)
+    if response.status_code != 200:
+        raise Exception("Error at get_energy_consumption: " + response.text)
+    response_obj = response.json()
+    # _LOGGER.info("TCL-Service.get_energy_consumption: %s", response_obj)
+    if verbose_logging:
+        _LOGGER.info("TCL-Service.get_energy_consumption response: %s", response_obj)
+    return GetEnergyConsumptioneResponse(response_obj)
 
 @dataclass
 class ConfigGetResponse:
@@ -428,7 +638,7 @@ async def get_config(
     }
 
     httpx_client = get_async_client(hass)
-    response = await httpx_client.post(url, json=payload, headers=headers)
+    response = await httpx_client.post(url, json=payload, headers=headers, timeout=15)
     if response.status_code != 200:
         if verbose_logging:
             _LOGGER.error(
@@ -498,3 +708,11 @@ def check_if_expired(exp) -> bool:
     now = datetime.datetime.now().timestamp()
     is_expired = exp < now
     return is_expired
+
+def get_day_for_filer(addDays=0) -> str:    
+    time=datetime.datetime.now()+ datetime.timedelta(days=addDays)    
+    return time.strftime("%Y%m%d")
+
+def get_day_for_data(addDays=0) -> str:    
+    time=datetime.datetime.now()+ datetime.timedelta(days=addDays)    
+    return time.strftime("%Y-%m-%d")

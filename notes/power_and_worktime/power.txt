@@ -1,0 +1,322 @@
+test data was puled at 2025.10.01 (Wendnesday)
+
+data is in KWh
+
+day:
+(on 20251002)
+getPowerData url:https://prod-sgp.aws.tcljd.com/v3/ac/***/power/consumption/info/?week=20250929-20250929
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "20250929-20250929",
+    "currStatisticsRes": {
+      "offlineElectricity": 0,
+      "date": "20250929-20250929",
+      "totalElectricity": 5.194181740492809,
+      "onlineElectricity": 5.194181740492809,
+      "aiElectricity": 0
+    },
+    "beforeStatisticsRes": {},
+    "consumptionDetails": [
+      {
+        "date": "2025-09-29",
+        "consumption": 5.194181740492809,
+        "aiConsumption": 0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
+}
+
+
+
+week
+https://prod-sgp.aws.tcljd.com/v3/ac/***/power/consumption/info/?week=20250928-20251004
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "20250928-20251004",
+    "currStatisticsRes": {
+      "offlineElectricity": 0,
+      "date": "20250928-20251004",
+      "totalElectricity": 17.395303707673936,
+      "onlineElectricity": 17.395303707673936,
+      "aiElectricity": 0
+    },
+    "beforeStatisticsRes": {},
+    "consumptionDetails": [
+      {
+        "date": "2025-09-28",
+        "consumption": 4.487267109186084,
+        "aiConsumption": 0
+      },
+      {
+        "date": "2025-09-29",
+        "consumption": 5.194181740492809,
+        "aiConsumption": 0
+      },
+      {
+        "date": "2025-09-30",
+        "consumption": 5.066044716989489,
+        "aiConsumption": 0
+      },
+      {
+        "date": "2025-10-01",
+        "consumption": 2.647810141005555,
+        "aiConsumption": 0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
+}
+
+Month
+https://prod-sgp.aws.tcljd.com/v3/ac/***/power/consumption/info/2025/10
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "2025-10",
+    "currStatisticsRes": {
+      "offlineElectricity": 0,
+      "date": "2025-10",
+      "totalElectricity": 2.6378101410055548,
+      "onlineElectricity": 2.6378101410055548,
+      "aiElectricity": 0
+    },
+    "beforeStatisticsRes": {
+      "offlineElectricity": 0,
+      "date": "2025-09",
+      "totalElectricity": 55.65104406992051,
+      "onlineElectricity": 55.65104406992051,
+      "aiElectricity": 0.7690363790208676
+    },
+    "consumptionDetails": [
+      {
+        "date": "2025-10-01",
+        "consumption": 2.6378101410055548,
+        "aiConsumption": 0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
+}
+
+year
+https://prod-sgp.aws.tcljd.com/v3/ac/***/power/consumption/info/2025
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "2025",
+    "currStatisticsRes": {
+      "offlineElectricity": 0,
+      "date": "2025",
+      "totalElectricity": 58.25893895668878,
+      "onlineElectricity": 58.25893895668878,
+      "aiElectricity": 0.7690363790208676
+    },
+    "beforeStatisticsRes": {
+      "offlineElectricity": 0,
+      "date": "2024",
+      "totalElectricity": 0,
+      "onlineElectricity": 0,
+      "aiElectricity": 0
+    },
+    "consumptionDetails": [
+      {
+        "date": "2025-09",
+        "consumption": 55.65104406992051,
+        "aiConsumption": 0.7690363790208676
+      },
+      {
+        "date": "2025-10",
+        "consumption": 2.6078948867682668,
+        "aiConsumption": 0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
+}
+
+NodeJs implementaion
+
+export interface PowerConsumptionResponseItem {
+    date: string,
+    consumption: number, //number in KWh
+    aiConsumption: number,
+}
+
+export interface PowerConsumptionStatisticsResult {
+    offlineElectricity: number,
+    date: string,
+    totalElectricity: number,
+    onlineElectricity: number,
+    aiElectricity: number,
+}
+export interface PowerConsumptionResponse {
+    code: number
+    message: string
+    data: {
+        deviceId: string,
+        date: string,
+        currStatisticsRes: PowerConsumptionStatisticsResult,
+        beforeStatisticsRes: PowerConsumptionStatisticsResult,
+        consumptionDetails: PowerConsumptionResponseItem[]
+        timeZone: string,
+        timeOffset: string,
+    }
+}
+
+export const getPowerData = async (cloud_url: string, saasToken: string, deviceId: string): Promise<any> => {
+    const timestamp: string = String(Date.now())
+    const nonce: string = Math.random().toString(36).substring(2)
+    const sign = calculateMD5HashBytes(timestamp + nonce + saasToken)
+
+    //week
+    const host = `${cloud_url}/v3/ac/${deviceId}/power/consumption/info/?week=20250928-20251004`
+    //month
+    //const host = `${cloud_url}/v3/ac/${deviceId}/power/consumption/info/2025/10`
+    //year
+    //const host = `${cloud_url}/v3/ac/${deviceId}/power/consumption/info/2025`
+
+    const r = await fetch(host, {
+        method: "GET",
+        headers: {
+            "accept-encoding": "gzip",
+            "accept-language": "en",
+            accessToken: saasToken,
+            //appId: APP_ID,
+            appversion: "5.4.1",
+            //appversion: "5.1.2",
+            "user-agent": "Android",
+            //"user-agent": "okhttp/4.9.1",
+            nonce,
+            platform: "android",
+            sign,
+            //countrycode: countryAbbr,
+            timestamp,
+            // "content-type": "application/json; charset=UTF-8",
+
+        }
+    })
+
+    const response = await r.json()
+
+    console.log(JSON.stringify(response, null, 2))
+
+    if (r.status !== 200) throw new Error("b")
+
+    return response as PowerConsumptionResponse
+}
+
+
+
+
+
+
+
+
+other
+getPowerData url:https://prod-sgp.aws.tcljd.com/v3/ac/***/power/consumption/info/?week=20250928-20250929
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "20250928-20250929",
+    "currStatisticsRes": {
+      "offlineElectricity": 0,
+      "date": "20250928-20250929",
+      "totalElectricity": 9.681448849678894,
+      "onlineElectricity": 9.681448849678894,
+      "aiElectricity": 0
+    },
+    "beforeStatisticsRes": {},
+    "consumptionDetails": [
+      {
+        "date": "2025-09-28",
+        "consumption": 4.487267109186084,
+        "aiConsumption": 0
+      },
+      {
+        "date": "2025-09-29",
+        "consumption": 5.194181740492809,
+        "aiConsumption": 0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
+}
+
+(on 20251002)
+getPowerData url:https://prod-sgp.aws.tcljd.com/v3/ac/***/power/consumption/info/?week=20251001-20251003
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "20251001-20251003",
+    "currStatisticsRes": {
+      "offlineElectricity": 0,
+      "date": "20251001-20251003",
+      "totalElectricity": 8.872509566538481,
+      "onlineElectricity": 8.872509566538481,
+      "aiElectricity": 0
+    },
+    "beforeStatisticsRes": {},
+    "consumptionDetails": [
+      {
+        "date": "2025-10-01",
+        "consumption": 4.348812135023501,
+        "aiConsumption": 0
+      },
+      {
+        "date": "2025-10-02",
+        "consumption": 4.52369743151498,
+        "aiConsumption": 0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
+}
+
+(on 20251002)
+getPowerData url:https://prod-sgp.aws.tcljd.com/v3/ac/***/power/consumption/info/?week=20251002-20251002
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "20251002-20251002",
+    "currStatisticsRes": {
+      "offlineElectricity": 0,
+      "date": "20251002-20251002",
+      "totalElectricity": 4.52369743151498,
+      "onlineElectricity": 4.52369743151498,
+      "aiElectricity": 0
+    },
+    "beforeStatisticsRes": {},
+    "consumptionDetails": [
+      {
+        "date": "2025-10-02",
+        "consumption": 4.52369743151498,
+        "aiConsumption": 0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
+}

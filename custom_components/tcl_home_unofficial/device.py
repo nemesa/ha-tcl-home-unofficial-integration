@@ -10,39 +10,39 @@ from .const import DOMAIN
 from .device_enums import ModeEnum, DehumidifierModeEnum
 from .device_capabilities import DeviceCapabilityEnum, get_capabilities
 from .device_features import getSupportedFeatures, DeviceFeatureEnum
-from .device_portable_ac import (
+from .tcl_device_portable_ac import (
     TCL_PortableAC_DeviceData,
     get_stored_portable_ac_data,
     handle_portable_ac_mode_change,
 )
-from .device_spit_ac_fresh_air import (
+from .tcl_device_spit_ac_fresh_air import (
     TCL_SplitAC_Fresh_Air_DeviceData,
     get_stored_spit_ac_fresh_data,
     handle_split_ac_freshair_mode_change,
 )
-from .device_spit_ac import (
+from .tcl_device_spit_ac import (
     TCL_SplitAC_DeviceData,
     get_stored_spit_ac_data,
     handle_split_ac_mode_change,
 )
-from .device_window_ac import (
+from .tcl_device_window_ac import (
     TCL_WindowAC_DeviceData,
     get_stored_window_ac_data,
     handle_window_ac_mode_change,
 )
-from .device_dehumidifier_dem import (
+from .tcl_device_dehumidifier_dem import (
     TCL_Dehumidifier_DEM_DeviceData,
     get_stored_dehumidifier_dem_data,
     handle_dehumidifier_dem_mode_change,
 )
-from .device_dehumidifier_df import (
+from .tcl_device_dehumidifier_df import (
     TCL_Dehumidifier_DF_DeviceData,
     get_stored_dehumidifier_df_data,
     handle_dehumidifier_df_mode_change,
 )
 
 from .device_types import DeviceTypeEnum, calculateDeviceType
-from .data_storage import get_stored_data, safe_set_value, set_stored_data
+from .data_storage import get_stored_data, safe_set_value, set_stored_data, safe_get_value
 from .tcl import GetThingsResponseData
 
 _LOGGER = logging.getLogger(__name__)
@@ -56,6 +56,7 @@ class Device:
         aws_thing: dict | None,
         tcl_thing: GetThingsResponseData | None = None,
         device_storage: dict | None = None,
+        extra_tcl_data: dict | None = None,
     ) -> None:
         self.device_id = "noId"
         self.product_key = None
@@ -70,6 +71,7 @@ class Device:
         self.mode_enum_to_value_mapp = {}
         self.mode_value_to_enum_mapp = {}
         self.is_online = False
+        self.extra_tcl_data = extra_tcl_data if extra_tcl_data is not None else {}
         if tcl_thing is not None:
             self.is_online = tcl_thing.is_online
             self.product_key = tcl_thing.product_key
@@ -159,6 +161,7 @@ class Device:
     storage: dict[str, any]
     mode_enum_to_value_mapp: dict[str, int]
     mode_value_to_enum_mapp: dict[int, str]
+    extra_tcl_data: dict
     data: (
         TCL_SplitAC_DeviceData
         | TCL_SplitAC_Fresh_Air_DeviceData
@@ -271,6 +274,7 @@ class Device:
     def print_data(self):
         _LOGGER.info("Device ID: %s", self.device_id)
         _LOGGER.info("data: %s", self.data)
+        _LOGGER.info("data: %s", self.extra_tcl_data)
 
 
 def toDeviceInfo(device: Device) -> DeviceInfo:

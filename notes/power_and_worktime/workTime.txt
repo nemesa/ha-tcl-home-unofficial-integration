@@ -1,0 +1,314 @@
+test data was puled at 2025.10.01 (Wendnesday)
+
+data is in minutes
+day:
+(on 20251002)
+getWorkTime url:https://prod-sgp.aws.tcljd.com/v3/ac/***/work-time/info?week=20250929-20250929
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "",
+    "currentTotalWorkTime": {
+      "date": "",
+      "workTime": 1431.883,
+      "aiWorkTime": 0
+    },
+    "beforeTotalWorkTime": {
+      "date": "2025-09-29",
+      "workTime": 0,
+      "aiWorkTime": 0
+    },
+    "workTimeDetails": [
+      {
+        "date": "2025-09-29",
+        "workTime": 1431.883,
+        "aiWorkTime": 0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
+}
+
+
+week
+https://prod-sgp.aws.tcljd.com/v3/ac/***/work-time/info?week=20250928-20251004
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "",
+    "currentTotalWorkTime": {
+      "date": "",
+      "workTime": 5238.933,
+      "aiWorkTime": 0
+    },
+    "beforeTotalWorkTime": {
+      "date": "2025-09-28",
+      "workTime": 0,
+      "aiWorkTime": 0
+    },
+    "workTimeDetails": [
+      {
+        "date": "2025-09-28",
+        "workTime": 1433.733,
+        "aiWorkTime": 0
+      },
+      {
+        "date": "2025-09-29",
+        "workTime": 1431.883,
+        "aiWorkTime": 0
+      },
+      {
+        "date": "2025-09-30",
+        "workTime": 1434.75,
+        "aiWorkTime": 0
+      },
+      {
+        "date": "2025-10-01",
+        "workTime": 938.567,
+        "aiWorkTime": 0.0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
+}
+
+Month
+https://prod-sgp.aws.tcljd.com/v3/ac/***/work-time/info/2025/10
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "2025-10",
+    "currentTotalWorkTime": {
+      "date": "2025-10",
+      "workTime": 936.583,
+      "aiWorkTime": 0
+    },
+    "beforeTotalWorkTime": {
+      "date": "2025-09",
+      "workTime": 16021.067,
+      "aiWorkTime": 586.7
+    },
+    "workTimeDetails": [
+      {
+        "date": "2025-10-01",
+        "workTime": 936.584,
+        "aiWorkTime": 0.0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
+}
+
+year
+https://prod-sgp.aws.tcljd.com/v3/ac/***/work-time/info/2025
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "2025",
+    "currentTotalWorkTime": {
+      "date": "2025",
+      "workTime": 16949.7,
+      "aiWorkTime": 586.7
+    },
+    "beforeTotalWorkTime": {
+      "date": "2024",
+      "workTime": 0,
+      "aiWorkTime": 0
+    },
+    "workTimeDetails": [
+      {
+        "date": "2025-09",
+        "workTime": 16021.067,
+        "aiWorkTime": 586.7
+      },
+      {
+        "date": "2025-10",
+        "workTime": 928.634,
+        "aiWorkTime": 0.0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
+}
+
+
+
+NodeJS implementaion
+
+export interface WorkTimeResponseItem {
+    date: string,
+    workTime: number, // in minutes
+    aiWorkTime: number,
+}
+
+export interface WorkTimeResponse {
+    code: number
+    message: string
+    data: {
+        deviceId: string,
+        date: string,
+        currentTotalWorkTime: WorkTimeResponseItem,
+        beforeTotalWorkTime: WorkTimeResponseItem,
+        workTimeDetails: WorkTimeResponseItem[],
+        timeZone: string,
+        timeOffset: string,
+    }
+}
+
+export const getWorkTime = async (cloud_url: string, saasToken: string, deviceId: string): Promise<any> => {
+    const timestamp: string = String(Date.now())
+    const nonce: string = Math.random().toString(36).substring(2)
+    const sign = calculateMD5HashBytes(timestamp + nonce + saasToken)
+    //week
+    const host = `${cloud_url}/v3/ac/${deviceId}/work-time/info?week=20250928-20251004`
+    //month
+    //const host = `${cloud_url}/v3/ac/${deviceId}/work-time/info/2025/10`
+    //year
+    //const host = `${cloud_url}/v3/ac/${deviceId}/work-time/info/2025`
+
+
+    const r = await fetch(host, {
+        method: "GET",
+        headers: {
+            "accept-encoding": "gzip",
+            "accept-language": "en",
+            accessToken: saasToken,
+            //appId: APP_ID,
+            appversion: "5.4.1",
+            //appversion: "5.1.2",
+            "user-agent": "Android",
+            //"user-agent": "okhttp/4.9.1",
+            nonce,
+            platform: "android",
+            sign,
+            //countrycode: countryAbbr,
+            timestamp,
+            // "content-type": "application/json; charset=UTF-8",
+
+        }
+    })
+
+    const response = await r.json()
+
+    console.log(JSON.stringify(response, null, 2))
+
+    if (r.status !== 200) throw new Error("b")
+
+    return response as WorkTimeResponse
+}
+
+
+
+other
+getWorkTime url:https://prod-sgp.aws.tcljd.com/v3/ac/***/work-time/info?week=20250928-20250929
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "",
+    "currentTotalWorkTime": {
+      "date": "",
+      "workTime": 2865.617,
+      "aiWorkTime": 0
+    },
+    "beforeTotalWorkTime": {
+      "date": "2025-09-28",
+      "workTime": 0,
+      "aiWorkTime": 0
+    },
+    "workTimeDetails": [
+      {
+        "date": "2025-09-28",
+        "workTime": 1433.733,
+        "aiWorkTime": 0
+      },
+      {
+        "date": "2025-09-29",
+        "workTime": 1431.883,
+        "aiWorkTime": 0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
+}
+
+
+
+(on 20251002)
+getWorkTime url:https://prod-sgp.aws.tcljd.com/v3/ac/***/work-time/info?week=20251001-20251003
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "",
+    "currentTotalWorkTime": {
+      "date": "",
+      "workTime": 2421.667,
+      "aiWorkTime": 0
+    },
+    "beforeTotalWorkTime": {
+      "date": "2025-10-01",
+      "workTime": 0,
+      "aiWorkTime": 0
+    },
+    "workTimeDetails": [
+      {
+        "date": "2025-10-01",
+        "workTime": 1391.15,
+        "aiWorkTime": 0
+      },
+      {
+        "date": "2025-10-02",
+        "workTime": 1030.517,
+        "aiWorkTime": 0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
+}
+
+(on 20251002)
+getWorkTime url:https://prod-sgp.aws.tcljd.com/v3/ac/***/work-time/info?week=20251002-20251002
+{
+  "code": 0,
+  "message": "SUCCESS",
+  "data": {
+    "deviceId": "***",
+    "date": "",
+    "currentTotalWorkTime": {
+      "date": "",
+      "workTime": 1030.517,
+      "aiWorkTime": 0
+    },
+    "beforeTotalWorkTime": {
+      "date": "2025-10-02",
+      "workTime": 0,
+      "aiWorkTime": 0
+    },
+    "workTimeDetails": [
+      {
+        "date": "2025-10-02",
+        "workTime": 1030.517,
+        "aiWorkTime": 0
+      }
+    ],
+    "timeZone": "Asia/Bangkok",
+    "timeOffset": "UTC+07:00"
+  }
+}

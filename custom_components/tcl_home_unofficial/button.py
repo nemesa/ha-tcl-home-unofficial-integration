@@ -14,6 +14,7 @@ from .device import Device, Device, DeviceTypeEnum
 from .device_features import DeviceFeatureEnum
 from .tcl_entity_base import TclEntityBase, TclNonPollingEntityBase
 from .self_diagnostics import SelfDiagnostics
+from .data_storage import safe_set_value, set_stored_data, get_stored_data,safe_get_value
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -66,6 +67,8 @@ async def async_setup_entry(
             )
         )
         buttons.append(Reload_Button(coordinator, device))
+        buttons.append(Reset_Has_Power_Consumption_Button(hass,coordinator, device,False))
+        buttons.append(Reset_Has_Work_Time_Button(hass,coordinator, device,False))        
 
         if DeviceFeatureEnum.BUTTON_SELF_CLEAN in device.supported_features:
             buttons.append(
@@ -165,7 +168,16 @@ class Reload_Button(TclNonPollingEntityBase, ButtonEntity):
     def icon(self):
         return "mdi:cloud-sync"
 
-    async def async_press(self) -> None:
+    async def async_press(self) -> None:        
+        power_consumption_data_enabled= safe_get_value(self.device.storage, "non_user_config.power_consumption.enabled", False)
+        work_time_data_enabled= safe_get_value(self.device.storage, "non_user_config.work_time.enabled", False)        
+        if power_consumption_data_enabled or work_time_data_enabled:        
+            device_id=self.device.device_id
+            storage_data=await get_stored_data(self.hass, device_id)        
+            storage_data, need_save= safe_set_value(storage_data, "non_user_config.power_consumption.last_response.timestamp", 1759400000, True)            
+            storage_data, need_save= safe_set_value(storage_data, "non_user_config.work_time.last_response.timestamp", 1759400000, True)          
+            if need_save:
+                self.device.storage= await set_stored_data(self.hass, device_id, storage_data)
         await self.coordinator.async_refresh()
 
 
@@ -199,3 +211,63 @@ class NotImplementedDevice_Clear_ManualStateDump_Button(
 
     async def async_press(self) -> None:
         await self.selfDiagnostics.clearStorage()
+
+class Reset_Has_Power_Consumption_Button(TclNonPollingEntityBase, ButtonEntity):
+    def __init__(self,
+        hass: HomeAssistant, 
+        coordinator: IotDeviceCoordinator, 
+        device: Device,
+        enabled: bool = False) -> None:
+        TclNonPollingEntityBase.__init__(
+            self, "ForceResetHasPowerConsumption", "Try get Power Consumption Data", device
+        )
+        self.hass=hass
+        self.coordinator = coordinator
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_entity_registry_enabled_default = enabled
+
+    @property
+    def device_class(self) -> str:
+        return ButtonDeviceClass.RESTART
+
+    @property
+    def icon(self):
+        return "mdi:transmission-tower-export"
+
+    async def async_press(self) -> None:        
+        storage_data=await get_stored_data(self.hass, self.device.device_id)        
+        storage_data, need_save= safe_set_value(storage_data, "non_user_config.power_consumption.init_done", False, True)      
+        storage_data, need_save= safe_set_value(storage_data, "non_user_config.power_consumption.enabled", True, True)            
+        if need_save:
+            await set_stored_data(self.hass, self.device.device_id, storage_data)
+            await self.coordinator.async_refresh()
+
+class Reset_Has_Work_Time_Button(TclNonPollingEntityBase, ButtonEntity):
+    def __init__(self,
+        hass: HomeAssistant, 
+        coordinator: IotDeviceCoordinator, 
+        device: Device,
+        enabled: bool = False) -> None:
+        TclNonPollingEntityBase.__init__(
+            self, "ForceResetHasWorkTime", "Try get Work time Data", device
+        )
+        self.hass=hass
+        self.coordinator = coordinator
+        self._attr_entity_category = EntityCategory.DIAGNOSTIC
+        self._attr_entity_registry_enabled_default = enabled
+
+    @property
+    def device_class(self) -> str:
+        return ButtonDeviceClass.RESTART
+
+    @property
+    def icon(self):
+        return "mdi:clock-time-eight-outline"
+
+    async def async_press(self) -> None:
+        storage_data=await get_stored_data(self.hass, self.device.device_id)                
+        storage_data, need_save= safe_set_value(storage_data, "non_user_config.work_time.init_done", False, True)            
+        storage_data, need_save= safe_set_value(storage_data, "non_user_config.work_time.enabled", True, True)            
+        if need_save:  
+            await set_stored_data(self.hass, self.device.device_id, storage_data)
+            await self.coordinator.async_refresh()
