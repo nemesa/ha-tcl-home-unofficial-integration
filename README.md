@@ -6,6 +6,7 @@
 - Split AC Fresh air
 - Portable AC
 - Window AC
+- Duct AC
 - Dehumidifier (DEM)
 - Dehumidifier (DF)
 

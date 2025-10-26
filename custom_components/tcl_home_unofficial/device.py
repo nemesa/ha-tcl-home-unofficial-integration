@@ -40,6 +40,13 @@ from .tcl_device_dehumidifier_df import (
     get_stored_dehumidifier_df_data,
     handle_dehumidifier_df_mode_change,
 )
+from .tcl_device_duct_ac import (
+    TCL_DuctAC_DeviceData,
+    get_stored_duct_ac_data,
+    handle_duct_ac_mode_change,
+)
+
+
 
 from .device_types import DeviceTypeEnum, calculateDeviceType
 from .data_storage import get_stored_data, safe_set_value, set_stored_data, safe_get_value
@@ -141,6 +148,12 @@ class Device:
                         aws_thing_state=aws_thing["state"]["reported"],
                         delta=aws_thing["state"].get("delta", {}),
                     )
+                case DeviceTypeEnum.DUCT_AC:
+                    self.data = TCL_DuctAC_DeviceData(
+                        device_id=self.device_id,
+                        aws_thing_state=aws_thing["state"]["reported"],
+                        delta=aws_thing["state"].get("delta", {}),
+                    )
 
                 case _:
                     self.data = None
@@ -169,6 +182,7 @@ class Device:
         | TCL_WindowAC_DeviceData
         | TCL_Dehumidifier_DEM_DeviceData
         | TCL_Dehumidifier_DF_DeviceData
+        | TCL_DuctAC_DeviceData
         | None
     ) = None
 
@@ -298,6 +312,8 @@ async def get_device_storage(hass: HomeAssistant, device: Device) -> None:
         return await get_stored_spit_ac_fresh_data(hass, device.device_id)
     elif device.device_type == DeviceTypeEnum.SPLIT_AC:
         return await get_stored_spit_ac_data(hass, device.device_id)
+    elif device.device_type == DeviceTypeEnum.DUCT_AC:
+        return await get_stored_duct_ac_data(hass, device.device_id)
     elif device.device_type == DeviceTypeEnum.PORTABLE_AC:
         return await get_stored_portable_ac_data(hass, device.device_id)
     elif device.device_type == DeviceTypeEnum.WINDOW_AC:
@@ -321,6 +337,13 @@ def get_desired_state_for_mode_change(
         )
     elif device.device_type == DeviceTypeEnum.SPLIT_AC:
         desired_state = handle_split_ac_mode_change(
+            desired_state=desired_state,
+            value=value,
+            supported_features=device.supported_features,
+            stored_data=stored_data,
+        )
+    elif device.device_type == DeviceTypeEnum.DUCT_AC:
+        desired_state = handle_duct_ac_mode_change(
             desired_state=desired_state,
             value=value,
             supported_features=device.supported_features,
