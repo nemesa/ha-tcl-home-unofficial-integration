@@ -51,6 +51,14 @@ if manual_state_dump_data:
         logging.info("--------------------------------")
         logging.info("Step: %s", step["actionDescription"])
         logging.info("--------------------------------")
+        logging.info("Reported actual changes")
+        for key in step["changedReportedKeys"]:
+            change = step["changedReportedData"].get(key, {})
+            change_from = change.get("from", "")
+            change_to = change.get("to", "")
+            if change_from != change_to:
+                logging.info("   %s:(%s)->(%s)", key, change_from, change_to)
+        logging.info("--------------------------------")
         logging.info("DesiredKeys: %s", step["changedDesiredKeys"])
         for key in step["changedDesiredKeys"]:
             change = step["changedDesiredData"].get(key, {})

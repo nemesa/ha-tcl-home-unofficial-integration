@@ -1,0 +1,2115 @@
+Tcl_thing
+{
+  "device_id": "******1",
+  "product_key": "j8qrxlwylthgotyw",
+  "platform": "TCLIOT",
+  "nick_name": "-------",
+  "device_name": "Duct",
+  "category": "AC",
+  "type": 2,
+  "device_type": "",
+  "firmware_version": "V8-R82CT20-WFMV205.171.1.35",
+  "net_type": 1,
+  "is_online": 1,
+  "room": "Living Room"
+}
+
+"device_storages": [
+      {
+        "non_user_config": {
+          "rn_probe_data": {
+            "is_success": false,
+            "config_data": [
+              {
+                "deviceId": "******1",
+                "productKey": "j8qrxlwylthgotyw",
+                "TSLVersion": "",
+                "minSdkVersion": "5.4.2"
+              },
+              {
+                "deviceId": null,
+                "productKey": "virtualTvRt41",
+                "TSLVersion": "",
+                "plugInType": 1,
+                "packageName": "com.tcl.panel_tv_overseas_virtualRT41",
+                "plugInVersion": "2.1.2",
+                "plugInUrl": "https://sgp-h5-prod.aws.tcljd.com/virtualTvRt41/android/2.1.2/release_android.zip",
+                "minSdkVersion": "5.4.1"
+              }
+            ],
+            "probing_messages": [
+              "no url for best plugin record"
+            ],
+            "data": null
+          },
+          "power_consumption": {
+            "init_done": true,
+            "enabled": true,
+            "last_response": {
+              "timestamp": 1761257927,
+              "data": {
+                "code": 0,
+                "message": "SUCCESS",
+                "data": {
+                  "device_id": "******1",
+                  "date": "20251023-20251024",
+                  "time_zone": "Australia/Brisbane",
+                  "time_offset": "UTC+10:00",
+                  "curr_statistics_res": {
+                    "date": "20251023-20251024",
+                    "offline_electricity": 0,
+                    "total_electricity": 0,
+                    "online_electricity": 0,
+                    "ai_electricity": 0
+                  },
+                  "before_statistics_res": {},
+                  "consumption_details": []
+                }
+              }
+            }
+          },
+          "work_time": {
+            "init_done": true,
+            "enabled": true,
+            "last_response": {
+              "timestamp": 1761257927,
+              "data": {
+                "code": 0,
+                "message": "SUCCESS",
+                "data": {
+                  "device_id": "******1",
+                  "date": "",
+                  "time_zone": null,
+                  "time_offset": null,
+                  "current_total_work_time": {
+                    "date": "",
+                    "work_time": 0,
+                    "ai_work_time": 0
+                  },
+                  "before_total_work_time": {
+                    "date": "2025-10-23",
+                    "work_time": 0,
+                    "ai_work_time": 0
+                  },
+                  "work_time_details": []
+                }
+              }
+            }
+          }
+        },
+        "deviceId": "******1"
+      }
+    ],
+
+
+************************************
+aws_things
+--------------------------------
+******1
+--------------------------------
+{
+  "AIECOStatus": 0,
+  "AIECOSwitch": 0,
+  "FreshAirStatus": 0,
+  "OutDoorCompTarFreqRun": 0,
+  "OutDoorCompTarFreqSet": 0,
+  "OutDoorEEVTarOpenDegree": 0,
+  "OutDoorFanTarSpeed": 0,
+  "PTCStatus": 0,
+  "antiMoldew": 0,
+  "beepSwitch": 0,
+  "capabilities": [
+    3,
+    9,
+    11,
+    12,
+    13,
+    21,
+    26,
+    33,
+    36,
+    48,
+    50,
+    53
+  ],
+  "compressorFrequency": 52,
+  "currentTemperature": 22.8,
+  "eightAddHot": 0,
+  "errorCode": [],
+  "expansionValve": 222,
+  "externalUnitCoilTemperature": 36,
+  "externalUnitElectricCurrent": 9,
+  "externalUnitExhaustTemperature": 45,
+  "externalUnitFanGear": 0,
+  "externalUnitFanSpeed": 600,
+  "externalUnitTemperature": 31,
+  "externalUnitVoltage": 225,
+  "filterAgePercentage": 100,
+  "fourWayValveStatus": 0,
+  "internalUnitCoilTemperature": 16,
+  "internalUnitFanCurrentGear": 3,
+  "internalUnitFanSpeed": 811,
+  "newWindAutoSwitch": 0,
+  "newWindPercentage": 33,
+  "newWindStrength": 0,
+  "newWindSuper": 0,
+  "newWindSwitch": 0,
+  "nightSilentEnd": 0,
+  "nightSilentStart": 0,
+  "nightSilentSwitch": 0,
+  "otaStatus": 1,
+  "powerSwitch": 1,
+  "regularReporting": 0,
+  "rssi": -61,
+  "screen": 1,
+  "selfClean": 0,
+  "selfCleanStatus": 6,
+  "sleep": 0,
+  "targetFahrenheitTemp": 70,
+  "targetTemperature": 21,
+  "temperatureType": 0,
+  "verticalDirection": 8,
+  "windSpeed7Gear": 3,
+  "windSpeedAutoSwitch": 0,
+  "windSpeedPercentage": 40,
+  "workMode": 1
+}
+************************************
+manual_state_dump_data
+################################
+--------------------------------
+Step: turn on
+--------------------------------
+Reported actual changes
+   powerSwitch:(0)->(1)
+   currentTemperature:(23.2)->(23.3)
+   regularReporting:(1)->(0)
+   antiMoldew:(1)->(0)
+   externalUnitVoltage:(230)->(229)
+   internalUnitFanSpeed:(670)->(1010)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(0)->(1)
+   targetTemperature:(23)->(23)
+   currentTemperature:(23.2)->(23.3)
+   windSpeed7Gear:(7)->(7)
+   verticalDirection:(8)->(8)
+   workMode:(1)->(1)
+   AIECOSwitch:(1)->(1)
+   regularReporting:(1)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(1)->(1)
+   antiMoldew:(1)->(0)
+   externalUnitVoltage:(230)->(229)
+   externalUnitElectricCurrent:(0)->(0)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(24)->(24)
+   internalUnitFanSpeed:(670)->(1010)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(34)->(34)
+   externalUnitCoilTemperature:(27)->(27)
+   externalUnitExhaustTemperature:(41)->(41)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(0)->(0)
+   compressorFrequency:(0)->(0)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(73)->(73)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(480)->(480)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(100)->(100)
+   windSpeedAutoSwitch:(0)->(0)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(2)->(2)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+ReportedKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(0)->(1)
+   targetTemperature:(23)->(23)
+   currentTemperature:(23.2)->(23.3)
+   windSpeed7Gear:(7)->(7)
+   verticalDirection:(8)->(8)
+   workMode:(1)->(1)
+   AIECOSwitch:(1)->(1)
+   regularReporting:(1)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(1)->(1)
+   antiMoldew:(1)->(0)
+   externalUnitVoltage:(230)->(229)
+   externalUnitElectricCurrent:(0)->(0)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(24)->(24)
+   internalUnitFanSpeed:(670)->(1010)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(34)->(34)
+   externalUnitCoilTemperature:(27)->(27)
+   externalUnitExhaustTemperature:(41)->(41)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(0)->(0)
+   compressorFrequency:(0)->(0)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(73)->(73)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(480)->(480)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(100)->(100)
+   windSpeedAutoSwitch:(0)->(0)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(2)->(2)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+################################
+--------------------------------
+Step: startup settings
+--------------------------------
+Reported actual changes
+   targetTemperature:(23)->(21)
+   currentTemperature:(23.3)->(23.5)
+   windSpeed7Gear:(7)->(0)
+   AIECOSwitch:(1)->(0)
+   externalUnitVoltage:(229)->(227)
+   externalUnitElectricCurrent:(0)->(7)
+   internalUnitCoilTemperature:(24)->(20)
+   internalUnitFanSpeed:(1010)->(862)
+   externalUnitCoilTemperature:(27)->(34)
+   externalUnitExhaustTemperature:(41)->(43)
+   externalUnitFanSpeed:(0)->(730)
+   compressorFrequency:(0)->(46)
+   targetFahrenheitTemp:(73)->(70)
+   expansionValve:(480)->(240)
+   windSpeedPercentage:(100)->(0)
+   windSpeedAutoSwitch:(0)->(1)
+   internalUnitFanCurrentGear:(2)->(4)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'AIECOSwitch', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanSpeed', 'compressorFrequency', 'targetFahrenheitTemp', 'expansionValve', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'internalUnitFanCurrentGear', 'eightAddHot']
+   powerSwitch:(1)->(1)
+   targetTemperature:(23)->(21)
+   currentTemperature:(23.3)->(23.5)
+   windSpeed7Gear:(7)->(0)
+   AIECOSwitch:(1)->(0)
+   externalUnitVoltage:(229)->(227)
+   externalUnitElectricCurrent:(0)->(7)
+   internalUnitCoilTemperature:(24)->(20)
+   internalUnitFanSpeed:(1010)->(862)
+   externalUnitTemperature:(34)->(34)
+   externalUnitCoilTemperature:(27)->(34)
+   externalUnitExhaustTemperature:(41)->(43)
+   externalUnitFanSpeed:(0)->(730)
+   compressorFrequency:(0)->(46)
+   targetFahrenheitTemp:(73)->(70)
+   expansionValve:(480)->(240)
+   windSpeedPercentage:(100)->(0)
+   windSpeedAutoSwitch:(0)->(1)
+   internalUnitFanCurrentGear:(2)->(4)
+   eightAddHot:(0)->(0)
+ReportedKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'AIECOSwitch', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanSpeed', 'compressorFrequency', 'targetFahrenheitTemp', 'expansionValve', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'internalUnitFanCurrentGear']
+   powerSwitch:(1)->(1)
+   targetTemperature:(23)->(21)
+   currentTemperature:(23.3)->(23.5)
+   windSpeed7Gear:(7)->(0)
+   AIECOSwitch:(1)->(0)
+   externalUnitVoltage:(229)->(227)
+   externalUnitElectricCurrent:(0)->(7)
+   internalUnitCoilTemperature:(24)->(20)
+   internalUnitFanSpeed:(1010)->(862)
+   externalUnitTemperature:(34)->(34)
+   externalUnitCoilTemperature:(27)->(34)
+   externalUnitExhaustTemperature:(41)->(43)
+   externalUnitFanSpeed:(0)->(730)
+   compressorFrequency:(0)->(46)
+   targetFahrenheitTemp:(73)->(70)
+   expansionValve:(480)->(240)
+   windSpeedPercentage:(100)->(0)
+   windSpeedAutoSwitch:(0)->(1)
+   internalUnitFanCurrentGear:(2)->(4)
+################################
+--------------------------------
+Step: mode: Dry
+--------------------------------
+Reported actual changes
+   currentTemperature:(23.5)->(24.5)
+   windSpeed7Gear:(0)->(2)
+   workMode:(1)->(2)
+   externalUnitVoltage:(227)->(225)
+   externalUnitElectricCurrent:(7)->(9)
+   internalUnitCoilTemperature:(20)->(16)
+   internalUnitFanSpeed:(862)->(727)
+   externalUnitTemperature:(34)->(33)
+   externalUnitCoilTemperature:(34)->(35)
+   externalUnitExhaustTemperature:(43)->(45)
+   externalUnitFanSpeed:(730)->(600)
+   compressorFrequency:(46)->(54)
+   expansionValve:(240)->(212)
+   windSpeedPercentage:(0)->(25)
+   windSpeedAutoSwitch:(1)->(0)
+   internalUnitFanCurrentGear:(4)->(2)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(21)->(21)
+   currentTemperature:(23.5)->(24.5)
+   windSpeed7Gear:(0)->(2)
+   verticalDirection:(8)->(8)
+   workMode:(1)->(2)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(0)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(1)->(1)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(227)->(225)
+   externalUnitElectricCurrent:(7)->(9)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(20)->(16)
+   internalUnitFanSpeed:(862)->(727)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(34)->(33)
+   externalUnitCoilTemperature:(34)->(35)
+   externalUnitExhaustTemperature:(43)->(45)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(730)->(600)
+   compressorFrequency:(46)->(54)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(70)->(70)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(240)->(212)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(0)->(25)
+   windSpeedAutoSwitch:(1)->(0)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(4)->(2)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+ReportedKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(21)->(21)
+   currentTemperature:(23.5)->(24.5)
+   windSpeed7Gear:(0)->(2)
+   verticalDirection:(8)->(8)
+   workMode:(1)->(2)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(0)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(1)->(1)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(227)->(225)
+   externalUnitElectricCurrent:(7)->(9)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(20)->(16)
+   internalUnitFanSpeed:(862)->(727)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(34)->(33)
+   externalUnitCoilTemperature:(34)->(35)
+   externalUnitExhaustTemperature:(43)->(45)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(730)->(600)
+   compressorFrequency:(46)->(54)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(70)->(70)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(240)->(212)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(0)->(25)
+   windSpeedAutoSwitch:(1)->(0)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(4)->(2)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+################################
+--------------------------------
+Step: temp: 23
+--------------------------------
+Reported actual changes
+   targetTemperature:(21)->(23)
+   externalUnitElectricCurrent:(9)->(10)
+   internalUnitCoilTemperature:(16)->(14)
+   externalUnitTemperature:(33)->(32)
+   externalUnitCoilTemperature:(35)->(38)
+   externalUnitExhaustTemperature:(45)->(49)
+   targetFahrenheitTemp:(70)->(73)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'targetFahrenheitTemp', 'eightAddHot']
+   powerSwitch:(1)->(1)
+   targetTemperature:(21)->(23)
+   currentTemperature:(24.5)->(24.5)
+   externalUnitElectricCurrent:(9)->(10)
+   internalUnitCoilTemperature:(16)->(14)
+   externalUnitTemperature:(33)->(32)
+   externalUnitCoilTemperature:(35)->(38)
+   externalUnitExhaustTemperature:(45)->(49)
+   targetFahrenheitTemp:(70)->(73)
+   eightAddHot:(0)->(0)
+ReportedKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'targetFahrenheitTemp']
+   powerSwitch:(1)->(1)
+   targetTemperature:(21)->(23)
+   currentTemperature:(24.5)->(24.5)
+   externalUnitElectricCurrent:(9)->(10)
+   internalUnitCoilTemperature:(16)->(14)
+   externalUnitTemperature:(33)->(32)
+   externalUnitCoilTemperature:(35)->(38)
+   externalUnitExhaustTemperature:(45)->(49)
+   targetFahrenheitTemp:(70)->(73)
+################################
+--------------------------------
+Step: mode: Fan
+--------------------------------
+Reported actual changes
+   currentTemperature:(24.5)->(24.4)
+   windSpeed7Gear:(2)->(0)
+   workMode:(2)->(3)
+   externalUnitVoltage:(225)->(229)
+   externalUnitElectricCurrent:(10)->(1)
+   internalUnitFanSpeed:(727)->(720)
+   externalUnitCoilTemperature:(38)->(37)
+   externalUnitExhaustTemperature:(49)->(50)
+   externalUnitFanSpeed:(600)->(610)
+   compressorFrequency:(54)->(0)
+   expansionValve:(212)->(276)
+   windSpeedPercentage:(25)->(0)
+   windSpeedAutoSwitch:(0)->(1)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(23)->(23)
+   currentTemperature:(24.5)->(24.4)
+   windSpeed7Gear:(2)->(0)
+   verticalDirection:(8)->(8)
+   workMode:(2)->(3)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(0)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(1)->(1)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(225)->(229)
+   externalUnitElectricCurrent:(10)->(1)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(14)->(14)
+   internalUnitFanSpeed:(727)->(720)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(32)->(32)
+   externalUnitCoilTemperature:(38)->(37)
+   externalUnitExhaustTemperature:(49)->(50)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(600)->(610)
+   compressorFrequency:(54)->(0)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(73)->(73)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(212)->(276)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(25)->(0)
+   windSpeedAutoSwitch:(0)->(1)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(2)->(2)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+ReportedKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(23)->(23)
+   currentTemperature:(24.5)->(24.4)
+   windSpeed7Gear:(2)->(0)
+   verticalDirection:(8)->(8)
+   workMode:(2)->(3)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(0)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(1)->(1)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(225)->(229)
+   externalUnitElectricCurrent:(10)->(1)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(14)->(14)
+   internalUnitFanSpeed:(727)->(720)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(32)->(32)
+   externalUnitCoilTemperature:(38)->(37)
+   externalUnitExhaustTemperature:(49)->(50)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(600)->(610)
+   compressorFrequency:(54)->(0)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(73)->(73)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(212)->(276)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(25)->(0)
+   windSpeedAutoSwitch:(0)->(1)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(2)->(2)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+################################
+--------------------------------
+Step: temp: 24
+--------------------------------
+Reported actual changes
+   targetTemperature:(23)->(24)
+   currentTemperature:(24.4)->(24.1)
+   externalUnitVoltage:(229)->(230)
+   externalUnitElectricCurrent:(1)->(0)
+   internalUnitCoilTemperature:(14)->(20)
+   externalUnitCoilTemperature:(37)->(28)
+   externalUnitExhaustTemperature:(50)->(45)
+   externalUnitFanSpeed:(610)->(0)
+   targetFahrenheitTemp:(73)->(75)
+   expansionValve:(276)->(480)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanSpeed', 'targetFahrenheitTemp', 'expansionValve', 'eightAddHot']
+   powerSwitch:(1)->(1)
+   targetTemperature:(23)->(24)
+   currentTemperature:(24.4)->(24.1)
+   externalUnitVoltage:(229)->(230)
+   externalUnitElectricCurrent:(1)->(0)
+   internalUnitCoilTemperature:(14)->(20)
+   externalUnitCoilTemperature:(37)->(28)
+   externalUnitExhaustTemperature:(50)->(45)
+   externalUnitFanSpeed:(610)->(0)
+   targetFahrenheitTemp:(73)->(75)
+   expansionValve:(276)->(480)
+   eightAddHot:(0)->(0)
+ReportedKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanSpeed', 'targetFahrenheitTemp', 'expansionValve']
+   powerSwitch:(1)->(1)
+   targetTemperature:(23)->(24)
+   currentTemperature:(24.4)->(24.1)
+   externalUnitVoltage:(229)->(230)
+   externalUnitElectricCurrent:(1)->(0)
+   internalUnitCoilTemperature:(14)->(20)
+   externalUnitCoilTemperature:(37)->(28)
+   externalUnitExhaustTemperature:(50)->(45)
+   externalUnitFanSpeed:(610)->(0)
+   targetFahrenheitTemp:(73)->(75)
+   expansionValve:(276)->(480)
+################################
+--------------------------------
+Step: mode: Auto
+--------------------------------
+Reported actual changes
+   currentTemperature:(24.1)->(24)
+   workMode:(3)->(0)
+   internalUnitFanSpeed:(720)->(719)
+   externalUnitCoilTemperature:(28)->(24)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(24)->(24)
+   currentTemperature:(24.1)->(24)
+   windSpeed7Gear:(0)->(0)
+   verticalDirection:(8)->(8)
+   workMode:(3)->(0)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(0)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(1)->(1)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(230)->(230)
+   externalUnitElectricCurrent:(0)->(0)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(20)->(20)
+   internalUnitFanSpeed:(720)->(719)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(32)->(32)
+   externalUnitCoilTemperature:(28)->(24)
+   externalUnitExhaustTemperature:(45)->(45)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(0)->(0)
+   compressorFrequency:(0)->(0)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(75)->(75)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(480)->(480)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(0)->(0)
+   windSpeedAutoSwitch:(1)->(1)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(2)->(2)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+ReportedKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(24)->(24)
+   currentTemperature:(24.1)->(24)
+   windSpeed7Gear:(0)->(0)
+   verticalDirection:(8)->(8)
+   workMode:(3)->(0)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(0)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(1)->(1)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(230)->(230)
+   externalUnitElectricCurrent:(0)->(0)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(20)->(20)
+   internalUnitFanSpeed:(720)->(719)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(32)->(32)
+   externalUnitCoilTemperature:(28)->(24)
+   externalUnitExhaustTemperature:(45)->(45)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(0)->(0)
+   compressorFrequency:(0)->(0)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(75)->(75)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(480)->(480)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(0)->(0)
+   windSpeedAutoSwitch:(1)->(1)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(2)->(2)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+################################
+--------------------------------
+Step: temp: 25
+--------------------------------
+Reported actual changes
+   targetTemperature:(24)->(25)
+   currentTemperature:(24)->(20.9)
+   internalUnitFanSpeed:(719)->(658)
+   externalUnitCoilTemperature:(24)->(22)
+   targetFahrenheitTemp:(75)->(77)
+   internalUnitFanCurrentGear:(2)->(1)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(24)->(25)
+   currentTemperature:(24)->(20.9)
+   windSpeed7Gear:(0)->(0)
+   verticalDirection:(8)->(8)
+   workMode:(0)->(0)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(0)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(1)->(1)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(230)->(230)
+   externalUnitElectricCurrent:(0)->(0)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(20)->(20)
+   internalUnitFanSpeed:(719)->(658)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(32)->(32)
+   externalUnitCoilTemperature:(24)->(22)
+   externalUnitExhaustTemperature:(45)->(45)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(0)->(0)
+   compressorFrequency:(0)->(0)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(75)->(77)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(480)->(480)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(0)->(0)
+   windSpeedAutoSwitch:(1)->(1)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(2)->(1)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+ReportedKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(24)->(25)
+   currentTemperature:(24)->(20.9)
+   windSpeed7Gear:(0)->(0)
+   verticalDirection:(8)->(8)
+   workMode:(0)->(0)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(0)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(1)->(1)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(230)->(230)
+   externalUnitElectricCurrent:(0)->(0)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(20)->(20)
+   internalUnitFanSpeed:(719)->(658)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(32)->(32)
+   externalUnitCoilTemperature:(24)->(22)
+   externalUnitExhaustTemperature:(45)->(45)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(0)->(0)
+   compressorFrequency:(0)->(0)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(75)->(77)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(480)->(480)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(0)->(0)
+   windSpeedAutoSwitch:(1)->(1)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(2)->(1)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+################################
+--------------------------------
+Step: mode: cool
+--------------------------------
+Reported actual changes
+   targetTemperature:(25)->(21)
+   currentTemperature:(20.9)->(22.9)
+   workMode:(0)->(1)
+   internalUnitFanSpeed:(658)->(788)
+   targetFahrenheitTemp:(77)->(70)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(25)->(21)
+   currentTemperature:(20.9)->(22.9)
+   windSpeed7Gear:(0)->(0)
+   verticalDirection:(8)->(8)
+   workMode:(0)->(1)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(0)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(1)->(1)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(230)->(230)
+   externalUnitElectricCurrent:(0)->(0)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(20)->(20)
+   internalUnitFanSpeed:(658)->(788)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(32)->(32)
+   externalUnitCoilTemperature:(22)->(22)
+   externalUnitExhaustTemperature:(45)->(45)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(0)->(0)
+   compressorFrequency:(0)->(0)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(77)->(70)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(480)->(480)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(0)->(0)
+   windSpeedAutoSwitch:(1)->(1)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(1)->(1)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+ReportedKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(25)->(21)
+   currentTemperature:(20.9)->(22.9)
+   windSpeed7Gear:(0)->(0)
+   verticalDirection:(8)->(8)
+   workMode:(0)->(1)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(0)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(1)->(1)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(230)->(230)
+   externalUnitElectricCurrent:(0)->(0)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(20)->(20)
+   internalUnitFanSpeed:(658)->(788)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(32)->(32)
+   externalUnitCoilTemperature:(22)->(22)
+   externalUnitExhaustTemperature:(45)->(45)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(0)->(0)
+   compressorFrequency:(0)->(0)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(77)->(70)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(480)->(480)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(0)->(0)
+   windSpeedAutoSwitch:(1)->(1)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(1)->(1)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+################################
+--------------------------------
+Step: temp: 21
+--------------------------------
+Reported actual changes
+   externalUnitVoltage:(230)->(229)
+   externalUnitElectricCurrent:(0)->(3)
+   internalUnitFanSpeed:(788)->(858)
+   externalUnitTemperature:(32)->(31)
+   compressorFrequency:(0)->(32)
+   expansionValve:(480)->(240)
+   internalUnitFanCurrentGear:(1)->(4)
+--------------------------------
+DesiredKeys: ['externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitFanSpeed', 'externalUnitTemperature', 'externalUnitFanSpeed', 'compressorFrequency', 'expansionValve', 'internalUnitFanCurrentGear']
+   externalUnitVoltage:(230)->(229)
+   externalUnitElectricCurrent:(0)->(3)
+   internalUnitFanSpeed:(788)->(858)
+   externalUnitTemperature:(32)->(31)
+   externalUnitFanSpeed:(0)->(0)
+   compressorFrequency:(0)->(32)
+   expansionValve:(480)->(240)
+   internalUnitFanCurrentGear:(1)->(4)
+ReportedKeys: ['externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitFanSpeed', 'externalUnitTemperature', 'externalUnitFanSpeed', 'compressorFrequency', 'expansionValve', 'internalUnitFanCurrentGear']
+   externalUnitVoltage:(230)->(229)
+   externalUnitElectricCurrent:(0)->(3)
+   internalUnitFanSpeed:(788)->(858)
+   externalUnitTemperature:(32)->(31)
+   externalUnitFanSpeed:(0)->(0)
+   compressorFrequency:(0)->(32)
+   expansionValve:(480)->(240)
+   internalUnitFanCurrentGear:(1)->(4)
+################################
+--------------------------------
+Step: Fan speed:1
+--------------------------------
+Reported actual changes
+   windSpeed7Gear:(0)->(1)
+   externalUnitVoltage:(229)->(228)
+   externalUnitElectricCurrent:(3)->(6)
+   internalUnitCoilTemperature:(20)->(18)
+   internalUnitFanSpeed:(858)->(758)
+   externalUnitCoilTemperature:(22)->(29)
+   externalUnitFanSpeed:(0)->(720)
+   compressorFrequency:(32)->(36)
+   windSpeedPercentage:(0)->(1)
+   windSpeedAutoSwitch:(1)->(0)
+   internalUnitFanCurrentGear:(4)->(3)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'currentTemperature', 'windSpeed7Gear', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'externalUnitCoilTemperature', 'externalUnitFanSpeed', 'compressorFrequency', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'internalUnitFanCurrentGear']
+   powerSwitch:(1)->(1)
+   currentTemperature:(22.9)->(22.9)
+   windSpeed7Gear:(0)->(1)
+   externalUnitVoltage:(229)->(228)
+   externalUnitElectricCurrent:(3)->(6)
+   internalUnitCoilTemperature:(20)->(18)
+   internalUnitFanSpeed:(858)->(758)
+   externalUnitCoilTemperature:(22)->(29)
+   externalUnitFanSpeed:(0)->(720)
+   compressorFrequency:(32)->(36)
+   windSpeedPercentage:(0)->(1)
+   windSpeedAutoSwitch:(1)->(0)
+   internalUnitFanCurrentGear:(4)->(3)
+ReportedKeys: ['powerSwitch', 'currentTemperature', 'windSpeed7Gear', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'externalUnitCoilTemperature', 'externalUnitFanSpeed', 'compressorFrequency', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'internalUnitFanCurrentGear']
+   powerSwitch:(1)->(1)
+   currentTemperature:(22.9)->(22.9)
+   windSpeed7Gear:(0)->(1)
+   externalUnitVoltage:(229)->(228)
+   externalUnitElectricCurrent:(3)->(6)
+   internalUnitCoilTemperature:(20)->(18)
+   internalUnitFanSpeed:(858)->(758)
+   externalUnitCoilTemperature:(22)->(29)
+   externalUnitFanSpeed:(0)->(720)
+   compressorFrequency:(32)->(36)
+   windSpeedPercentage:(0)->(1)
+   windSpeedAutoSwitch:(1)->(0)
+   internalUnitFanCurrentGear:(4)->(3)
+################################
+--------------------------------
+Step: Fan speed:2
+--------------------------------
+Reported actual changes
+   windSpeed7Gear:(1)->(2)
+   externalUnitElectricCurrent:(6)->(5)
+   internalUnitCoilTemperature:(18)->(17)
+   internalUnitFanSpeed:(758)->(711)
+   externalUnitCoilTemperature:(29)->(32)
+   externalUnitExhaustTemperature:(45)->(44)
+   externalUnitFanSpeed:(720)->(600)
+   windSpeedPercentage:(1)->(25)
+   internalUnitFanCurrentGear:(3)->(2)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'windSpeed7Gear', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanSpeed', 'windSpeedPercentage', 'internalUnitFanCurrentGear']
+   powerSwitch:(1)->(1)
+   windSpeed7Gear:(1)->(2)
+   externalUnitElectricCurrent:(6)->(5)
+   internalUnitCoilTemperature:(18)->(17)
+   internalUnitFanSpeed:(758)->(711)
+   externalUnitCoilTemperature:(29)->(32)
+   externalUnitExhaustTemperature:(45)->(44)
+   externalUnitFanSpeed:(720)->(600)
+   windSpeedPercentage:(1)->(25)
+   internalUnitFanCurrentGear:(3)->(2)
+ReportedKeys: ['powerSwitch', 'windSpeed7Gear', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanSpeed', 'windSpeedPercentage', 'internalUnitFanCurrentGear']
+   powerSwitch:(1)->(1)
+   windSpeed7Gear:(1)->(2)
+   externalUnitElectricCurrent:(6)->(5)
+   internalUnitCoilTemperature:(18)->(17)
+   internalUnitFanSpeed:(758)->(711)
+   externalUnitCoilTemperature:(29)->(32)
+   externalUnitExhaustTemperature:(45)->(44)
+   externalUnitFanSpeed:(720)->(600)
+   windSpeedPercentage:(1)->(25)
+   internalUnitFanCurrentGear:(3)->(2)
+################################
+--------------------------------
+Step: Fan speed:3
+--------------------------------
+Reported actual changes
+   windSpeed7Gear:(2)->(3)
+   externalUnitVoltage:(228)->(226)
+   externalUnitElectricCurrent:(5)->(9)
+   internalUnitFanSpeed:(711)->(816)
+   externalUnitCoilTemperature:(32)->(34)
+   externalUnitExhaustTemperature:(44)->(45)
+   compressorFrequency:(36)->(54)
+   expansionValve:(240)->(222)
+   windSpeedPercentage:(25)->(40)
+   internalUnitFanCurrentGear:(2)->(3)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'currentTemperature', 'windSpeed7Gear', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitFanSpeed', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'compressorFrequency', 'expansionValve', 'windSpeedPercentage', 'internalUnitFanCurrentGear']
+   powerSwitch:(1)->(1)
+   currentTemperature:(22.9)->(22.9)
+   windSpeed7Gear:(2)->(3)
+   externalUnitVoltage:(228)->(226)
+   externalUnitElectricCurrent:(5)->(9)
+   internalUnitFanSpeed:(711)->(816)
+   externalUnitCoilTemperature:(32)->(34)
+   externalUnitExhaustTemperature:(44)->(45)
+   compressorFrequency:(36)->(54)
+   expansionValve:(240)->(222)
+   windSpeedPercentage:(25)->(40)
+   internalUnitFanCurrentGear:(2)->(3)
+ReportedKeys: ['powerSwitch', 'currentTemperature', 'windSpeed7Gear', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitFanSpeed', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'compressorFrequency', 'expansionValve', 'windSpeedPercentage', 'internalUnitFanCurrentGear']
+   powerSwitch:(1)->(1)
+   currentTemperature:(22.9)->(22.9)
+   windSpeed7Gear:(2)->(3)
+   externalUnitVoltage:(228)->(226)
+   externalUnitElectricCurrent:(5)->(9)
+   internalUnitFanSpeed:(711)->(816)
+   externalUnitCoilTemperature:(32)->(34)
+   externalUnitExhaustTemperature:(44)->(45)
+   compressorFrequency:(36)->(54)
+   expansionValve:(240)->(222)
+   windSpeedPercentage:(25)->(40)
+   internalUnitFanCurrentGear:(2)->(3)
+################################
+--------------------------------
+Step: Fan speed: Auto
+--------------------------------
+Reported actual changes
+   windSpeed7Gear:(3)->(0)
+   externalUnitVoltage:(226)->(225)
+   internalUnitCoilTemperature:(17)->(16)
+   internalUnitFanSpeed:(816)->(866)
+   externalUnitCoilTemperature:(34)->(35)
+   externalUnitExhaustTemperature:(45)->(47)
+   expansionValve:(222)->(235)
+   windSpeedPercentage:(40)->(0)
+   windSpeedAutoSwitch:(0)->(1)
+   internalUnitFanCurrentGear:(3)->(4)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'windSpeed7Gear', 'externalUnitVoltage', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'expansionValve', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'internalUnitFanCurrentGear']
+   powerSwitch:(1)->(1)
+   windSpeed7Gear:(3)->(0)
+   externalUnitVoltage:(226)->(225)
+   internalUnitCoilTemperature:(17)->(16)
+   internalUnitFanSpeed:(816)->(866)
+   externalUnitCoilTemperature:(34)->(35)
+   externalUnitExhaustTemperature:(45)->(47)
+   expansionValve:(222)->(235)
+   windSpeedPercentage:(40)->(0)
+   windSpeedAutoSwitch:(0)->(1)
+   internalUnitFanCurrentGear:(3)->(4)
+ReportedKeys: ['powerSwitch', 'windSpeed7Gear', 'externalUnitVoltage', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'expansionValve', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'internalUnitFanCurrentGear']
+   powerSwitch:(1)->(1)
+   windSpeed7Gear:(3)->(0)
+   externalUnitVoltage:(226)->(225)
+   internalUnitCoilTemperature:(17)->(16)
+   internalUnitFanSpeed:(816)->(866)
+   externalUnitCoilTemperature:(34)->(35)
+   externalUnitExhaustTemperature:(45)->(47)
+   expansionValve:(222)->(235)
+   windSpeedPercentage:(40)->(0)
+   windSpeedAutoSwitch:(0)->(1)
+   internalUnitFanCurrentGear:(3)->(4)
+################################
+--------------------------------
+Step: ECO: on
+--------------------------------
+Reported actual changes
+   AIECOSwitch:(0)->(1)
+   externalUnitElectricCurrent:(9)->(10)
+   internalUnitCoilTemperature:(16)->(15)
+   externalUnitCoilTemperature:(35)->(36)
+   externalUnitExhaustTemperature:(47)->(48)
+   expansionValve:(235)->(242)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'AIECOSwitch', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'expansionValve', 'eightAddHot']
+   powerSwitch:(1)->(1)
+   AIECOSwitch:(0)->(1)
+   externalUnitVoltage:(225)->(225)
+   externalUnitElectricCurrent:(9)->(10)
+   internalUnitCoilTemperature:(16)->(15)
+   externalUnitCoilTemperature:(35)->(36)
+   externalUnitExhaustTemperature:(47)->(48)
+   expansionValve:(235)->(242)
+   eightAddHot:(0)->(0)
+ReportedKeys: ['powerSwitch', 'AIECOSwitch', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'expansionValve']
+   powerSwitch:(1)->(1)
+   AIECOSwitch:(0)->(1)
+   externalUnitVoltage:(225)->(225)
+   externalUnitElectricCurrent:(9)->(10)
+   internalUnitCoilTemperature:(16)->(15)
+   externalUnitCoilTemperature:(35)->(36)
+   externalUnitExhaustTemperature:(47)->(48)
+   expansionValve:(235)->(242)
+################################
+--------------------------------
+Step: ECO: off
+--------------------------------
+Reported actual changes
+   currentTemperature:(22.9)->(22.8)
+   AIECOSwitch:(1)->(0)
+   externalUnitCoilTemperature:(36)->(37)
+   externalUnitExhaustTemperature:(48)->(49)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'currentTemperature', 'AIECOSwitch', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'eightAddHot']
+   powerSwitch:(1)->(1)
+   currentTemperature:(22.9)->(22.8)
+   AIECOSwitch:(1)->(0)
+   externalUnitCoilTemperature:(36)->(37)
+   externalUnitExhaustTemperature:(48)->(49)
+   eightAddHot:(0)->(0)
+ReportedKeys: ['powerSwitch', 'currentTemperature', 'AIECOSwitch', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature']
+   powerSwitch:(1)->(1)
+   currentTemperature:(22.9)->(22.8)
+   AIECOSwitch:(1)->(0)
+   externalUnitCoilTemperature:(36)->(37)
+   externalUnitExhaustTemperature:(48)->(49)
+################################
+--------------------------------
+Step: Sleep: on
+--------------------------------
+Reported actual changes
+   sleep:(0)->(1)
+   externalUnitElectricCurrent:(10)->(12)
+   internalUnitCoilTemperature:(15)->(14)
+   externalUnitCoilTemperature:(37)->(38)
+   externalUnitExhaustTemperature:(49)->(50)
+   compressorFrequency:(54)->(64)
+   expansionValve:(242)->(267)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'targetTemperature', 'sleep', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'compressorFrequency', 'targetFahrenheitTemp', 'expansionValve', 'eightAddHot']
+   powerSwitch:(1)->(1)
+   targetTemperature:(21)->(21)
+   sleep:(0)->(1)
+   externalUnitElectricCurrent:(10)->(12)
+   internalUnitCoilTemperature:(15)->(14)
+   externalUnitCoilTemperature:(37)->(38)
+   externalUnitExhaustTemperature:(49)->(50)
+   compressorFrequency:(54)->(64)
+   targetFahrenheitTemp:(70)->(70)
+   expansionValve:(242)->(267)
+   eightAddHot:(0)->(0)
+ReportedKeys: ['powerSwitch', 'targetTemperature', 'sleep', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'compressorFrequency', 'targetFahrenheitTemp', 'expansionValve']
+   powerSwitch:(1)->(1)
+   targetTemperature:(21)->(21)
+   sleep:(0)->(1)
+   externalUnitElectricCurrent:(10)->(12)
+   internalUnitCoilTemperature:(15)->(14)
+   externalUnitCoilTemperature:(37)->(38)
+   externalUnitExhaustTemperature:(49)->(50)
+   compressorFrequency:(54)->(64)
+   targetFahrenheitTemp:(70)->(70)
+   expansionValve:(242)->(267)
+################################
+--------------------------------
+Step: Sleep: off
+--------------------------------
+Reported actual changes
+   sleep:(1)->(0)
+   externalUnitCoilTemperature:(38)->(39)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'sleep', 'externalUnitCoilTemperature', 'eightAddHot']
+   powerSwitch:(1)->(1)
+   sleep:(1)->(0)
+   externalUnitCoilTemperature:(38)->(39)
+   eightAddHot:(0)->(0)
+ReportedKeys: ['powerSwitch', 'sleep', 'externalUnitCoilTemperature']
+   powerSwitch:(1)->(1)
+   sleep:(1)->(0)
+   externalUnitCoilTemperature:(38)->(39)
+################################
+--------------------------------
+Step: light: off
+--------------------------------
+Reported actual changes
+   currentTemperature:(22.8)->(22.7)
+   screen:(1)->(0)
+   externalUnitVoltage:(225)->(223)
+   externalUnitElectricCurrent:(12)->(13)
+   internalUnitCoilTemperature:(14)->(12)
+   externalUnitTemperature:(31)->(32)
+   externalUnitCoilTemperature:(39)->(38)
+   externalUnitExhaustTemperature:(50)->(53)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'currentTemperature', 'screen', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature']
+   powerSwitch:(1)->(1)
+   currentTemperature:(22.8)->(22.7)
+   screen:(1)->(0)
+   externalUnitVoltage:(225)->(223)
+   externalUnitElectricCurrent:(12)->(13)
+   internalUnitCoilTemperature:(14)->(12)
+   externalUnitTemperature:(31)->(32)
+   externalUnitCoilTemperature:(39)->(38)
+   externalUnitExhaustTemperature:(50)->(53)
+ReportedKeys: ['powerSwitch', 'currentTemperature', 'screen', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature']
+   powerSwitch:(1)->(1)
+   currentTemperature:(22.8)->(22.7)
+   screen:(1)->(0)
+   externalUnitVoltage:(225)->(223)
+   externalUnitElectricCurrent:(12)->(13)
+   internalUnitCoilTemperature:(14)->(12)
+   externalUnitTemperature:(31)->(32)
+   externalUnitCoilTemperature:(39)->(38)
+   externalUnitExhaustTemperature:(50)->(53)
+################################
+--------------------------------
+Step: Light: on
+--------------------------------
+Reported actual changes
+   screen:(0)->(1)
+   externalUnitVoltage:(223)->(224)
+   externalUnitElectricCurrent:(13)->(11)
+   externalUnitCoilTemperature:(38)->(37)
+   externalUnitExhaustTemperature:(53)->(54)
+   compressorFrequency:(64)->(56)
+   expansionValve:(267)->(228)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'screen', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'compressorFrequency', 'expansionValve']
+   powerSwitch:(1)->(1)
+   screen:(0)->(1)
+   externalUnitVoltage:(223)->(224)
+   externalUnitElectricCurrent:(13)->(11)
+   externalUnitCoilTemperature:(38)->(37)
+   externalUnitExhaustTemperature:(53)->(54)
+   compressorFrequency:(64)->(56)
+   expansionValve:(267)->(228)
+ReportedKeys: ['powerSwitch', 'screen', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'compressorFrequency', 'expansionValve']
+   powerSwitch:(1)->(1)
+   screen:(0)->(1)
+   externalUnitVoltage:(223)->(224)
+   externalUnitElectricCurrent:(13)->(11)
+   externalUnitCoilTemperature:(38)->(37)
+   externalUnitExhaustTemperature:(53)->(54)
+   compressorFrequency:(64)->(56)
+   expansionValve:(267)->(228)
+################################
+--------------------------------
+Step: prompt: on
+--------------------------------
+Reported actual changes
+   currentTemperature:(22.7)->(22.4)
+   externalUnitElectricCurrent:(11)->(6)
+   internalUnitCoilTemperature:(12)->(13)
+   externalUnitCoilTemperature:(37)->(34)
+   compressorFrequency:(56)->(36)
+   expansionValve:(228)->(166)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'currentTemperature', 'beepSwitch', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'compressorFrequency', 'expansionValve']
+   powerSwitch:(1)->(1)
+   currentTemperature:(22.7)->(22.4)
+   beepSwitch:(1)->(1)
+   externalUnitElectricCurrent:(11)->(6)
+   internalUnitCoilTemperature:(12)->(13)
+   externalUnitCoilTemperature:(37)->(34)
+   externalUnitExhaustTemperature:(54)->(54)
+   compressorFrequency:(56)->(36)
+   expansionValve:(228)->(166)
+ReportedKeys: ['powerSwitch', 'currentTemperature', 'beepSwitch', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'compressorFrequency', 'expansionValve']
+   powerSwitch:(1)->(1)
+   currentTemperature:(22.7)->(22.4)
+   beepSwitch:(1)->(1)
+   externalUnitElectricCurrent:(11)->(6)
+   internalUnitCoilTemperature:(12)->(13)
+   externalUnitCoilTemperature:(37)->(34)
+   externalUnitExhaustTemperature:(54)->(54)
+   compressorFrequency:(56)->(36)
+   expansionValve:(228)->(166)
+################################
+--------------------------------
+Step: prompt: off
+--------------------------------
+Reported actual changes
+   beepSwitch:(1)->(0)
+   internalUnitCoilTemperature:(13)->(14)
+   externalUnitCoilTemperature:(34)->(33)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'beepSwitch', 'internalUnitCoilTemperature', 'externalUnitCoilTemperature']
+   powerSwitch:(1)->(1)
+   beepSwitch:(1)->(0)
+   internalUnitCoilTemperature:(13)->(14)
+   externalUnitCoilTemperature:(34)->(33)
+ReportedKeys: ['powerSwitch', 'beepSwitch', 'internalUnitCoilTemperature', 'externalUnitCoilTemperature']
+   powerSwitch:(1)->(1)
+   beepSwitch:(1)->(0)
+   internalUnitCoilTemperature:(13)->(14)
+   externalUnitCoilTemperature:(34)->(33)
+################################
+--------------------------------
+Step: mode: Dry
+--------------------------------
+Reported actual changes
+   targetTemperature:(21)->(23)
+   currentTemperature:(22.4)->(23.1)
+   windSpeed7Gear:(0)->(2)
+   workMode:(1)->(2)
+   externalUnitElectricCurrent:(6)->(7)
+   internalUnitCoilTemperature:(14)->(13)
+   internalUnitFanSpeed:(866)->(728)
+   externalUnitCoilTemperature:(33)->(32)
+   externalUnitExhaustTemperature:(54)->(52)
+   compressorFrequency:(36)->(42)
+   targetFahrenheitTemp:(70)->(73)
+   expansionValve:(166)->(209)
+   windSpeedPercentage:(0)->(25)
+   windSpeedAutoSwitch:(1)->(0)
+   internalUnitFanCurrentGear:(4)->(2)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(21)->(23)
+   currentTemperature:(22.4)->(23.1)
+   windSpeed7Gear:(0)->(2)
+   verticalDirection:(8)->(8)
+   workMode:(1)->(2)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(0)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(0)->(0)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(224)->(224)
+   externalUnitElectricCurrent:(6)->(7)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(14)->(13)
+   internalUnitFanSpeed:(866)->(728)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(32)->(32)
+   externalUnitCoilTemperature:(33)->(32)
+   externalUnitExhaustTemperature:(54)->(52)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(600)->(600)
+   compressorFrequency:(36)->(42)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(70)->(73)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(166)->(209)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(0)->(25)
+   windSpeedAutoSwitch:(1)->(0)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(4)->(2)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+ReportedKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(21)->(23)
+   currentTemperature:(22.4)->(23.1)
+   windSpeed7Gear:(0)->(2)
+   verticalDirection:(8)->(8)
+   workMode:(1)->(2)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(0)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(0)->(0)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(224)->(224)
+   externalUnitElectricCurrent:(6)->(7)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(14)->(13)
+   internalUnitFanSpeed:(866)->(728)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(32)->(32)
+   externalUnitCoilTemperature:(33)->(32)
+   externalUnitExhaustTemperature:(54)->(52)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(600)->(600)
+   compressorFrequency:(36)->(42)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(70)->(73)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(166)->(209)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(0)->(25)
+   windSpeedAutoSwitch:(1)->(0)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(4)->(2)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+################################
+--------------------------------
+Step: temp: 21
+--------------------------------
+Reported actual changes
+   targetTemperature:(23)->(21)
+   externalUnitVoltage:(224)->(222)
+   externalUnitElectricCurrent:(7)->(10)
+   internalUnitCoilTemperature:(13)->(12)
+   externalUnitCoilTemperature:(32)->(31)
+   externalUnitExhaustTemperature:(52)->(53)
+   compressorFrequency:(42)->(54)
+   targetFahrenheitTemp:(73)->(70)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'targetTemperature', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'compressorFrequency', 'targetFahrenheitTemp', 'eightAddHot']
+   powerSwitch:(1)->(1)
+   targetTemperature:(23)->(21)
+   externalUnitVoltage:(224)->(222)
+   externalUnitElectricCurrent:(7)->(10)
+   internalUnitCoilTemperature:(13)->(12)
+   externalUnitCoilTemperature:(32)->(31)
+   externalUnitExhaustTemperature:(52)->(53)
+   compressorFrequency:(42)->(54)
+   targetFahrenheitTemp:(73)->(70)
+   eightAddHot:(0)->(0)
+ReportedKeys: ['powerSwitch', 'targetTemperature', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'compressorFrequency', 'targetFahrenheitTemp']
+   powerSwitch:(1)->(1)
+   targetTemperature:(23)->(21)
+   externalUnitVoltage:(224)->(222)
+   externalUnitElectricCurrent:(7)->(10)
+   internalUnitCoilTemperature:(13)->(12)
+   externalUnitCoilTemperature:(32)->(31)
+   externalUnitExhaustTemperature:(52)->(53)
+   compressorFrequency:(42)->(54)
+   targetFahrenheitTemp:(73)->(70)
+################################
+--------------------------------
+Step: mode: fan
+--------------------------------
+Reported actual changes
+   targetTemperature:(21)->(24)
+   currentTemperature:(23.1)->(23)
+   windSpeed7Gear:(2)->(0)
+   workMode:(2)->(3)
+   externalUnitVoltage:(222)->(227)
+   externalUnitElectricCurrent:(10)->(0)
+   internalUnitCoilTemperature:(12)->(11)
+   internalUnitFanSpeed:(728)->(719)
+   externalUnitCoilTemperature:(31)->(32)
+   externalUnitExhaustTemperature:(53)->(54)
+   externalUnitFanSpeed:(600)->(0)
+   compressorFrequency:(54)->(0)
+   targetFahrenheitTemp:(70)->(75)
+   expansionValve:(209)->(227)
+   windSpeedPercentage:(25)->(0)
+   windSpeedAutoSwitch:(0)->(1)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(21)->(24)
+   currentTemperature:(23.1)->(23)
+   windSpeed7Gear:(2)->(0)
+   verticalDirection:(8)->(8)
+   workMode:(2)->(3)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(0)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(0)->(0)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(222)->(227)
+   externalUnitElectricCurrent:(10)->(0)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(12)->(11)
+   internalUnitFanSpeed:(728)->(719)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(32)->(32)
+   externalUnitCoilTemperature:(31)->(32)
+   externalUnitExhaustTemperature:(53)->(54)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(600)->(0)
+   compressorFrequency:(54)->(0)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(70)->(75)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(209)->(227)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(25)->(0)
+   windSpeedAutoSwitch:(0)->(1)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(2)->(2)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+ReportedKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(21)->(24)
+   currentTemperature:(23.1)->(23)
+   windSpeed7Gear:(2)->(0)
+   verticalDirection:(8)->(8)
+   workMode:(2)->(3)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(0)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(0)->(0)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(222)->(227)
+   externalUnitElectricCurrent:(10)->(0)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(12)->(11)
+   internalUnitFanSpeed:(728)->(719)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(32)->(32)
+   externalUnitCoilTemperature:(31)->(32)
+   externalUnitExhaustTemperature:(53)->(54)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(600)->(0)
+   compressorFrequency:(54)->(0)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(70)->(75)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(209)->(227)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(25)->(0)
+   windSpeedAutoSwitch:(0)->(1)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(2)->(2)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+################################
+--------------------------------
+Step: temp: 23
+--------------------------------
+Reported actual changes
+   targetTemperature:(24)->(23)
+   externalUnitVoltage:(227)->(229)
+   internalUnitCoilTemperature:(11)->(16)
+   externalUnitCoilTemperature:(32)->(33)
+   externalUnitExhaustTemperature:(54)->(52)
+   targetFahrenheitTemp:(75)->(73)
+   expansionValve:(227)->(431)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'targetTemperature', 'externalUnitVoltage', 'internalUnitCoilTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'targetFahrenheitTemp', 'expansionValve', 'eightAddHot']
+   powerSwitch:(1)->(1)
+   targetTemperature:(24)->(23)
+   externalUnitVoltage:(227)->(229)
+   internalUnitCoilTemperature:(11)->(16)
+   externalUnitCoilTemperature:(32)->(33)
+   externalUnitExhaustTemperature:(54)->(52)
+   targetFahrenheitTemp:(75)->(73)
+   expansionValve:(227)->(431)
+   eightAddHot:(0)->(0)
+ReportedKeys: ['powerSwitch', 'targetTemperature', 'externalUnitVoltage', 'internalUnitCoilTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'targetFahrenheitTemp', 'expansionValve']
+   powerSwitch:(1)->(1)
+   targetTemperature:(24)->(23)
+   externalUnitVoltage:(227)->(229)
+   internalUnitCoilTemperature:(11)->(16)
+   externalUnitCoilTemperature:(32)->(33)
+   externalUnitExhaustTemperature:(54)->(52)
+   targetFahrenheitTemp:(75)->(73)
+   expansionValve:(227)->(431)
+################################
+--------------------------------
+Step: Fan speed:1
+--------------------------------
+Reported actual changes
+   currentTemperature:(23)->(22.9)
+   windSpeed7Gear:(0)->(1)
+   internalUnitCoilTemperature:(16)->(18)
+   internalUnitFanSpeed:(719)->(629)
+   externalUnitExhaustTemperature:(52)->(51)
+   expansionValve:(431)->(480)
+   windSpeedPercentage:(0)->(1)
+   windSpeedAutoSwitch:(1)->(0)
+   internalUnitFanCurrentGear:(2)->(1)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'currentTemperature', 'windSpeed7Gear', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'externalUnitExhaustTemperature', 'expansionValve', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'internalUnitFanCurrentGear']
+   powerSwitch:(1)->(1)
+   currentTemperature:(23)->(22.9)
+   windSpeed7Gear:(0)->(1)
+   internalUnitCoilTemperature:(16)->(18)
+   internalUnitFanSpeed:(719)->(629)
+   externalUnitExhaustTemperature:(52)->(51)
+   expansionValve:(431)->(480)
+   windSpeedPercentage:(0)->(1)
+   windSpeedAutoSwitch:(1)->(0)
+   internalUnitFanCurrentGear:(2)->(1)
+ReportedKeys: ['powerSwitch', 'currentTemperature', 'windSpeed7Gear', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'externalUnitExhaustTemperature', 'expansionValve', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'internalUnitFanCurrentGear']
+   powerSwitch:(1)->(1)
+   currentTemperature:(23)->(22.9)
+   windSpeed7Gear:(0)->(1)
+   internalUnitCoilTemperature:(16)->(18)
+   internalUnitFanSpeed:(719)->(629)
+   externalUnitExhaustTemperature:(52)->(51)
+   expansionValve:(431)->(480)
+   windSpeedPercentage:(0)->(1)
+   windSpeedAutoSwitch:(1)->(0)
+   internalUnitFanCurrentGear:(2)->(1)
+################################
+--------------------------------
+Step: Fan speed:2
+--------------------------------
+Reported actual changes
+   windSpeed7Gear:(1)->(2)
+   internalUnitCoilTemperature:(18)->(19)
+   internalUnitFanSpeed:(629)->(712)
+   externalUnitCoilTemperature:(33)->(32)
+   externalUnitExhaustTemperature:(51)->(50)
+   windSpeedPercentage:(1)->(25)
+   internalUnitFanCurrentGear:(1)->(2)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'windSpeed7Gear', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'windSpeedPercentage', 'internalUnitFanCurrentGear']
+   powerSwitch:(1)->(1)
+   windSpeed7Gear:(1)->(2)
+   internalUnitCoilTemperature:(18)->(19)
+   internalUnitFanSpeed:(629)->(712)
+   externalUnitCoilTemperature:(33)->(32)
+   externalUnitExhaustTemperature:(51)->(50)
+   windSpeedPercentage:(1)->(25)
+   internalUnitFanCurrentGear:(1)->(2)
+ReportedKeys: ['powerSwitch', 'windSpeed7Gear', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'windSpeedPercentage', 'internalUnitFanCurrentGear']
+   powerSwitch:(1)->(1)
+   windSpeed7Gear:(1)->(2)
+   internalUnitCoilTemperature:(18)->(19)
+   internalUnitFanSpeed:(629)->(712)
+   externalUnitCoilTemperature:(33)->(32)
+   externalUnitExhaustTemperature:(51)->(50)
+   windSpeedPercentage:(1)->(25)
+   internalUnitFanCurrentGear:(1)->(2)
+################################
+--------------------------------
+Step: mode: Auto
+--------------------------------
+Reported actual changes
+   targetTemperature:(23)->(25)
+   currentTemperature:(22.9)->(20)
+   workMode:(3)->(0)
+   regularReporting:(0)->(1)
+   internalUnitFanSpeed:(712)->(672)
+   externalUnitCoilTemperature:(32)->(24)
+   externalUnitExhaustTemperature:(50)->(49)
+   targetFahrenheitTemp:(73)->(77)
+   internalUnitFanCurrentGear:(2)->(1)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(23)->(25)
+   currentTemperature:(22.9)->(20)
+   windSpeed7Gear:(2)->(2)
+   verticalDirection:(8)->(8)
+   workMode:(3)->(0)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(0)->(1)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(0)->(0)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(229)->(229)
+   externalUnitElectricCurrent:(0)->(0)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(19)->(19)
+   internalUnitFanSpeed:(712)->(672)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(32)->(32)
+   externalUnitCoilTemperature:(32)->(24)
+   externalUnitExhaustTemperature:(50)->(49)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(0)->(0)
+   compressorFrequency:(0)->(0)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(73)->(77)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(480)->(480)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(25)->(25)
+   windSpeedAutoSwitch:(0)->(0)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(2)->(1)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+ReportedKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(23)->(25)
+   currentTemperature:(22.9)->(20)
+   windSpeed7Gear:(2)->(2)
+   verticalDirection:(8)->(8)
+   workMode:(3)->(0)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(0)->(1)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(0)->(0)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(229)->(229)
+   externalUnitElectricCurrent:(0)->(0)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(19)->(19)
+   internalUnitFanSpeed:(712)->(672)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(32)->(32)
+   externalUnitCoilTemperature:(32)->(24)
+   externalUnitExhaustTemperature:(50)->(49)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(0)->(0)
+   compressorFrequency:(0)->(0)
+   fourWayValveStatus:(0)->(0)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(73)->(77)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(480)->(480)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(25)->(25)
+   windSpeedAutoSwitch:(0)->(0)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(2)->(1)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+################################
+--------------------------------
+Step: temp:24
+--------------------------------
+Reported actual changes
+   targetTemperature:(25)->(24)
+   externalUnitVoltage:(229)->(230)
+   internalUnitFanSpeed:(672)->(0)
+   externalUnitCoilTemperature:(24)->(23)
+   targetFahrenheitTemp:(77)->(75)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'targetTemperature', 'externalUnitVoltage', 'internalUnitFanSpeed', 'externalUnitCoilTemperature', 'targetFahrenheitTemp', 'eightAddHot']
+   powerSwitch:(1)->(1)
+   targetTemperature:(25)->(24)
+   externalUnitVoltage:(229)->(230)
+   internalUnitFanSpeed:(672)->(0)
+   externalUnitCoilTemperature:(24)->(23)
+   targetFahrenheitTemp:(77)->(75)
+   eightAddHot:(0)->(0)
+ReportedKeys: ['powerSwitch', 'targetTemperature', 'externalUnitVoltage', 'internalUnitFanSpeed', 'externalUnitCoilTemperature', 'targetFahrenheitTemp']
+   powerSwitch:(1)->(1)
+   targetTemperature:(25)->(24)
+   externalUnitVoltage:(229)->(230)
+   internalUnitFanSpeed:(672)->(0)
+   externalUnitCoilTemperature:(24)->(23)
+   targetFahrenheitTemp:(77)->(75)
+################################
+--------------------------------
+Step: Fan speed:3
+--------------------------------
+Reported actual changes
+   currentTemperature:(20)->(20.1)
+   windSpeed7Gear:(2)->(3)
+   externalUnitVoltage:(230)->(229)
+   windSpeedPercentage:(25)->(40)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'currentTemperature', 'windSpeed7Gear', 'externalUnitVoltage', 'windSpeedPercentage']
+   powerSwitch:(1)->(1)
+   currentTemperature:(20)->(20.1)
+   windSpeed7Gear:(2)->(3)
+   externalUnitVoltage:(230)->(229)
+   windSpeedPercentage:(25)->(40)
+ReportedKeys: ['powerSwitch', 'currentTemperature', 'windSpeed7Gear', 'externalUnitVoltage', 'windSpeedPercentage']
+   powerSwitch:(1)->(1)
+   currentTemperature:(20)->(20.1)
+   windSpeed7Gear:(2)->(3)
+   externalUnitVoltage:(230)->(229)
+   windSpeedPercentage:(25)->(40)
+################################
+--------------------------------
+Step: Fan speed: Auto
+--------------------------------
+Reported actual changes
+   windSpeed7Gear:(3)->(0)
+   externalUnitVoltage:(229)->(230)
+   windSpeedPercentage:(40)->(0)
+   windSpeedAutoSwitch:(0)->(1)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'windSpeed7Gear', 'externalUnitVoltage', 'externalUnitFanSpeed', 'windSpeedPercentage', 'windSpeedAutoSwitch']
+   powerSwitch:(1)->(1)
+   windSpeed7Gear:(3)->(0)
+   externalUnitVoltage:(229)->(230)
+   externalUnitFanSpeed:(0)->(0)
+   windSpeedPercentage:(40)->(0)
+   windSpeedAutoSwitch:(0)->(1)
+ReportedKeys: ['powerSwitch', 'windSpeed7Gear', 'externalUnitVoltage', 'externalUnitFanSpeed', 'windSpeedPercentage', 'windSpeedAutoSwitch']
+   powerSwitch:(1)->(1)
+   windSpeed7Gear:(3)->(0)
+   externalUnitVoltage:(229)->(230)
+   externalUnitFanSpeed:(0)->(0)
+   windSpeedPercentage:(40)->(0)
+   windSpeedAutoSwitch:(0)->(1)
+################################
+--------------------------------
+Step: mode: cool
+--------------------------------
+Reported actual changes
+   targetTemperature:(24)->(21)
+   currentTemperature:(20.1)->(22.2)
+   windSpeed7Gear:(0)->(3)
+   workMode:(0)->(1)
+   regularReporting:(1)->(0)
+   externalUnitVoltage:(230)->(229)
+   internalUnitCoilTemperature:(19)->(20)
+   externalUnitExhaustTemperature:(49)->(48)
+   externalUnitFanSpeed:(0)->(340)
+   fourWayValveStatus:(0)->(1)
+   targetFahrenheitTemp:(75)->(70)
+   expansionValve:(480)->(272)
+   windSpeedPercentage:(0)->(40)
+   windSpeedAutoSwitch:(1)->(0)
+--------------------------------
+DesiredKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(24)->(21)
+   currentTemperature:(20.1)->(22.2)
+   windSpeed7Gear:(0)->(3)
+   verticalDirection:(8)->(8)
+   workMode:(0)->(1)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(1)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(0)->(0)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(230)->(229)
+   externalUnitElectricCurrent:(0)->(0)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(19)->(20)
+   internalUnitFanSpeed:(0)->(0)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(32)->(32)
+   externalUnitCoilTemperature:(23)->(23)
+   externalUnitExhaustTemperature:(49)->(48)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(0)->(340)
+   compressorFrequency:(0)->(0)
+   fourWayValveStatus:(0)->(1)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(75)->(70)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(480)->(272)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(0)->(40)
+   windSpeedAutoSwitch:(1)->(0)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(1)->(1)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+ReportedKeys: ['powerSwitch', 'targetTemperature', 'currentTemperature', 'windSpeed7Gear', 'verticalDirection', 'workMode', 'AIECOSwitch', 'regularReporting', 'selfClean', 'screen', 'sleep', 'beepSwitch', 'antiMoldew', 'externalUnitVoltage', 'externalUnitElectricCurrent', 'AIECOStatus', 'OutDoorCompTarFreqSet', 'OutDoorFanTarSpeed', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'PTCStatus', 'externalUnitTemperature', 'externalUnitCoilTemperature', 'externalUnitExhaustTemperature', 'externalUnitFanGear', 'externalUnitFanSpeed', 'compressorFrequency', 'fourWayValveStatus', 'nightSilentStart', 'nightSilentEnd', 'newWindSuper', 'filterAgePercentage', 'targetFahrenheitTemp', 'OutDoorEEVTarOpenDegree', 'OutDoorCompTarFreqRun', 'expansionValve', 'FreshAirStatus', 'newWindPercentage', 'newWindSwitch', 'windSpeedPercentage', 'windSpeedAutoSwitch', 'selfCleanStatus', 'newWindAutoSwitch', 'internalUnitFanCurrentGear', 'newWindStrength', 'eightAddHot', 'temperatureType', 'nightSilentSwitch']
+   powerSwitch:(1)->(1)
+   targetTemperature:(24)->(21)
+   currentTemperature:(20.1)->(22.2)
+   windSpeed7Gear:(0)->(3)
+   verticalDirection:(8)->(8)
+   workMode:(0)->(1)
+   AIECOSwitch:(0)->(0)
+   regularReporting:(1)->(0)
+   selfClean:(0)->(0)
+   screen:(1)->(1)
+   sleep:(0)->(0)
+   beepSwitch:(0)->(0)
+   antiMoldew:(0)->(0)
+   externalUnitVoltage:(230)->(229)
+   externalUnitElectricCurrent:(0)->(0)
+   AIECOStatus:(0)->(0)
+   OutDoorCompTarFreqSet:(0)->(0)
+   OutDoorFanTarSpeed:(0)->(0)
+   internalUnitCoilTemperature:(19)->(20)
+   internalUnitFanSpeed:(0)->(0)
+   PTCStatus:(0)->(0)
+   externalUnitTemperature:(32)->(32)
+   externalUnitCoilTemperature:(23)->(23)
+   externalUnitExhaustTemperature:(49)->(48)
+   externalUnitFanGear:(0)->(0)
+   externalUnitFanSpeed:(0)->(340)
+   compressorFrequency:(0)->(0)
+   fourWayValveStatus:(0)->(1)
+   nightSilentStart:(0)->(0)
+   nightSilentEnd:(0)->(0)
+   newWindSuper:(0)->(0)
+   filterAgePercentage:(100)->(100)
+   targetFahrenheitTemp:(75)->(70)
+   OutDoorEEVTarOpenDegree:(0)->(0)
+   OutDoorCompTarFreqRun:(0)->(0)
+   expansionValve:(480)->(272)
+   FreshAirStatus:(0)->(0)
+   newWindPercentage:(33)->(33)
+   newWindSwitch:(0)->(0)
+   windSpeedPercentage:(0)->(40)
+   windSpeedAutoSwitch:(1)->(0)
+   selfCleanStatus:(6)->(6)
+   newWindAutoSwitch:(0)->(0)
+   internalUnitFanCurrentGear:(1)->(1)
+   newWindStrength:(0)->(0)
+   eightAddHot:(0)->(0)
+   temperatureType:(0)->(0)
+   nightSilentSwitch:(0)->(0)
+################################
+--------------------------------
+Step: temp:21
+--------------------------------
+Reported actual changes
+   externalUnitVoltage:(229)->(228)
+   externalUnitElectricCurrent:(0)->(1)
+   internalUnitCoilTemperature:(20)->(21)
+   internalUnitFanSpeed:(0)->(759)
+   externalUnitExhaustTemperature:(48)->(47)
+   externalUnitFanSpeed:(340)->(720)
+   expansionValve:(272)->(432)
+--------------------------------
+DesiredKeys: ['externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'externalUnitExhaustTemperature', 'externalUnitFanSpeed', 'expansionValve']
+   externalUnitVoltage:(229)->(228)
+   externalUnitElectricCurrent:(0)->(1)
+   internalUnitCoilTemperature:(20)->(21)
+   internalUnitFanSpeed:(0)->(759)
+   externalUnitExhaustTemperature:(48)->(47)
+   externalUnitFanSpeed:(340)->(720)
+   expansionValve:(272)->(432)
+ReportedKeys: ['externalUnitVoltage', 'externalUnitElectricCurrent', 'internalUnitCoilTemperature', 'internalUnitFanSpeed', 'externalUnitExhaustTemperature', 'externalUnitFanSpeed', 'expansionValve']
+   externalUnitVoltage:(229)->(228)
+   externalUnitElectricCurrent:(0)->(1)
+   internalUnitCoilTemperature:(20)->(21)
+   internalUnitFanSpeed:(0)->(759)
+   externalUnitExhaustTemperature:(48)->(47)
+   externalUnitFanSpeed:(340)->(720)
+   expansionValve:(272)->(432)

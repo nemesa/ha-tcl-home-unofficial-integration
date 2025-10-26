@@ -214,6 +214,56 @@ def getSupportedFeatures(
             if has_property(aws_thing_state_reported, "sensorTVOC"):
                 features.append(DeviceFeatureEnum.SENSOR_FRESH_AIR_TVOC)
             return features
+        case DeviceTypeEnum.DUCT_AC:
+            features = [
+                DeviceFeatureEnum.INTERNAL_IS_AC,
+                DeviceFeatureEnum.MODE_AC_AUTO,
+                DeviceFeatureEnum.MODE_AC_COOL,
+                DeviceFeatureEnum.MODE_AC_DEHUMIDIFICATION,
+                DeviceFeatureEnum.MODE_AC_FAN,
+                DeviceFeatureEnum.MODE_AC_HEAT,
+                DeviceFeatureEnum.SENSOR_CURRENT_TEMPERATURE,
+                DeviceFeatureEnum.SENSOR_IS_ONLINE,
+                DeviceFeatureEnum.SWITCH_POWER,
+                DeviceFeatureEnum.SWITCH_BEEP,                
+                DeviceFeatureEnum.SWITCH_DRYING,
+                DeviceFeatureEnum.SWITCH_SCREEN,
+                DeviceFeatureEnum.SWITCH_SLEEP,
+                DeviceFeatureEnum.SELECT_MODE,
+                DeviceFeatureEnum.NUMBER_TARGET_TEMPERATURE,
+                DeviceFeatureEnum.BUTTON_SELF_CLEAN,
+                DeviceFeatureEnum.CLIMATE,
+                DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE,
+                DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE,
+                DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON,
+            ]
+            if has_power_consumption_data:
+                features.append(DeviceFeatureEnum.SENSOR_POWER_CONSUMPTION_DAILY)
+            if has_work_time_data:
+                features.append(DeviceFeatureEnum.SENSOR_WORK_TIME_DAILY)
+            if len(capabilities) > 0:
+                if DeviceCapabilityEnum.CAPABILITY_SOFT_WIND in capabilities:
+                    features.append(DeviceFeatureEnum.SWITCH_SOFT_WIND)
+
+                if DeviceCapabilityEnum.CAPABILITY_8C_HEATING in capabilities:
+                    features.append(DeviceFeatureEnum.SWITCH_8_C_HEATING)
+
+                if DeviceCapabilityEnum.CAPABILITY_GENERATOR_MODE in capabilities:
+                    features.append(DeviceFeatureEnum.SELECT_GENERATOR_MODE)
+
+            if has_property(aws_thing_state_reported, "windSpeed7Gear"):
+                features.append(DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR)
+
+            if has_property(aws_thing_state_reported, "externalUnitTemperature"):
+                features.append(DeviceFeatureEnum.SENSOR_EXTERNAL_UNIT_TEMPERATURE)
+
+            if has_property(aws_thing_state_reported, "AIECOSwitch"):
+                features.append(DeviceFeatureEnum.SWITCH_AI_ECO)
+
+            if has_property(aws_thing_state_reported, "targetFahrenheitTemp"):
+                features.append(DeviceFeatureEnum.INTERNAL_SET_TFT_WITH_TT)
+
+            return features
         case DeviceTypeEnum.WINDOW_AC:
             features= [
                 DeviceFeatureEnum.INTERNAL_IS_AC,
