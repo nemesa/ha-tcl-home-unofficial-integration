@@ -1,0 +1,75 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Cihaz zaten yapılandırılmış"
+        },
+        "error": {
+            "cannot_connect": "Bağlantı kurulamadı",
+            "invalid_auth": "Geçersiz kimlik doğrulama",
+            "unknown": "Beklenmeyen hata"
+        },
+        "flow_title": "TCL Home uygulaması - Resmi Olmayan (flow_title)",
+        "step": {
+            "settings_of_app": {
+                "data": {
+                    "app_login_url": "Uygulama Giriş URL'si",
+                    "cloud_urls": "Uygulama Bulut URL'leri",
+                    "app_id": "Uygulama Kimlik Numarası"
+                },
+                "description": "Genellikle bu değerleri olduğu gibi bırakmanız gerekir. Bu değerler, TCL'nin gelecekte bunları değiştirmesi durumunda buradadır. Bu durumda entegrasyonu güncellemeye gerek kalmadan bunları buradan düzeltebilirsiniz.",
+                "title": "Android uygulama ayarları"
+            },
+            "settings_of_logs": {
+              "title": "Günlük ayarları",
+              "description": "Günlük kaydını daha sonra entegrasyon seçeneklerinden açabilirsiniz. Günlükler Ayarlar -> Sistem -> Günlükler -> ([...] menüsü) -> Ham günlükleri göster bölümünde olacaktır",
+              "data": {
+                "verbose_device_logging": "Cihazla ilgili günlükler, cihaz durum değişikliklerinin ham JSON'ları, vb.",
+                "verbose_session_logging": "Oturum yönetimi günlükleri, erişim belirteçleri, vb.",
+                "verbose_setup_logging": "Kurulumla ilgili günlükler, yapılandırma akışında ilk bulunan cihazlar, vb."
+              }
+            },
+            "user": {
+                "data": {
+                    "password": "TCL Home uygulaması - Şifre",
+                    "username": "TCL Home uygulaması - E-posta"
+                },
+                "description": "Bu entegrasyon kendisini TCL-Home Android uygulaması olarak gösterecektir. Uygulamada kullandığınız kimlik bilgilerini kullanın. (TCL'nin hesabı engellemesi ihtimaline karşı bu entegrasyon için ayrı bir hesap kullanmanız ve cihazları yeni hesapla paylaşmanız önerilir.)",
+                "title": "Hesap"
+            }
+        }
+    },
+    "options": {
+    "step": {
+      "init": {
+        "title": "Seçenekler",
+        "description": "Herhangi bir yapılandırma değişikliği TCL Home uygulamasına yeniden giriş yapacaktır."
+      },
+      "option_page_account": {
+        "title": "Hesap",
+        "description": "Bu entegrasyon kendisini TCL-Home Android uygulaması olarak gösterecektir. Uygulamada kullandığınız kimlik bilgilerini kullanın. (TCL'nin hesabı engellemesi ihtimaline karşı bu entegrasyon için ayrı bir hesap kullanmanız ve cihazları yeni hesapla paylaşmanız önerilir.)",
+        "data": {
+          "username": "TCL Home uygulaması - E-posta",
+          "password": "TCL Home uygulaması - Şifre"
+        }
+      },
+      "option_page_tcl_app": {
+        "title": "Android uygulama ayarları",
+        "description": "Genellikle bu değerleri olduğu gibi bırakmanız gerekir. Bu değerler, TCL'nin gelecekte bunları değiştirmesi durumunda buradadır. Bu durumda entegrasyonu güncellemeye gerek kalmadan bunları buradan düzeltebilirsiniz.",
+        "data": {
+          "app_login_url": "Uygulama Giriş URL'si",
+          "cloud_urls": "Uygulama Bulut URL'leri",
+          "app_id": "Uygulama Kimlik Numarası"
+        }
+      },
+      "option_page_logs": {
+        "title": "Günlük ayarları",
+        "description": "Günlük kaydını daha sonra entegrasyon seçeneklerinden açabilirsiniz. Günlükler Ayarlar -> Sistem -> Günlükler -> ([...] menüsü) -> Ham günlükleri göster bölümünde olacaktır",
+        "data": {
+          "verbose_device_logging": "Cihazla ilgili günlükler, cihaz durum değişikliklerinin ham JSON'ları, vb.",
+          "verbose_session_logging": "Oturum yönetimi günlükleri, erişim belirteçleri, vb.",
+          "verbose_setup_logging": "Kurulumla ilgili günlükler, yapılandırma akışında ilk bulunan cihazlar, vb."
+        }
+      }
+    }
+  }
+}
