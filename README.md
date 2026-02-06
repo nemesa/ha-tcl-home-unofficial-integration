@@ -9,6 +9,8 @@
 - Duct AC
 - Dehumidifier (DEM)
 - Dehumidifier (DF)
+- Breeva Air Purifier A3 (by Ajsalemo)
+- Breeva Air Purifier A5 (by Ajsalemo)
 
 ## Notes by device types
 

@@ -1,6 +1,9 @@
 """."""
 
+import logging
 from enum import StrEnum
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class ModeEnum(StrEnum):
@@ -10,11 +13,13 @@ class ModeEnum(StrEnum):
     FAN = "Fan"
     AUTO = "Auto"
 
+
 class DehumidifierModeEnum(StrEnum):
     DRY = "Dry"
     TURBO = "Turbo"
     COMFORT = "Comfort"
     CONTINUE = "Continue"
+
 
 class UpAndDownAirSupplyVectorEnum(StrEnum):
     UP_AND_DOWN_SWING = "Up and down swing"
@@ -206,7 +211,9 @@ class PortableWind4ValueSeedEnum(StrEnum):
     AUTO = "Auto"
 
 
-def getPortableWind4ValueSeed(wind_speed: int, has_auto_mode: bool) -> PortableWind4ValueSeedEnum:
+def getPortableWind4ValueSeed(
+    wind_speed: int, has_auto_mode: bool
+) -> PortableWind4ValueSeedEnum:
     if has_auto_mode:
         match wind_speed:
             case 3:
@@ -229,6 +236,7 @@ def getPortableWind4ValueSeed(wind_speed: int, has_auto_mode: bool) -> PortableW
                 return PortableWind4ValueSeedEnum.LOW
             case _:
                 return PortableWind4ValueSeedEnum.LOW
+
 
 class WindowAcWindSeedEnum(StrEnum):
     SPEED_1 = "1"
@@ -327,6 +335,7 @@ def getGeneratorMode(generator_mode: int) -> GeneratorModeEnum:
         case 0:
             return GeneratorModeEnum.NONE
 
+
 class WindSpeedLowMediumHigh(StrEnum):
     LOW = "Low"
     MEDIUM = "Medium"
@@ -342,3 +351,49 @@ def getWindSpeedLowMediumHigh(windSpeed: int) -> GeneratorModeEnum:
         case 2:
             return WindSpeedLowMediumHigh.HIGH
     return GeneratorModeEnum.LOW
+
+
+class AirPurifierFanWindSpeedEnum(StrEnum):
+    LOW = "1"
+    MEDIUM = "2"
+    HIGH = "3"
+
+
+class AirPurifierWorkModeEnum(StrEnum):
+    AUTO = "0"
+    SLEEP = "1"
+    FAN = "2"
+
+
+class AirPurifierFanWindSpeedStrEnum(StrEnum):
+    LOW = "Low"
+    MEDIUM = "Medium"
+    HIGH = "High"
+
+
+class AirPurifierWorkModeStrEnum(StrEnum):
+    AUTO = "Auto"
+    FAN = "Fan"
+    SLEEP = "Sleep"
+
+
+def getAirPurifierFanWindSpeed(windSpeed: int) -> AirPurifierFanWindSpeedEnum:
+    match windSpeed:
+        case 1:
+            return AirPurifierFanWindSpeedStrEnum.LOW
+        case 2:
+            return AirPurifierFanWindSpeedStrEnum.MEDIUM
+        case 3:
+            return AirPurifierFanWindSpeedStrEnum.HIGH
+    return AirPurifierFanWindSpeedStrEnum.LOW
+
+
+def getAirPurifierWorkMode(workMode: int) -> AirPurifierWorkModeEnum:
+    match workMode:
+        case 0:
+            return AirPurifierWorkModeStrEnum.AUTO
+        case 1:
+            return AirPurifierWorkModeStrEnum.SLEEP
+        case 2:
+            return AirPurifierWorkModeStrEnum.FAN
+    return AirPurifierWorkModeStrEnum.AUTO

@@ -7,50 +7,36 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 
 from .const import DOMAIN
-from .device_enums import ModeEnum, DehumidifierModeEnum
+from .data_storage import get_stored_data, safe_set_value, set_stored_data
 from .device_capabilities import DeviceCapabilityEnum, get_capabilities
-from .device_features import getSupportedFeatures, DeviceFeatureEnum
-from .tcl_device_portable_ac import (
-    TCL_PortableAC_DeviceData,
-    get_stored_portable_ac_data,
-    handle_portable_ac_mode_change,
-)
-from .tcl_device_spit_ac_fresh_air import (
-    TCL_SplitAC_Fresh_Air_DeviceData,
-    get_stored_spit_ac_fresh_data,
-    handle_split_ac_freshair_mode_change,
-)
-from .tcl_device_spit_ac import (
-    TCL_SplitAC_DeviceData,
-    get_stored_spit_ac_data,
-    handle_split_ac_mode_change,
-)
-from .tcl_device_window_ac import (
-    TCL_WindowAC_DeviceData,
-    get_stored_window_ac_data,
-    handle_window_ac_mode_change,
-)
-from .tcl_device_dehumidifier_dem import (
-    TCL_Dehumidifier_DEM_DeviceData,
-    get_stored_dehumidifier_dem_data,
-    handle_dehumidifier_dem_mode_change,
-)
-from .tcl_device_dehumidifier_df import (
-    TCL_Dehumidifier_DF_DeviceData,
-    get_stored_dehumidifier_df_data,
-    handle_dehumidifier_df_mode_change,
-)
-from .tcl_device_duct_ac import (
-    TCL_DuctAC_DeviceData,
-    get_stored_duct_ac_data,
-    handle_duct_ac_mode_change,
-)
-
-
-
+from .device_enums import (AirPurifierFanWindSpeedStrEnum,
+                           AirPurifierWorkModeStrEnum, DehumidifierModeEnum,
+                           ModeEnum)
+from .device_features import DeviceFeatureEnum, getSupportedFeatures
 from .device_types import DeviceTypeEnum, calculateDeviceType
-from .data_storage import get_stored_data, safe_set_value, set_stored_data, safe_get_value
 from .tcl import GetThingsResponseData
+from .tcl_device_breeva import TCL_Breeva_DeviceData, get_stored_breeva_data
+from .tcl_device_dehumidifier_dem import (TCL_Dehumidifier_DEM_DeviceData,
+                                          get_stored_dehumidifier_dem_data,
+                                          handle_dehumidifier_dem_mode_change)
+from .tcl_device_dehumidifier_df import (TCL_Dehumidifier_DF_DeviceData,
+                                         get_stored_dehumidifier_df_data,
+                                         handle_dehumidifier_df_mode_change)
+from .tcl_device_duct_ac import (TCL_DuctAC_DeviceData,
+                                 get_stored_duct_ac_data,
+                                 handle_duct_ac_mode_change)
+from .tcl_device_portable_ac import (TCL_PortableAC_DeviceData,
+                                     get_stored_portable_ac_data,
+                                     handle_portable_ac_mode_change)
+from .tcl_device_spit_ac import (TCL_SplitAC_DeviceData,
+                                 get_stored_spit_ac_data,
+                                 handle_split_ac_mode_change)
+from .tcl_device_spit_ac_fresh_air import (
+    TCL_SplitAC_Fresh_Air_DeviceData, get_stored_spit_ac_fresh_data,
+    handle_split_ac_freshair_mode_change)
+from .tcl_device_window_ac import (TCL_WindowAC_DeviceData,
+                                   get_stored_window_ac_data,
+                                   handle_window_ac_mode_change)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -94,7 +80,11 @@ class Device:
             try:
                 if "state" in aws_thing:
                     if "reported" in aws_thing["state"]:
-                        self.supported_features = getSupportedFeatures(self.device_type,aws_thing["state"]["reported"],self.storage)
+                        self.supported_features = getSupportedFeatures(
+                            self.device_type,
+                            aws_thing["state"]["reported"],
+                            self.storage,
+                        )
                         self.create_mode_mapps()
                         if "capabilities" in aws_thing["state"]["reported"]:
                             capabilities_array = aws_thing["state"]["reported"][
@@ -154,6 +144,15 @@ class Device:
                         aws_thing_state=aws_thing["state"]["reported"],
                         delta=aws_thing["state"].get("delta", {}),
                     )
+                case (
+                    DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3
+                    | DeviceTypeEnum.AIR_PURIFIER_BREEVA_A5
+                ):
+                    self.data = TCL_Breeva_DeviceData(
+                        device_id=self.device_id,
+                        aws_thing_state=aws_thing["state"]["reported"],
+                        delta=aws_thing["state"].get("delta", {}),
+                    )
 
                 case _:
                     self.data = None
@@ -183,6 +182,7 @@ class Device:
         | TCL_Dehumidifier_DEM_DeviceData
         | TCL_Dehumidifier_DF_DeviceData
         | TCL_DuctAC_DeviceData
+        | TCL_Breeva_DeviceData
         | None
     ) = None
 
@@ -250,6 +250,28 @@ class Device:
             else:
                 self.mode_enum_to_value_mapp[ModeEnum.HEAT] = 0
 
+
+        if self.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3 or self.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A5:
+            _LOGGER.info("Creating mode mappings for Air Purifier Breeva device %s", self.device_id)
+            if (
+                DeviceFeatureEnum.SELECT_WIND_SPEED
+                in self.supported_features
+            ):
+                self.mode_enum_to_value_mapp[AirPurifierFanWindSpeedStrEnum.LOW] = 1
+                self.mode_value_to_enum_mapp[1] = AirPurifierFanWindSpeedStrEnum.LOW
+                self.mode_enum_to_value_mapp[AirPurifierFanWindSpeedStrEnum.MEDIUM] = 2
+                self.mode_value_to_enum_mapp[2] = AirPurifierFanWindSpeedStrEnum.MEDIUM
+                self.mode_enum_to_value_mapp[AirPurifierFanWindSpeedStrEnum.HIGH] = 3
+                self.mode_value_to_enum_mapp[3] = AirPurifierFanWindSpeedStrEnum.HIGH
+
+            if DeviceFeatureEnum.SELECT_WORK_MODE in self.supported_features:
+                self.mode_enum_to_value_mapp[AirPurifierWorkModeStrEnum.AUTO] = 0
+                self.mode_value_to_enum_mapp[0] = AirPurifierWorkModeStrEnum.AUTO
+                self.mode_enum_to_value_mapp[AirPurifierWorkModeStrEnum.SLEEP] = 1
+                self.mode_value_to_enum_mapp[1] = AirPurifierWorkModeStrEnum.SLEEP
+                self.mode_enum_to_value_mapp[AirPurifierWorkModeStrEnum.FAN] = 2
+                self.mode_value_to_enum_mapp[2] = AirPurifierWorkModeStrEnum.FAN
+
         if DeviceFeatureEnum.INTERNAL_IS_DEHUMIDIFIER in self.supported_features:
             if self.device_type == DeviceTypeEnum.DEHUMIDIFIER_DEM:
                 if DeviceFeatureEnum.MODE_DEHUMIDIFIER_DRY in self.supported_features:
@@ -266,16 +288,30 @@ class Device:
                 else:
                     self.mode_enum_to_value_mapp[DehumidifierModeEnum.TURBO] = 0
 
-                if DeviceFeatureEnum.MODE_DEHUMIDIFIER_COMFORT in self.supported_features:
-                    self.mode_enum_to_value_mapp[DehumidifierModeEnum.COMFORT] = work_mode
-                    self.mode_value_to_enum_mapp[work_mode] = DehumidifierModeEnum.COMFORT
+                if (
+                    DeviceFeatureEnum.MODE_DEHUMIDIFIER_COMFORT
+                    in self.supported_features
+                ):
+                    self.mode_enum_to_value_mapp[DehumidifierModeEnum.COMFORT] = (
+                        work_mode
+                    )
+                    self.mode_value_to_enum_mapp[work_mode] = (
+                        DehumidifierModeEnum.COMFORT
+                    )
                     work_mode += 1
                 else:
                     self.mode_enum_to_value_mapp[DehumidifierModeEnum.COMFORT] = 0
 
-                if DeviceFeatureEnum.MODE_DEHUMIDIFIER_CONTINUE in self.supported_features:
-                    self.mode_enum_to_value_mapp[DehumidifierModeEnum.CONTINUE] = work_mode
-                    self.mode_value_to_enum_mapp[work_mode] = DehumidifierModeEnum.CONTINUE
+                if (
+                    DeviceFeatureEnum.MODE_DEHUMIDIFIER_CONTINUE
+                    in self.supported_features
+                ):
+                    self.mode_enum_to_value_mapp[DehumidifierModeEnum.CONTINUE] = (
+                        work_mode
+                    )
+                    self.mode_value_to_enum_mapp[work_mode] = (
+                        DehumidifierModeEnum.CONTINUE
+                    )
                     work_mode += 1
                 else:
                     self.mode_enum_to_value_mapp[DehumidifierModeEnum.CONTINUE] = 0
@@ -284,7 +320,7 @@ class Device:
                 self.mode_value_to_enum_mapp[0] = DehumidifierModeEnum.DRY
                 self.mode_enum_to_value_mapp[DehumidifierModeEnum.COMFORT] = 2
                 self.mode_value_to_enum_mapp[2] = DehumidifierModeEnum.COMFORT
-    
+
     def print_data(self):
         _LOGGER.info("Device ID: %s", self.device_id)
         _LOGGER.info("data: %s", self.data)
@@ -322,6 +358,10 @@ async def get_device_storage(hass: HomeAssistant, device: Device) -> None:
         return await get_stored_dehumidifier_dem_data(hass, device.device_id)
     elif device.device_type == DeviceTypeEnum.DEHUMIDIFIER_DF:
         return await get_stored_dehumidifier_df_data(hass, device.device_id)
+    elif device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3:
+        return await get_stored_breeva_data(hass, device.device_id)
+    elif device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A5:
+        return await get_stored_breeva_data(hass, device.device_id)
 
 
 def get_desired_state_for_mode_change(
@@ -377,6 +417,7 @@ def get_desired_state_for_mode_change(
             supported_features=device.supported_features,
             stored_data=stored_data,
         )
+        
     return desired_state
 
 

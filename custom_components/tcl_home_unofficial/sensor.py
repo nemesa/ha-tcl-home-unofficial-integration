@@ -1,5 +1,10 @@
 """Interfaces with the Integration 101 Template api sensors."""
 import logging
+
+from homeassistant.components.sensor import (SensorDeviceClass, SensorEntity,
+                                             SensorStateClass)
+from homeassistant.const import (PERCENTAGE, UnitOfEnergy, UnitOfTemperature,
+                                 UnitOfTime)
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -152,6 +157,38 @@ async def async_setup_entry(
                     value_fn=lambda device: round((device.extra_tcl_data.get("yesterday_work_time",0)/60),2),
                 )
             )
+
+        if DeviceFeatureEnum.SENSOR_FILTER_LIFETIME in device.supported_features:
+            sensors.append(
+                IntNumberSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="FilterLifeTime",
+                    name="Filter Life Time",
+                    device_classification=SensorDeviceClass.DURATION,
+                    state_classification=SensorStateClass.MEASUREMENT,
+                    native_unit_of_measurement=UnitOfTime.HOURS,
+                    icon_fn=lambda device: "mdi:filter-check",
+                    value_fn=lambda device: device.data.filter_life_time,
+                )
+            )
+
+        
+        if DeviceFeatureEnum.SENSOR_PM25_SENSOR_VALUE in device.supported_features:
+            sensors.append(
+                IntNumberSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="PM25SensorValue",
+                    name="PM2.5 Sensor Value",
+                    device_classification=SensorDeviceClass.PM25,
+                    state_classification=SensorStateClass.MEASUREMENT,
+                    native_unit_of_measurement="µg/m³",
+                    icon_fn=lambda device: "mdi:air-filter",
+                    value_fn=lambda device: device.data.pm25_sensor_value,
+                )
+            )
+
     async_add_entities(sensors)
 class TemperatureSensor(TclEntityBase, SensorEntity):
     def __init__(

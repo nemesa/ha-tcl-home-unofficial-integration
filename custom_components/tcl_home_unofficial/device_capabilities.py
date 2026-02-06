@@ -1,5 +1,5 @@
-from enum import IntEnum
 import logging
+from enum import IntEnum
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -58,6 +58,7 @@ class DeviceCapabilityEnum(IntEnum):
 
 
 def get_capabilities(aws_capabilities: list[int]) -> list[DeviceCapabilityEnum]:
+    _LOGGER.info("Device capabilities from AWS: %s", aws_capabilities)
     return aws_capabilities
 
 

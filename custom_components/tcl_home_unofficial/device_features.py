@@ -1,12 +1,11 @@
 """."""
 
-from enum import StrEnum
 import logging
+from enum import StrEnum
 
 from .device_capabilities import DeviceCapabilityEnum
 from .device_types import DeviceTypeEnum
 
-_LOGGER = logging.getLogger(__name__)
 
 class DeviceFeatureEnum(StrEnum):
     MODE_AC_AUTO = "mode.ac.auto"
@@ -19,6 +18,7 @@ class DeviceFeatureEnum(StrEnum):
     MODE_DEHUMIDIFIER_COMFORT = "mode.dehumidifier.comfort"
     MODE_DEHUMIDIFIER_CONTINUE = "mode.dehumidifier.continue"
     SENSOR_IS_ONLINE = "sensor.is_online"
+    SENSOR_FILTER_LIFETIME = "sensor.filterLifeTime"
     SENSOR_CURRENT_TEMPERATURE = "sensor.current_temperature"
     SENSOR_DEHUMIDIFIER_ENV_HUMIDITY = "sensor.dehumidifier.env_humidity"
     SENSOR_DEHUMIDIFIER_WATER_BUCKET_FULL = "sensor.dehumidifier.is_water_bucket_full"
@@ -28,6 +28,7 @@ class DeviceFeatureEnum(StrEnum):
     SENSOR_EXTERNAL_UNIT_EXHAUST_TEMPERATURE = "sensor.external_unit_exhaust_temperature"
     SENSOR_FRESH_AIR_TVOC = "sensor.fresh_air.TVOC"
     SENSOR_POWER_CONSUMPTION_DAILY = "sensor.power_consumption.daily"
+    SENSOR_PM25_SENSOR_VALUE = "sensor.PM25SensorValue"
     SENSOR_WORK_TIME_DAILY = "sensor.work_time.daily"
     SWITCH_POWER = "switch.powerSwitch"
     SWITCH_BEEP = "switch.beepSwitch"
@@ -42,11 +43,13 @@ class DeviceFeatureEnum(StrEnum):
     SWITCH_8_C_HEATING = "switch.8CHeating"
     SWITCH_SOFT_WIND = "switch.softWind"
     SWITCH_FRESH_AIR = "switch.freshAir"
+    SWITCH_SHIELD_SWITCH = "switch.shieldSwitch"
     SELECT_MODE = "select.mode"
     SELECT_DEHUMIDIFIER_WIND_SPEED_LOW_MEDIUM_HEIGH = "select.dehumidifier.windSpeed.lowMediumHigh"
     SELECT_WIND_SPEED = "select.windSpeed"
     SELECT_WIND_SPEED_7_GEAR = "select.windSpeed7Gear"
     SELECT_WIND_FEELING = "select.windFeeling"
+    SELECT_WORK_MODE = "select.workMode"
     SELECT_VERTICAL_DIRECTION = "select.verticalDirection"
     SELECT_HORIZONTAL_DIRECTION = "select.horizontalDirection"
     SELECT_SLEEP_MODE = "select.sleepMode"
@@ -75,7 +78,6 @@ class DeviceFeatureEnum(StrEnum):
     USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE = "user_config.behavior.memorize_fan_speed_by_mode"
     USER_CONFIG_BEHAVIOR_MEMORIZE_HUMIDITY_BY_MODE = "user_config.behavior.memorize_humidity_by_mode"
     USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON = "user_config.behavior.silent_beep_when_turn_on"
-
 
 def has_property(aws_thing_state_reported: dict[str, any], propertyName: str) -> bool:
     return propertyName in aws_thing_state_reported
@@ -385,5 +387,20 @@ def getSupportedFeatures(
                 features.append(DeviceFeatureEnum.CLIMATE)
                 
             return features
+        # Breeva A3 and A5 pretty much have the same features
+        case DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3 | DeviceTypeEnum.AIR_PURIFIER_BREEVA_A5:
+            features = [
+                DeviceFeatureEnum.SWITCH_POWER,
+                DeviceFeatureEnum.SWITCH_SHIELD_SWITCH,
+                DeviceFeatureEnum.SENSOR_IS_ONLINE,
+                DeviceFeatureEnum.SENSOR_FILTER_LIFETIME,
+                DeviceFeatureEnum.SENSOR_PM25_SENSOR_VALUE,
+                DeviceFeatureEnum.SELECT_WIND_SPEED, 
+                DeviceFeatureEnum.SELECT_WORK_MODE
+            ]
+            
+            return features
+        
+
         case _:
             return []

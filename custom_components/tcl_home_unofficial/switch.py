@@ -10,16 +10,12 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
+from .data_storage import (get_stored_data, safe_get_value, safe_set_value,
+                           set_stored_data)
 from .device import Device
+from .device_enums import ModeEnum
 from .device_features import DeviceFeatureEnum
 from .device_types import DeviceTypeEnum
-from .data_storage import (
-    get_stored_data,
-    safe_get_value,
-    safe_set_value,
-    set_stored_data,
-)
-from .device_enums import ModeEnum
 from .tcl_entity_base import TclEntityBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -75,9 +71,13 @@ class DesiredStateHandlerForSwitch:
                 return await self.SWITCH_SOFT_WIND(value=value)
             case DeviceFeatureEnum.SWITCH_FRESH_AIR:
                 return await self.SWITCH_FRESH_AIR(value=value)
+            case DeviceFeatureEnum.SWITCH_SHIELD_SWITCH:
+                return await self.SWITCH_SHIELD_SWITCH(value=value)
 
     def is_allowed(self) -> bool:
-        mode = self.device.mode_value_to_enum_mapp.get(self.device.data.work_mode,ModeEnum.AUTO)
+        mode = self.device.mode_value_to_enum_mapp.get(
+            self.device.data.work_mode, ModeEnum.AUTO
+        )
         match self.deviceFeature:
             case DeviceFeatureEnum.SWITCH_DRYING:
                 if (
@@ -130,6 +130,14 @@ class DesiredStateHandlerForSwitch:
                     return False
                 else:
                     return True
+            # If the power switch is off, shield switch cannot be changed
+            # The TCL app has this disabled - but still loads the last known state
+            # This is close enough to the behavior without writing a whole new switch class
+            # When power is on, it'll load the last known state - so if shield was on, it'll be on
+            case DeviceFeatureEnum.SWITCH_SHIELD_SWITCH:
+                if self.device.data.power_switch == 0:
+                    return False
+                return True
             case _:
                 return True
 
@@ -145,6 +153,13 @@ class DesiredStateHandlerForSwitch:
             self.device.device_id, desired_state
         )
 
+    async def SWITCH_SHIELD_SWITCH(self, value: int):        
+        _LOGGER.info("Setting shield switch to %s", value)
+        desired_state = {"shieldSwitch": value}
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
     async def SWITCH_BEEP(self, value: int):
         desired_state = {"beepSwitch": value}
         return await self.coordinator.get_aws_iot().async_set_desired_state(
@@ -154,9 +169,13 @@ class DesiredStateHandlerForSwitch:
     async def SWITCH_ECO(self, value: int):
         desired_state = {"ECO": value}
 
-        if (DeviceFeatureEnum.INTERNAL_HAS_TURBO_PROPERTY in self.device.supported_features
-            and DeviceFeatureEnum.INTERNAL_HAS_HIGHTEMPERATUREWIND_PROPERTY in self.device.supported_features
-            and DeviceFeatureEnum.INTERNAL_HAS_SILENCESWITCH_PROPERTY in self.device.supported_features
+        if (
+            DeviceFeatureEnum.INTERNAL_HAS_TURBO_PROPERTY
+            in self.device.supported_features
+            and DeviceFeatureEnum.INTERNAL_HAS_HIGHTEMPERATUREWIND_PROPERTY
+            in self.device.supported_features
+            and DeviceFeatureEnum.INTERNAL_HAS_SILENCESWITCH_PROPERTY
+            in self.device.supported_features
         ):
             desired_state["highTemperatureWind"] = 0
             desired_state["highTemperatureWind"] = 0
@@ -252,10 +271,29 @@ async def async_setup_entry(
                     deviceFeature=DeviceFeatureEnum.SWITCH_POWER,
                     type="Power",
                     name="Power Switch",
-                    icon_fn=lambda device: "mdi:power-plug"
-                    if device.data.power_switch == 1
-                    else "mdi:power-plug-off",
+                    icon_fn=lambda device: (
+                        "mdi:power-plug"
+                        if device.data.power_switch == 1
+                        else "mdi:power-plug-off"
+                    ),
                     is_on_fn=lambda device: device.data.power_switch,
+                )
+            )
+
+        if DeviceFeatureEnum.SWITCH_SHIELD_SWITCH in device.supported_features:
+            switches.append(
+                DynamicSwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_SHIELD_SWITCH,
+                    type="ShieldSwitch",
+                    name="Shield Switch",
+                    icon_fn=lambda device: (
+                        "mdi:shield-check" if device.data.shield_switch == 1 
+                        else "mdi:shield-off"
+                    ),
+                    is_on_fn=lambda device: device.data.shield_switch,
                 )
             )
 
@@ -268,9 +306,11 @@ async def async_setup_entry(
                     deviceFeature=DeviceFeatureEnum.SWITCH_BEEP,
                     type="BeepMode",
                     name="Beep Mode Switch",
-                    icon_fn=lambda device: "mdi:volume-high"
-                    if device.data.beep_switch == 1
-                    else "mdi:volume-off",
+                    icon_fn=lambda device: (
+                        "mdi:volume-high"
+                        if device.data.beep_switch == 1
+                        else "mdi:volume-off"
+                    ),
                     is_on_fn=lambda device: device.data.beep_switch,
                 )
             )
@@ -284,9 +324,9 @@ async def async_setup_entry(
                     deviceFeature=DeviceFeatureEnum.SWITCH_ECO,
                     type="ECO",
                     name="ECO Switch",
-                    icon_fn=lambda device: "mdi:leaf"
-                    if device.data.eco == 1
-                    else "mdi:leaf-off",
+                    icon_fn=lambda device: (
+                        "mdi:leaf" if device.data.eco == 1 else "mdi:leaf-off"
+                    ),
                     is_on_fn=lambda device: device.data.eco,
                 )
             )
@@ -300,9 +340,9 @@ async def async_setup_entry(
                     deviceFeature=DeviceFeatureEnum.SWITCH_AI_ECO,
                     type="aiECO",
                     name="AI ECO Switch",
-                    icon_fn=lambda device: "mdi:leaf"
-                    if device.data.ai_eco == 1
-                    else "mdi:leaf-off",
+                    icon_fn=lambda device: (
+                        "mdi:leaf" if device.data.ai_eco == 1 else "mdi:leaf-off"
+                    ),
                     is_on_fn=lambda device: device.data.ai_eco,
                 )
             )
@@ -330,9 +370,9 @@ async def async_setup_entry(
                     deviceFeature=DeviceFeatureEnum.SWITCH_HEALTHY,
                     type="Healthy",
                     name="Healthy Switch",
-                    icon_fn=lambda device: "mdi:heart"
-                    if device.data.healthy == 1
-                    else "mdi:heart-off",
+                    icon_fn=lambda device: (
+                        "mdi:heart" if device.data.healthy == 1 else "mdi:heart-off"
+                    ),
                     is_on_fn=lambda device: device.data.healthy,
                 )
             )
@@ -346,9 +386,11 @@ async def async_setup_entry(
                     deviceFeature=DeviceFeatureEnum.SWITCH_DRYING,
                     type="Drying",
                     name="Drying Switch",
-                    icon_fn=lambda device: "mdi:opacity"
-                    if device.data.anti_moldew == 1
-                    else "mdi:water-off-outline",
+                    icon_fn=lambda device: (
+                        "mdi:opacity"
+                        if device.data.anti_moldew == 1
+                        else "mdi:water-off-outline"
+                    ),
                     is_on_fn=lambda device: device.data.anti_moldew,
                 )
             )
@@ -362,9 +404,11 @@ async def async_setup_entry(
                     deviceFeature=DeviceFeatureEnum.SWITCH_SCREEN,
                     type="DiplayLight",
                     name="Diplay Light Switch",
-                    icon_fn=lambda device: "mdi:lightbulb-outline"
-                    if device.data.screen == 1
-                    else "mdi:lightbulb-off-outline",
+                    icon_fn=lambda device: (
+                        "mdi:lightbulb-outline"
+                        if device.data.screen == 1
+                        else "mdi:lightbulb-off-outline"
+                    ),
                     is_on_fn=lambda device: device.data.screen,
                 )
             )
@@ -434,14 +478,19 @@ async def async_setup_entry(
                     deviceFeature=DeviceFeatureEnum.SWITCH_FRESH_AIR,
                     type="FreshAir",
                     name="Fresh Air",
-                    icon_fn=lambda device: "mdi:window-open-variant"
-                    if device.data.new_wind_switch == 1
-                    else "mdi:window-closed-variant",
+                    icon_fn=lambda device: (
+                        "mdi:window-open-variant"
+                        if device.data.new_wind_switch == 1
+                        else "mdi:window-closed-variant"
+                    ),
                     is_on_fn=lambda device: device.data.new_wind_switch,
                 )
             )
 
-        if (DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE in device.supported_features):
+        if (
+            DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_TEMP_BY_MODE
+            in device.supported_features
+        ):
             switches.append(
                 ConfigSwitchHandler(
                     hass=hass,
@@ -452,7 +501,10 @@ async def async_setup_entry(
                 )
             )
 
-        if (DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE in device.supported_features):
+        if (
+            DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_FAN_SPEED_BY_MODE
+            in device.supported_features
+        ):
             switches.append(
                 ConfigSwitchHandler(
                     hass=hass,
@@ -463,7 +515,10 @@ async def async_setup_entry(
                 )
             )
 
-        if (DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON in device.supported_features):
+        if (
+            DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_SILENT_BEEP_WHEN_TURN_ON
+            in device.supported_features
+        ):
             switches.append(
                 ConfigSwitchHandler(
                     hass=hass,
@@ -474,7 +529,10 @@ async def async_setup_entry(
                 )
             )
 
-        if (DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_HUMIDITY_BY_MODE in device.supported_features):
+        if (
+            DeviceFeatureEnum.USER_CONFIG_BEHAVIOR_MEMORIZE_HUMIDITY_BY_MODE
+            in device.supported_features
+        ):
             switches.append(
                 ConfigSwitchHandler(
                     hass=hass,
@@ -609,7 +667,7 @@ class DynamicSwitchHandler(SwitchHandler, SwitchEntity):
 
     @property
     def available(self) -> bool:
-        if self.device.is_online:            
+        if self.device.is_online:
             self.device = self.coordinator.get_device_by_id(self.device.device_id)
             self.iot_handler.refreshDevice(self.device)
             return self.iot_handler.is_allowed()
