@@ -1,8 +1,4 @@
-import logging
 from enum import IntEnum
-
-_LOGGER = logging.getLogger(__name__)
-
 
 class DeviceCapabilityEnum(IntEnum):
     CAPABILITY_01 = 1
@@ -57,8 +53,7 @@ class DeviceCapabilityEnum(IntEnum):
     CAPABILITY_50 = 50
 
 
-def get_capabilities(aws_capabilities: list[int]) -> list[DeviceCapabilityEnum]:
-    _LOGGER.info("Device capabilities from AWS: %s", aws_capabilities)
+def get_capabilities(aws_capabilities: list[int]) -> list[DeviceCapabilityEnum]:    
     return aws_capabilities
 
 

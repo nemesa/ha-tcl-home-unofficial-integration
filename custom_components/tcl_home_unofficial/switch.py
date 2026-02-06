@@ -73,6 +73,8 @@ class DesiredStateHandlerForSwitch:
                 return await self.SWITCH_FRESH_AIR(value=value)
             case DeviceFeatureEnum.SWITCH_SHIELD_SWITCH:
                 return await self.SWITCH_SHIELD_SWITCH(value=value)
+            case DeviceFeatureEnum.SWITCH_ANION:
+                return await self.SWITCH_ANION(value=value)
 
     def is_allowed(self) -> bool:
         mode = self.device.mode_value_to_enum_mapp.get(
@@ -138,6 +140,10 @@ class DesiredStateHandlerForSwitch:
                 if self.device.data.power_switch == 0:
                     return False
                 return True
+            case DeviceFeatureEnum.SWITCH_ANION:
+                if self.device.data.anion_switch == 0:
+                    return False
+                return True
             case _:
                 return True
 
@@ -153,12 +159,18 @@ class DesiredStateHandlerForSwitch:
             self.device.device_id, desired_state
         )
 
-    async def SWITCH_SHIELD_SWITCH(self, value: int):        
-        _LOGGER.info("Setting shield switch to %s", value)
+    async def SWITCH_SHIELD_SWITCH(self, value: int):     
         desired_state = {"shieldSwitch": value}
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
         )
+    
+    async def SWITCH_ANION(self, value: int):        
+        desired_state = {"anionSwitch": value}
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
 
     async def SWITCH_BEEP(self, value: int):
         desired_state = {"beepSwitch": value}
@@ -292,6 +304,23 @@ async def async_setup_entry(
                     icon_fn=lambda device: (
                         "mdi:shield-check" if device.data.shield_switch == 1 
                         else "mdi:shield-off"
+                    ),
+                    is_on_fn=lambda device: device.data.shield_switch,
+                )
+            )
+
+        if DeviceFeatureEnum.SWITCH_ANION in device.supported_features:
+            switches.append(
+                DynamicSwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_ANION,
+                    type="AnionSwitch",
+                    name="Anion Switch",
+                    icon_fn=lambda device: (
+                        "mdi:atom-variant" if device.data.shield_switch == 1 
+                        else "mdi:atom-variant"
                     ),
                     is_on_fn=lambda device: device.data.shield_switch,
                 )

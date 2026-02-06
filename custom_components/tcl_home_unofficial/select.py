@@ -66,7 +66,8 @@ class DesiredStateHandlerForSelect:
                 )
             case DeviceFeatureEnum.SELECT_WIND_SPEED:
                 if (
-                    self.device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3
+                    self.device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A2
+                    or self.device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3
                     or self.device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A5
                 ):
                     return await self.AIR_PURIFIER_BREEVA_FAN_WIND_SPEED(value=value)
@@ -119,7 +120,8 @@ class DesiredStateHandlerForSelect:
                     )
             case DeviceFeatureEnum.SELECT_WIND_SPEED:
                 if (
-                    self.device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3
+                    self.device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A2
+                    or self.device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3
                     or self.device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A5
                 ):
                     return getAirPurifierFanWindSpeed(self.device.data.wind_speed)
@@ -190,7 +192,8 @@ class DesiredStateHandlerForSelect:
                 return [e.value for e in WindSpeedLowMediumHigh]
             case DeviceFeatureEnum.SELECT_WIND_SPEED:
                 if (
-                    self.device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3
+                    self.device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A2
+                    or self.device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3
                     or self.device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A5
                 ):
                     return [e.value for e in AirPurifierFanWindSpeedStrEnum]
@@ -952,7 +955,8 @@ async def async_setup_entry(
             )
 
         if (
-            device.device_type != DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3
+            device.device_type != DeviceTypeEnum.AIR_PURIFIER_BREEVA_A2
+            and device.device_type != DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3
             and device.device_type != DeviceTypeEnum.AIR_PURIFIER_BREEVA_A5
         ):
             if DeviceFeatureEnum.SELECT_WIND_SPEED in device.supported_features:
@@ -974,7 +978,8 @@ async def async_setup_entry(
                     )
                 )
         elif (
-            device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3
+            device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A2
+            or device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3
             or device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A5
         ):
             if DeviceFeatureEnum.SELECT_WIND_SPEED in device.supported_features:

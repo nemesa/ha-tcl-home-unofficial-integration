@@ -24,6 +24,9 @@ class TCL_Breeva_DeviceData:
         self.voc_sensor_level = int(
             try_get_value(delta, aws_thing_state, "VOCSensorLevel", -1)
         )
+        self.pm25_sensor_level = int(
+            try_get_value(delta, aws_thing_state, "PM25SensorLevel", -1)
+        )
         self.voc_sensor_level = int(
             try_get_value(delta, aws_thing_state, "filterLifeTime", -1)
         )
@@ -33,6 +36,7 @@ class TCL_Breeva_DeviceData:
         self.work_mode = int(try_get_value(delta, aws_thing_state, "workMode", -1))
         self.wind_speed = int(try_get_value(delta, aws_thing_state, "windSpeed", -1))
         self.screen_switch = int(try_get_value(delta, aws_thing_state, "screenSwitch", -1))
+        self.anion_switch = int(try_get_value(delta, aws_thing_state, "anionSwitch", -1))
         self.shield_switch = int(try_get_value(delta, aws_thing_state, "shieldSwitch", -1))
         # ambient_light's shape is ambient_light.powerSwitch and ambient_light.brightness
         # TODO: need to figure out if dot notation works here
@@ -46,10 +50,12 @@ class TCL_Breeva_DeviceData:
     power_switch: int | bool
     pm25_sensor_value: int | bool
     voc_sensor_level: int | bool
+    pm25_sensor_level: int | bool
     filter_life_time: int | bool
     work_mode: int | bool
     wind_speed: int | bool
     screen_switch: int | bool
+    anion_switch: int | bool
     shield_switch: int | bool
     child_lock_switch: int | bool
     timer_remaining: int | bool

@@ -145,7 +145,8 @@ class Device:
                         delta=aws_thing["state"].get("delta", {}),
                     )
                 case (
-                    DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3
+                    DeviceTypeEnum.AIR_PURIFIER_BREEVA_A2
+                    | DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3
                     | DeviceTypeEnum.AIR_PURIFIER_BREEVA_A5
                 ):
                     self.data = TCL_Breeva_DeviceData(
@@ -251,8 +252,7 @@ class Device:
                 self.mode_enum_to_value_mapp[ModeEnum.HEAT] = 0
 
 
-        if self.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3 or self.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A5:
-            _LOGGER.info("Creating mode mappings for Air Purifier Breeva device %s", self.device_id)
+        if self.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A2 or self.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3 or self.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A5:            
             if (
                 DeviceFeatureEnum.SELECT_WIND_SPEED
                 in self.supported_features
@@ -358,6 +358,8 @@ async def get_device_storage(hass: HomeAssistant, device: Device) -> None:
         return await get_stored_dehumidifier_dem_data(hass, device.device_id)
     elif device.device_type == DeviceTypeEnum.DEHUMIDIFIER_DF:
         return await get_stored_dehumidifier_df_data(hass, device.device_id)
+    elif device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A2:
+        return await get_stored_breeva_data(hass, device.device_id)
     elif device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3:
         return await get_stored_breeva_data(hass, device.device_id)
     elif device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A5:

@@ -44,6 +44,7 @@ class DeviceFeatureEnum(StrEnum):
     SWITCH_SOFT_WIND = "switch.softWind"
     SWITCH_FRESH_AIR = "switch.freshAir"
     SWITCH_SHIELD_SWITCH = "switch.shieldSwitch"
+    SWITCH_ANION = "switch.anionSwitch"
     SELECT_MODE = "select.mode"
     SELECT_DEHUMIDIFIER_WIND_SPEED_LOW_MEDIUM_HEIGH = "select.dehumidifier.windSpeed.lowMediumHigh"
     SELECT_WIND_SPEED = "select.windSpeed"
@@ -395,6 +396,17 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.SENSOR_IS_ONLINE,
                 DeviceFeatureEnum.SENSOR_FILTER_LIFETIME,
                 DeviceFeatureEnum.SENSOR_PM25_SENSOR_VALUE,
+                DeviceFeatureEnum.SELECT_WIND_SPEED, 
+                DeviceFeatureEnum.SELECT_WORK_MODE
+            ]
+            
+            return features
+        case DeviceTypeEnum.AIR_PURIFIER_BREEVA_A2:
+            features = [
+                DeviceFeatureEnum.SWITCH_POWER,
+                DeviceFeatureEnum.SWITCH_ANION,
+                DeviceFeatureEnum.SENSOR_IS_ONLINE,
+                DeviceFeatureEnum.SENSOR_FILTER_LIFETIME,
                 DeviceFeatureEnum.SELECT_WIND_SPEED, 
                 DeviceFeatureEnum.SELECT_WORK_MODE
             ]
