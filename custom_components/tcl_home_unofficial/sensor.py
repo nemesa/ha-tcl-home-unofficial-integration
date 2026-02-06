@@ -1,15 +1,7 @@
 """Interfaces with the Integration 101 Template api sensors."""
 import logging
 
-from homeassistant.components.sensor import (SensorDeviceClass, SensorEntity,
-                                             SensorStateClass)
-from homeassistant.const import (PERCENTAGE, UnitOfEnergy, UnitOfTemperature,
-                                 UnitOfTime)
-from homeassistant.components.sensor import (
-    SensorDeviceClass,
-    SensorEntity,
-    SensorStateClass,
-)
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity,SensorStateClass
 from homeassistant.const import UnitOfEnergy, UnitOfTemperature, UnitOfTime, PERCENTAGE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -172,7 +164,6 @@ async def async_setup_entry(
                     value_fn=lambda device: device.data.filter_life_time,
                 )
             )
-
         
         if DeviceFeatureEnum.SENSOR_PM25_SENSOR_VALUE in device.supported_features:
             sensors.append(
