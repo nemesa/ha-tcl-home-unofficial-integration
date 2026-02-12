@@ -103,6 +103,34 @@ async def async_setup_entry(
                     value_fn=lambda device: device.data.tvoc_level,
                 )
             )
+        if DeviceFeatureEnum.SENSOR_PM25_SENSOR_LEVEL in device.supported_features:            
+            sensors.append(
+                IntNumberSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="PM25.Level",
+                    name="PM25 Level",
+                    device_classification=None,
+                    state_classification=SensorStateClass.MEASUREMENT,
+                    icon_fn=lambda device: "mdi:dots-hexagon",
+                    native_unit_of_measurement="",
+                    value_fn=lambda device: device.data.pm25_sensor_level,
+                )
+            )
+        if DeviceFeatureEnum.SENSOR_VOC_SENSOR_LEVEL in device.supported_features:            
+            sensors.append(
+                IntNumberSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="TVOC.SENSOR.Level",
+                    name="TVOC Level",
+                    device_classification=None,
+                    state_classification=SensorStateClass.MEASUREMENT,
+                    icon_fn=lambda device: "mdi:dots-hexagon",
+                    native_unit_of_measurement="",
+                    value_fn=lambda device: device.data.voc_sensor_level,
+                )
+            )
         if DeviceFeatureEnum.SENSOR_POWER_CONSUMPTION_DAILY in device.supported_features:
             sensors.append(
                 EnergyConsumptionSensor(

@@ -75,6 +75,10 @@ class DesiredStateHandlerForSwitch:
                 return await self.SWITCH_SHIELD_SWITCH(value=value)
             case DeviceFeatureEnum.SWITCH_ANION:
                 return await self.SWITCH_ANION(value=value)
+            case DeviceFeatureEnum.SWITCH_CHILD_LOCK_SWITCH:
+                return await self.SWITCH_CHILD_LOCK_SWITCH(value=value)
+            case DeviceFeatureEnum.SWITCH_SCREEN_SWITCH:
+                return await self.SWITCH_SCREEN_SWITCH(value=value)
 
     def is_allowed(self) -> bool:
         mode = self.device.mode_value_to_enum_mapp.get(
@@ -141,7 +145,15 @@ class DesiredStateHandlerForSwitch:
                     return False
                 return True
             case DeviceFeatureEnum.SWITCH_ANION:
-                if self.device.data.anion_switch == 0:
+                if self.device.data.power_switch == 0:
+                    return False
+                return True
+            case DeviceFeatureEnum.SWITCH_SCREEN_SWITCH:
+                if self.device.data.power_switch == 0:
+                    return False
+                return True
+            case DeviceFeatureEnum.SWITCH_CHILD_LOCK_SWITCH:
+                if self.device.data.power_switch == 0:
                     return False
                 return True
             case _:
@@ -170,7 +182,18 @@ class DesiredStateHandlerForSwitch:
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
         )
-
+    
+    async def SWITCH_CHILD_LOCK_SWITCH(self, value: int):        
+        desired_state = {"childLockSwitch": value}
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+    
+    async def SWITCH_SCREEN_SWITCH(self, value: int):        
+        desired_state = {"screenSwitch": value}
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
 
     async def SWITCH_BEEP(self, value: int):
         desired_state = {"beepSwitch": value}
@@ -319,10 +342,45 @@ async def async_setup_entry(
                     type="AnionSwitch",
                     name="Anion Switch",
                     icon_fn=lambda device: (
-                        "mdi:atom-variant" if device.data.shield_switch == 1 
+                        "mdi:atom-variant" if device.data.anion_switch == 1 
                         else "mdi:atom-variant"
                     ),
-                    is_on_fn=lambda device: device.data.shield_switch,
+                    is_on_fn=lambda device: device.data.anion_switch,
+                )
+            )
+
+        if DeviceFeatureEnum.SWITCH_SCREEN_SWITCH in device.supported_features:
+            switches.append(
+                DynamicSwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_SCREEN_SWITCH,
+                    type="ScreenSwitch",
+                    name="Screen Switch",
+                    icon_fn=lambda device: (
+                        "mdi:lightbulb-outline"
+                        if device.data.screen_switch == 1
+                        else "mdi:lightbulb-off-outline"
+                    ),
+                    is_on_fn=lambda device: device.data.screen_switch,
+                )
+            )
+
+        if DeviceFeatureEnum.SWITCH_CHILD_LOCK_SWITCH in device.supported_features:
+            switches.append(
+                DynamicSwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_CHILD_LOCK_SWITCH,
+                    type="ChildLockSwitch",
+                    name="Child Lock Switch",
+                    icon_fn=lambda device: (
+                        "mdi:human-child" if device.data.child_lock_switch == 1 
+                        else "mdi:human-child"
+                    ),
+                    is_on_fn=lambda device: device.data.child_lock_switch,
                 )
             )
 

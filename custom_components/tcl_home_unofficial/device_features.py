@@ -29,6 +29,8 @@ class DeviceFeatureEnum(StrEnum):
     SENSOR_FRESH_AIR_TVOC = "sensor.fresh_air.TVOC"
     SENSOR_POWER_CONSUMPTION_DAILY = "sensor.power_consumption.daily"
     SENSOR_PM25_SENSOR_VALUE = "sensor.PM25SensorValue"
+    SENSOR_PM25_SENSOR_LEVEL = "sensor.PM25SensorLevel"
+    SENSOR_VOC_SENSOR_LEVEL = "sensor.VOCSensorLevel"
     SENSOR_WORK_TIME_DAILY = "sensor.work_time.daily"
     SWITCH_POWER = "switch.powerSwitch"
     SWITCH_BEEP = "switch.beepSwitch"
@@ -37,6 +39,7 @@ class DeviceFeatureEnum(StrEnum):
     SWITCH_HEALTHY = "switch.healthy"
     SWITCH_DRYING = "switch.drying"
     SWITCH_SCREEN = "switch.screen"
+    SWITCH_SCREEN_SWITCH = "switch.screenSwitch"
     SWITCH_LIGHT_SENSE = "switch.lightSense"
     SWITCH_SWING_WIND = "switch.swingWind"
     SWITCH_SLEEP = "switch.sleep"
@@ -45,6 +48,7 @@ class DeviceFeatureEnum(StrEnum):
     SWITCH_FRESH_AIR = "switch.freshAir"
     SWITCH_SHIELD_SWITCH = "switch.shieldSwitch"
     SWITCH_ANION = "switch.anionSwitch"
+    SWITCH_CHILD_LOCK_SWITCH = "switch.childLockSwitch"
     SELECT_MODE = "select.mode"
     SELECT_DEHUMIDIFIER_WIND_SPEED_LOW_MEDIUM_HEIGH = "select.dehumidifier.windSpeed.lowMediumHigh"
     SELECT_WIND_SPEED = "select.windSpeed"
@@ -394,9 +398,12 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.SWITCH_POWER,
                 DeviceFeatureEnum.SWITCH_SHIELD_SWITCH,
                 DeviceFeatureEnum.SENSOR_IS_ONLINE,
+                DeviceFeatureEnum.SWITCH_SCREEN_SWITCH,
+                DeviceFeatureEnum.SWITCH_CHILD_LOCK_SWITCH,
                 DeviceFeatureEnum.SENSOR_FILTER_LIFETIME,
                 DeviceFeatureEnum.SENSOR_PM25_SENSOR_VALUE,
-                DeviceFeatureEnum.SELECT_WIND_SPEED, 
+                DeviceFeatureEnum.SENSOR_VOC_SENSOR_LEVEL,
+                DeviceFeatureEnum.SELECT_WIND_SPEED,                 
                 DeviceFeatureEnum.SELECT_WORK_MODE
             ]
             
@@ -405,8 +412,11 @@ def getSupportedFeatures(
             features = [
                 DeviceFeatureEnum.SWITCH_POWER,
                 DeviceFeatureEnum.SWITCH_ANION,
+                DeviceFeatureEnum.SWITCH_SCREEN_SWITCH,
                 DeviceFeatureEnum.SENSOR_IS_ONLINE,
                 DeviceFeatureEnum.SENSOR_FILTER_LIFETIME,
+                DeviceFeatureEnum.SENSOR_PM25_SENSOR_LEVEL,
+                DeviceFeatureEnum.SENSOR_VOC_SENSOR_LEVEL,
                 DeviceFeatureEnum.SELECT_WIND_SPEED, 
                 DeviceFeatureEnum.SELECT_WORK_MODE
             ]

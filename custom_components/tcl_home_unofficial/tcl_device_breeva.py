@@ -27,9 +27,6 @@ class TCL_Breeva_DeviceData:
         self.pm25_sensor_level = int(
             try_get_value(delta, aws_thing_state, "PM25SensorLevel", -1)
         )
-        self.voc_sensor_level = int(
-            try_get_value(delta, aws_thing_state, "filterLifeTime", -1)
-        )
         self.filter_life_time = int(
             try_get_value(delta, aws_thing_state, "filterLifeTime", -1)
         )
