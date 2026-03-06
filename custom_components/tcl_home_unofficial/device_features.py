@@ -367,36 +367,27 @@ def getSupportedFeatures(
                 if has_power_consumption_data:
                     features.append(DeviceFeatureEnum.SENSOR_POWER_CONSUMPTION_DAILY)
                 if has_work_time_data:
-                    features.append(DeviceFeatureEnum.SENSOR_WORK_TIME_DAILY)            
+                    features.append(DeviceFeatureEnum.SENSOR_WORK_TIME_DAILY)
 
-                if has_rn_probe_data:
-                    fan_speed_mapping = rn_probe_data.get("fan_speed_mapping", [])
-                    if ("FAN_SPEED_AUTO" in fan_speed_mapping 
-                        and "FAN_SPEED_LOW" in fan_speed_mapping
-                        and ("FAN_SPEED_MED" in fan_speed_mapping or "FAN_SPEED_MEDIUM" in fan_speed_mapping)
-                        and "FAN_SPEED_HIGH" in fan_speed_mapping):
-                        features.append(DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED)
+                try:
+                    if has_rn_probe_data:
+                        fan_speed_mapping = rn_probe_data.get("fan_speed_mapping", [])
+                        if ("FAN_SPEED_AUTO" in fan_speed_mapping 
+                            and "FAN_SPEED_LOW" in fan_speed_mapping
+                            and ("FAN_SPEED_MED" in fan_speed_mapping or "FAN_SPEED_MEDIUM" in fan_speed_mapping)
+                            and "FAN_SPEED_HIGH" in fan_speed_mapping):
+                            features.append(DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED)
+                        else:
+                            features.append(DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED)
                     else:
                         features.append(DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED)
-                else:
-                    features.append(DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED)
-
-                if has_rn_probe_data:
-                    fan_speed_mapping = rn_probe_data.get("fan_speed_mapping", [])
-                    if ("FAN_SPEED_AUTO" in fan_speed_mapping 
-                        and "FAN_SPEED_LOW" in fan_speed_mapping
-                        and ("FAN_SPEED_MED" in fan_speed_mapping or "FAN_SPEED_MEDIUM" in fan_speed_mapping)
-                        and "FAN_SPEED_HIGH" in fan_speed_mapping):
-                        features.append(DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED)
-                    else:
-                        features.append(DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED)
-                else:
-                    features.append(DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED)
+                except Exception as e:
+                    _LOGGER.error("Error while device_features.getSupportedFeatures.DeviceTypeEnum.PORTABLE_AC.WIND_SPEED: %s",e)
+                    raise e
 
                 if has_property(aws_thing_state_reported, "swingWind"):
                     features.append(DeviceFeatureEnum.SWITCH_SWING_WIND)
                     features.append(DeviceFeatureEnum.MODE_AC_AUTO)
-
 
                 if has_property(aws_thing_state_reported, "currentTemperature"):
                     features.append(DeviceFeatureEnum.SENSOR_CURRENT_TEMPERATURE)
