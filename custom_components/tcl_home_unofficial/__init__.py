@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
@@ -19,7 +18,16 @@ from .coordinator import IotDeviceCoordinator
 from .device import Device, get_device_storage, store_rn_prode_data
 from .device_types import is_implemented_by_integration
 from .device_rn_probe import fetch_and_parse_config
-from .data_storage import get_internal_settings, safe_set_value, set_internal_settings, safe_get_value, set_stored_data
+from .data_storage import (
+    delete_internal_settings_file,
+    delete_session_storage_file,
+    delete_device_stored_file,
+    get_internal_settings,
+    safe_set_value,
+    set_internal_settings,
+    safe_get_value,
+    set_stored_data,
+)
 
 _PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
@@ -161,9 +169,15 @@ async def async_setup_entry(
 
 async def async_unload_entry(hass: HomeAssistant, entry: New_NameConfigEntry) -> bool:
     """Unload a config entry."""
-    # TODO: cleanup the device storega data
     return await hass.config_entries.async_unload_platforms(entry, _PLATFORMS)
 
+
+async def async_remove_entry(hass: HomeAssistant, entry: New_NameConfigEntry) -> bool:
+    """Remove a config entry."""
+    for device in entry.devices:
+        await delete_device_stored_file(hass, device.device_id)
+    await delete_internal_settings_file(hass)
+    await delete_session_storage_file(hass)
 
 async def _async_update_listener(hass: HomeAssistant, config_entry: ConfigEntry):
     """Handle config options update.

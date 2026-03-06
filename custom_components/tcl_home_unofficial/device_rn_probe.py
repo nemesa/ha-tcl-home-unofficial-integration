@@ -46,9 +46,15 @@ def pick_best_plugin_record(
 
     Accepts either a list of dicts or a single dict. Returns the chosen dict or None.
     """
-    records: list[dict] = []
+    records= []
     if isinstance(cfg_data, list):
-        records = [r for r in cfg_data if isinstance(r, dict)]
+        for r in cfg_data:
+            if isinstance(r, list):
+                for d in r:
+                    if isinstance(d, dict):
+                        records.append(d)
+            if isinstance(r, dict):
+                records.append(r)
     elif isinstance(cfg_data, dict):
         records = [cfg_data]
     else:
@@ -57,11 +63,11 @@ def pick_best_plugin_record(
     if not records:
         return None
 
-    filtered_records = [
-        r
-        for r in records
-        if r.get("deviceId") == device_id and r.get("productKey") == product_key
-    ]
+    filtered_records = []
+    for r in records:
+        if(r.get("deviceId","") == device_id and r.get("productKey","") == product_key) and r.get("plugInVersion","") != "":
+            filtered_records.append(r)
+
     return max(filtered_records, key=lambda r: _version_key(r.get("plugInVersion")))
 
 

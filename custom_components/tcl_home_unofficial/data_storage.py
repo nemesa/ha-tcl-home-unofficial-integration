@@ -3,7 +3,7 @@
 from homeassistant.core import HomeAssistant
 import logging
 from homeassistant.helpers import storage
-from .const import get_device_data_storege_key, get_internal_settings_storege_key
+from .const import DOMAIN, get_device_data_storege_key, get_internal_settings_storege_key
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -17,6 +17,15 @@ async def get_internal_settings(hass: HomeAssistant) -> dict[str, any] | None:
     _LOGGER.debug("device_data_storage.get_internal_settings %s - %s", key, data)
 
     return data
+
+async def delete_internal_settings_file(hass: HomeAssistant) -> None:
+    key = get_internal_settings_storege_key()
+    data_storage: storage.Store[dict] = storage.Store(hass=hass, version=1, key=key)    
+    await data_storage.async_remove()
+
+async def delete_session_storage_file(hass: HomeAssistant) -> None:    
+    data_storage: storage.Store[dict] = storage.Store(hass=hass, version=1, key=DOMAIN)    
+    await data_storage.async_remove()
 
 async def set_internal_settings(
     hass: HomeAssistant, data_to_set: dict[str, any]
@@ -71,6 +80,11 @@ async def delete_stored_data(hass: HomeAssistant, device_id: str) -> None:
     _LOGGER.debug("device_data_storage.delete_stored_data %s", key)
     await data_storage.async_save(data=None)
 
+async def delete_device_stored_file(hass: HomeAssistant, device_id: str) -> None:
+    """Delete the stored data file for a device."""
+    key = get_device_data_storege_key(device_id)
+    data_storage: storage.Store[dict] = storage.Store(hass=hass, version=1, key=key)
+    await data_storage.async_remove()
 
 def safe_setup_path(data: dict[str, any] | None, path: str):
     needs_save = False
