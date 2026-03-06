@@ -49,6 +49,7 @@ class DeviceFeatureEnum(StrEnum):
     SWITCH_SHIELD_SWITCH = "switch.shieldSwitch"
     SWITCH_ANION = "switch.anionSwitch"
     SWITCH_CHILD_LOCK_SWITCH = "switch.childLockSwitch"
+    SWITCH_PANEL_LIGHT_AUTO_OFF = "switch.panelLightAutoOFF"
     SELECT_MODE = "select.mode"
     SELECT_DEHUMIDIFIER_WIND_SPEED_LOW_MEDIUM_HEIGH = "select.dehumidifier.windSpeed.lowMediumHigh"
     SELECT_WIND_SPEED = "select.windSpeed"
@@ -406,7 +407,10 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.SELECT_WIND_SPEED,                 
                 DeviceFeatureEnum.SELECT_WORK_MODE
             ]
-            
+
+            if has_property(aws_thing_state_reported, "panelLightAutoOFF"):
+                features.append(DeviceFeatureEnum.SWITCH_PANEL_LIGHT_AUTO_OFF)
+
             return features
         case DeviceTypeEnum.AIR_PURIFIER_BREEVA_A2:
             features = [
@@ -420,6 +424,9 @@ def getSupportedFeatures(
                 DeviceFeatureEnum.SELECT_WIND_SPEED, 
                 DeviceFeatureEnum.SELECT_WORK_MODE
             ]
+
+            if has_property(aws_thing_state_reported, "panelLightAutoOFF"):
+                features.append(DeviceFeatureEnum.SWITCH_PANEL_LIGHT_AUTO_OFF)
             
             return features
         

@@ -75,6 +75,8 @@ class DesiredStateHandlerForSwitch:
                 return await self.SWITCH_SHIELD_SWITCH(value=value)
             case DeviceFeatureEnum.SWITCH_ANION:
                 return await self.SWITCH_ANION(value=value)
+            case DeviceFeatureEnum.SWITCH_PANEL_LIGHT_AUTO_OFF:
+                return await self.SWITCH_PANEL_LIGHT_AUTO_OFF(value=value)
             case DeviceFeatureEnum.SWITCH_CHILD_LOCK_SWITCH:
                 return await self.SWITCH_CHILD_LOCK_SWITCH(value=value)
             case DeviceFeatureEnum.SWITCH_SCREEN_SWITCH:
@@ -145,6 +147,8 @@ class DesiredStateHandlerForSwitch:
                     return False
                 return True
             case DeviceFeatureEnum.SWITCH_ANION:
+                return True
+            case DeviceFeatureEnum.SWITCH_PANEL_LIGHT_AUTO_OFF:
                 if self.device.data.power_switch == 0:
                     return False
                 return True
@@ -179,6 +183,12 @@ class DesiredStateHandlerForSwitch:
     
     async def SWITCH_ANION(self, value: int):        
         desired_state = {"anionSwitch": value}
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+    
+    async def SWITCH_PANEL_LIGHT_AUTO_OFF(self, value: int):        
+        desired_state = {"panelLightAutoOFF": value}
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
         )
@@ -346,6 +356,24 @@ async def async_setup_entry(
                         else "mdi:atom-variant"
                     ),
                     is_on_fn=lambda device: device.data.anion_switch,
+                )
+            )
+
+        if DeviceFeatureEnum.SWITCH_PANEL_LIGHT_AUTO_OFF in device.supported_features:
+            switches.append(
+                DynamicSwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_PANEL_LIGHT_AUTO_OFF,
+                    type="PanelLightAutoOffSwitch",
+                    name="Panel Light Auto Off Switch",
+                    icon_fn=lambda device: (
+                        "mdi:lightbulb-outline"
+                        if device.data.panel_light_auto_off == 1
+                        else "mdi:lightbulb-off-outline"
+                    ),
+                    is_on_fn=lambda device: device.data.panel_light_auto_off,
                 )
             )
 
