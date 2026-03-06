@@ -64,6 +64,7 @@ async def aws_iot_get_thing(hass: HomeAssistant, device_id: str):
                 break
             counter+=1        
     
+    _LOGGER.info("aws_iot_get_thing data:(%s)", data)
     return data
 
 

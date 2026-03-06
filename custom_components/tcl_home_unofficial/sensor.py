@@ -103,6 +103,33 @@ async def async_setup_entry(
                     value_fn=lambda device: device.data.tvoc_level,
                 )
             )
+        
+        if DeviceFeatureEnum.SENSOR_SPLIT_AC_TVOC_VALUE in device.supported_features:
+            sensors.append(
+                VolatileOrganicCompoundsSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="SplitAC.TVOC.Value",
+                    name="TVOC Value",
+                    value_fn=lambda device: device.data.sensor_TVOC_value,
+                )
+            )
+        
+        if DeviceFeatureEnum.SENSOR_SPLIT_AC_TVOC_LEVEL in device.supported_features:
+            sensors.append(
+                IntNumberSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="SplitAC.TVOC.Level",
+                    name="TVOC Level",
+                    device_classification=None,
+                    state_classification=SensorStateClass.MEASUREMENT,
+                    icon_fn=lambda device: "mdi:dots-hexagon",
+                    native_unit_of_measurement="",
+                    value_fn=lambda device: device.data.sensor_TVOC_level,
+                )
+            )
+
         if DeviceFeatureEnum.SENSOR_PM25_SENSOR_LEVEL in device.supported_features:            
             sensors.append(
                 IntNumberSensor(

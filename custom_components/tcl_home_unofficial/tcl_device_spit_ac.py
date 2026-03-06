@@ -42,6 +42,9 @@ class TCL_SplitAC_DeviceData:
         self.generator_mode             = int(try_get_value(delta, aws_thing_state, "generatorMode", -1))
         self.lower_temperature_limit    = int(try_get_value(delta, aws_thing_state, "lowerTemperatureLimit", 16))
         self.upper_temperature_limit    = int(try_get_value(delta, aws_thing_state, "upperTemperatureLimit", 36))
+        self.sensor_TVOC_level          = int(try_get_value(delta, aws_thing_state, "sensorTVOCLevel", -1))
+        self.sensor_TVOC_value          = float(try_get_value(delta, aws_thing_state, "sensorTVOCValue", -1))
+        
 
     device_id: str
     power_switch: int | bool
@@ -71,7 +74,8 @@ class TCL_SplitAC_DeviceData:
     generator_mode: int
     upper_temperature_limit: int
     lower_temperature_limit: int
-
+    sensor_TVOC_level: int
+    sensor_TVOC_value: float
 
 async def get_stored_spit_ac_data(
     hass: HomeAssistant, device_id: str

@@ -27,6 +27,8 @@ class DeviceFeatureEnum(StrEnum):
     SENSOR_EXTERNAL_UNIT_TEMPERATURE = "sensor.external_unit_temperature"
     SENSOR_EXTERNAL_UNIT_EXHAUST_TEMPERATURE = "sensor.external_unit_exhaust_temperature"
     SENSOR_FRESH_AIR_TVOC = "sensor.fresh_air.TVOC"
+    SENSOR_SPLIT_AC_TVOC_LEVEL = "sensor.split_ac.sensorTVOCLevel"
+    SENSOR_SPLIT_AC_TVOC_VALUE = "sensor.split_ac.sensorTVOCValue"
     SENSOR_POWER_CONSUMPTION_DAILY = "sensor.power_consumption.daily"
     SENSOR_PM25_SENSOR_VALUE = "sensor.PM25SensorValue"
     SENSOR_PM25_SENSOR_LEVEL = "sensor.PM25SensorLevel"
@@ -174,6 +176,12 @@ def getSupportedFeatures(
 
             if has_property(aws_thing_state_reported, "targetFahrenheitTemp"):
                 features.append(DeviceFeatureEnum.INTERNAL_SET_TFT_WITH_TT)
+
+            if has_property(aws_thing_state_reported, "sensorTVOCLevel"):
+                features.append(DeviceFeatureEnum.SENSOR_SPLIT_AC_TVOC_LEVEL)
+
+            if has_property(aws_thing_state_reported, "sensorTVOCValue"):
+                features.append(DeviceFeatureEnum.SENSOR_SPLIT_AC_TVOC_VALUE)
 
             return features
         case DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
