@@ -80,12 +80,20 @@ class Device:
             try:
                 if "state" in aws_thing:
                     if "reported" in aws_thing["state"]:
-                        self.supported_features = getSupportedFeatures(
-                            self.device_type,
-                            aws_thing["state"]["reported"],
-                            self.storage,
-                        )
-                        self.create_mode_mapps()
+                        try:
+                            self.supported_features = getSupportedFeatures(
+                                self.device_type,
+                                aws_thing["state"]["reported"],
+                                self.storage,
+                            )
+                        except Exception as e:
+                            _LOGGER.error("Error while getSupportedFeatures for device %s: %s",self.device_id,str(e),)
+                            raise e
+                        try:    
+                            self.create_mode_mapps()
+                        except Exception as e:
+                            _LOGGER.error("Error while create_mode_mapps for device %s: %s",self.device_id,str(e),)
+                            raise e
                         if "capabilities" in aws_thing["state"]["reported"]:
                             capabilities_array = aws_thing["state"]["reported"][
                                 "capabilities"
