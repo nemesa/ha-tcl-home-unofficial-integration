@@ -212,7 +212,7 @@ class PortableWind4ValueSeedEnum(StrEnum):
 
 
 def getPortableWind4ValueSeed(
-    wind_speed: int, has_auto_mode: bool
+    wind_speed: int, has_auto_mode: bool = False 
 ) -> PortableWind4ValueSeedEnum:
     if has_auto_mode:
         match wind_speed:
