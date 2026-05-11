@@ -201,7 +201,7 @@ def process_bundle_text(bundle_text: str) -> ProbeData:
     return probe_data
 
 
-def parse_fan_speed_mapping(bundle_text: str) -> list[str] | None:
+def parse_fan_speed_mapping(bundle_text: str) -> list[str]:
     """Parse FAN_SPEED_* new Map([...]) tokens from bundle text and return ordered list.
 
     Looks for an explicit new Map([...]) containing entries like ['FAN_SPEED_AUTO',0].
@@ -216,4 +216,4 @@ def parse_fan_speed_mapping(bundle_text: str) -> list[str] | None:
         entries = entry_pattern.findall(m.group(1))
         if entries and any(tok.startswith("FAN_SPEED_") for tok, _ in entries):
             return [tok for tok, _ in entries]
-    return None
+    return []
