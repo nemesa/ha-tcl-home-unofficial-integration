@@ -47,6 +47,7 @@ class DeviceFeatureEnum(StrEnum):
     SWITCH_LIGHT_SENSE = "switch.lightSense"
     SWITCH_SWING_WIND = "switch.swingWind"
     SWITCH_SLEEP = "switch.sleep"
+    SWITCH_PORTABLE_TURBO = "switch.portableTurbo"
     SWITCH_8_C_HEATING = "switch.8CHeating"
     SWITCH_SOFT_WIND = "switch.softWind"
     SWITCH_FRESH_AIR = "switch.freshAir"
@@ -432,6 +433,7 @@ def getSupportedFeatures(
                     DeviceFeatureEnum.MODE_AC_COOL,
                     DeviceFeatureEnum.SWITCH_POWER,
                     DeviceFeatureEnum.SWITCH_SLEEP,
+                    DeviceFeatureEnum.SWITCH_PORTABLE_TURBO,
                     DeviceFeatureEnum.SELECT_MODE,
                     DeviceFeatureEnum.NUMBER_TARGET_DEGREE,
                     DeviceFeatureEnum.SENSOR_IS_ONLINE,
