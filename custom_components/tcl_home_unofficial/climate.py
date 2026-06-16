@@ -20,12 +20,14 @@ from .device_enums import (
     LeftAndRightAirSupplyVectorEnum,
     ModeEnum,
     PortableWind4ValueSeedEnum,
+    PortableWindSeedEnum,
     UpAndDownAirSupplyVectorEnum,
     WindowAcWindSeedEnum,
     WindSeed7GearEnum,
     WindSeedEnum,
     getLeftAndRightAirSupplyVector,
     getPortableWind4ValueSeed,
+    getPortableWindSeed,
     getUpAndDownAirSupplyVector,
     getWindowAcWindSeed,
     getWindSeed7Gear,
@@ -51,6 +53,9 @@ def get_fan_speed_feature(device: Device) -> str:
 
     if DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in device.supported_features:
         return DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED
+
+    if DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED in device.supported_features:
+        return DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED
     return DeviceFeatureEnum.SELECT_WIND_SPEED
 
 
@@ -60,7 +65,19 @@ def get_current_fan_speed_fn(device: Device) -> str:
     if DeviceFeatureEnum.SELECT_WINDOW_AS_WIND_SPEED in device.supported_features:
         return getWindowAcWindSeed(device.data.wind_speed)
     if DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in device.supported_features:
-        return getPortableWind4ValueSeed(device.data.wind_speed)
+        return getPortableWind4ValueSeed(
+            device.data.wind_speed,
+            has_auto_mode=(
+                DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features
+            ),
+        )
+    if DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED in device.supported_features:
+        return getPortableWindSeed(
+            device.data.wind_speed,
+            has_auto_mode=(
+                DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features
+            ),
+        )
     return getWindSpeed(
         wind_speed=device.data.wind_speed,
         turbo=device.data.turbo,
@@ -75,6 +92,8 @@ def get_options_fan_speed(device: Device) -> list[str]:
         return [e.value for e in WindowAcWindSeedEnum]
     if DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in device.supported_features:
         return [e.value for e in PortableWind4ValueSeedEnum]
+    if DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED in device.supported_features:
+        return [e.value for e in PortableWindSeedEnum]
     return [e.value for e in WindSeedEnum]
 
 
