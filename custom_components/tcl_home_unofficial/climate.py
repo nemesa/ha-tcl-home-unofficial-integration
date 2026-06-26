@@ -65,12 +65,7 @@ def get_current_fan_speed_fn(device: Device) -> str:
     if DeviceFeatureEnum.SELECT_WINDOW_AS_WIND_SPEED in device.supported_features:
         return getWindowAcWindSeed(device.data.wind_speed)
     if DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in device.supported_features:
-        return getPortableWind4ValueSeed(
-            device.data.wind_speed,
-            has_auto_mode=(
-                DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features
-            ),
-        )
+        return getPortableWind4ValueSeed(device.data.wind_speed)
     if DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED in device.supported_features:
         return getPortableWindSeed(
             device.data.wind_speed,
@@ -91,14 +86,7 @@ def get_options_fan_speed(device: Device) -> list[str]:
     if DeviceFeatureEnum.SELECT_WINDOW_AS_WIND_SPEED in device.supported_features:
         return [e.value for e in WindowAcWindSeedEnum]
     if DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in device.supported_features:
-        options = [
-            PortableWind4ValueSeedEnum.LOW.value,
-            PortableWind4ValueSeedEnum.MEDIUM.value,
-            PortableWind4ValueSeedEnum.HIGH.value,
-        ]
-        if DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features:
-            options.append(PortableWind4ValueSeedEnum.AUTO.value)
-        return options
+        return [e.value for e in PortableWind4ValueSeedEnum]
     if DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED in device.supported_features:
         options = [
             PortableWindSeedEnum.LOW.value,
