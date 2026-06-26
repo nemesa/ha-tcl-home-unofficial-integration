@@ -31,9 +31,15 @@ def get_SWITCH_DRYING_name(device: Device) -> str:
 def get_portable_max_wind_speed(device: Device) -> int:
     """Return the windSpeed value that represents the highest fan speed.
 
-    The encoding depends on which portable wind-speed variant the device uses
-    and whether it has an Auto mode (signalled by the presence of swingWind /
-    MODE_AC_AUTO). This mirrors the mappings in select.py.
+    The raw windSpeed value that means "highest" differs per portable variant
+    and by whether the unit has an Auto mode (signalled by the swingWind
+    property / MODE_AC_AUTO feature). These numbers mirror the mappings used in
+    select.py / device_enums.py so Turbo and the Wind Speed select stay in sync:
+
+      4-value with Auto:    0=Auto 1=Low 2=Medium 3=High  -> max = 3
+      4-value without Auto:       0=Low 1=Medium 2=High    -> max = 2
+      2-value with Auto:    0=Auto 1=Low 2=High            -> max = 2
+      2-value without Auto:       0=Low 1=High             -> max = 1
     """
     has_auto = DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features
     if DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in device.supported_features:
@@ -42,7 +48,13 @@ def get_portable_max_wind_speed(device: Device) -> int:
 
 
 def get_portable_turbo_is_on(device: Device) -> bool:
-    """Turbo is considered active when the device is at max fan + min temperature."""
+    """Whether the Turbo switch should read as "on".
+
+    There is no native turbo flag on portable ACs, so Turbo is derived: it is
+    "on" when the device currently sits at the maximum fan speed AND the minimum
+    target temperature - exactly the state the Turbo macro applies. This also
+    makes the switch reflect Turbo set from the physical remote.
+    """
     if not device or not device.data:
         return False
     min_temp = safe_get_value(device.storage, "user_config.settings.min_temp", 18)
@@ -143,6 +155,9 @@ class DesiredStateHandlerForSwitch:
                 else:
                     return True
             case DeviceFeatureEnum.SWITCH_PORTABLE_TURBO:
+                # Turbo only makes sense as a cooling boost: it needs the unit
+                # powered on and in Cool mode (min temperature is meaningless in
+                # Fan / Dehumidification). Greyed out otherwise.
                 if self.device and self.device.data and self.device.data.power_switch == 0:
                     return False
                 return mode == ModeEnum.COOL
@@ -346,6 +361,10 @@ class DesiredStateHandlerForSwitch:
             target_temp = min_temp
             wind_speed = max_wind_speed
         else:
+            # Turning Turbo off: restore the remembered pre-turbo values. If none
+            # were stored (e.g. Turbo was engaged from the remote, or storage was
+            # cleared), fall back to the lowest fan speed (0) and the last known
+            # Cool target temperature so we leave the unit in a sane state.
             default_target_temp = safe_get_value(
                 stored_data, "target_temperature.Cool.value", 22
             )
@@ -358,6 +377,8 @@ class DesiredStateHandlerForSwitch:
                 default_target_temp,
             )
 
+        # Set both Celsius and Fahrenheit targets together - the portable AC
+        # firmware tracks both and expects them to stay consistent.
         desired_state = {
             "windSpeed": wind_speed,
             "targetCelsiusDegree": target_temp,
@@ -654,6 +675,11 @@ async def async_setup_entry(
                 )
             )
 
+        # Turbo switch. The feature is only present for portable AC models whose
+        # remote actually has a Turbo button (gated by product_key in
+        # device_features.py), so no extra device-type check is needed here.
+        # DynamicSwitchHandler is used so availability follows is_allowed()
+        # (powered on + Cool mode).
         if DeviceFeatureEnum.SWITCH_PORTABLE_TURBO in device.supported_features:
             switches.append(
                 DynamicSwitchHandler(

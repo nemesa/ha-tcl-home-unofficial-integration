@@ -117,6 +117,9 @@ PORTABLE_AC_NO_ENERGY_REPORTING_PRODUCT_KEYS = {
 def getSupportedFeatures(
     device_type: DeviceTypeEnum,aws_thing_state_reported: dict[str, any],device_storage: dict[str, any] | None = None,product_key: str | None = None,
 ) -> list[DeviceFeatureEnum]:
+    # product_key identifies the device MODEL (shared by every unit of the same
+    # model, unlike the per-unit device_id). It is used for model-specific
+    # behaviour - see the PORTABLE_AC_*_PRODUCT_KEYS sets above.
     try:
         capabilities = aws_thing_state_reported.get("capabilities", [])
         has_power_consumption_data = False
