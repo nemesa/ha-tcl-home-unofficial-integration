@@ -19,12 +19,14 @@ from .device import Device
 from .device_enums import (
     LeftAndRightAirSupplyVectorEnum,
     ModeEnum,
+    PortableWindSeedEnum,
     PortableWind4ValueSeedEnum,
     UpAndDownAirSupplyVectorEnum,
     WindowAcWindSeedEnum,
     WindSeed7GearEnum,
     WindSeedEnum,
     getLeftAndRightAirSupplyVector,
+    getPortableWindSeed,
     getPortableWind4ValueSeed,
     getUpAndDownAirSupplyVector,
     getWindowAcWindSeed,
@@ -51,6 +53,8 @@ def get_fan_speed_feature(device: Device) -> str:
 
     if DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in device.supported_features:
         return DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED
+    if DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED in device.supported_features:
+        return DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED
     return DeviceFeatureEnum.SELECT_WIND_SPEED
 
 
@@ -60,12 +64,71 @@ def get_current_fan_speed_fn(device: Device) -> str:
     if DeviceFeatureEnum.SELECT_WINDOW_AS_WIND_SPEED in device.supported_features:
         return getWindowAcWindSeed(device.data.wind_speed)
     if DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in device.supported_features:
-        return getPortableWind4ValueSeed(device.data.wind_speed)
+        return getPortableWind4ValueSeed(
+            device.data.wind_speed,
+            DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features,
+        )
+    if DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED in device.supported_features:
+        return getPortableWindSeed(
+            device.data.wind_speed,
+            DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features,
+        )
     return getWindSpeed(
-        wind_speed=device.data.wind_speed,
-        turbo=device.data.turbo,
-        silence_switch=device.data.silence_switch,
+        wind_speed=getattr(device.data, "wind_speed", 0),
+        turbo=getattr(device.data, "turbo", False),
+        silence_switch=getattr(device.data, "silence_switch", False),
     )
+
+def get_SELECT_PORTABLE_WIND_SPEED_options(device: Device) -> list[str]:
+    options = [
+        PortableWindSeedEnum.LOW.value,
+        PortableWindSeedEnum.HIGH.value,
+    ]
+    if DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features:
+        options.append(PortableWindSeedEnum.AUTO.value)
+
+    current_mode = device.mode_value_to_enum_mapp.get(
+        device.data.work_mode, ModeEnum.COOL
+    )
+    if current_mode == ModeEnum.DEHUMIDIFICATION:
+        if DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features:
+            return [PortableWindSeedEnum.AUTO.value]
+        return []
+
+    if current_mode == ModeEnum.FAN:
+        return [
+            PortableWindSeedEnum.LOW.value,
+            PortableWindSeedEnum.HIGH.value,
+        ]
+
+    return options
+
+
+def get_SELECT_PORTABLE_WIND_4VALUE_SPEED_options(device: Device) -> list[str]:
+    options = [
+        PortableWind4ValueSeedEnum.LOW.value,
+        PortableWind4ValueSeedEnum.MEDIUM.value,
+        PortableWind4ValueSeedEnum.HIGH.value,
+    ]
+    if DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features:
+        options.append(PortableWind4ValueSeedEnum.AUTO.value)
+
+    current_mode = device.mode_value_to_enum_mapp.get(
+        device.data.work_mode, ModeEnum.COOL
+    )
+    if current_mode == ModeEnum.DEHUMIDIFICATION:
+        if DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features:
+            return [PortableWind4ValueSeedEnum.AUTO.value]
+        return []
+
+    if current_mode == ModeEnum.FAN:
+        return [
+            PortableWind4ValueSeedEnum.LOW.value,
+            PortableWind4ValueSeedEnum.MEDIUM.value,
+            PortableWind4ValueSeedEnum.HIGH.value,
+        ]
+
+    return options
 
 
 def get_options_fan_speed(device: Device) -> list[str]:
@@ -74,7 +137,9 @@ def get_options_fan_speed(device: Device) -> list[str]:
     if DeviceFeatureEnum.SELECT_WINDOW_AS_WIND_SPEED in device.supported_features:
         return [e.value for e in WindowAcWindSeedEnum]
     if DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in device.supported_features:
-        return [e.value for e in PortableWind4ValueSeedEnum]
+        return get_SELECT_PORTABLE_WIND_4VALUE_SPEED_options(device)
+    if DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED in device.supported_features:
+        return get_SELECT_PORTABLE_WIND_SPEED_options(device)
     return [e.value for e in WindSeedEnum]
 
 
@@ -134,10 +199,10 @@ async def async_setup_entry(
                         get_current_mode_fn(device)
                     ),
                     current_vertical_air_direction_fn=lambda device: getUpAndDownAirSupplyVector(
-                        device.data.vertical_direction
+                        getattr(device.data, 'vertical_direction', None)
                     ),
                     current_horizontal_air_direction_fn=lambda device: getLeftAndRightAirSupplyVector(
-                        device.data.horizontal_direction
+                        getattr(device.data, 'horizontal_direction', None)
                     ),
                     options_fan_speed=get_options_fan_speed(device),
                     options_mode=[
@@ -323,6 +388,12 @@ class ClimateHandler(TclEntityBase, ClimateEntity):
             self.iot_handler_vertical_air_direction.refreshDevice(self.device)
         if self.horizontal_air_direction_select_feature is not None:
             self.iot_handler_horizontal_air_direction.refreshDevice(self.device)
+
+        self._current_fan_mode = self.current_fan_speed_fn(self.device)
+        self._fan_modes = get_options_fan_speed(self.device)
+        self._hvac_modes = [
+            map_mode_to_hvac_mode(e) for e in self.device.get_supported_modes()
+        ] + [HVACMode.OFF]
 
     @property
     def current_temperature(self) -> float:
