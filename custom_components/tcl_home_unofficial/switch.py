@@ -8,6 +8,7 @@ from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from .calculations import celsius_to_fahrenheit
 from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
 from .data_storage import (get_stored_data, safe_get_value, safe_set_value,
@@ -25,6 +26,42 @@ def get_SWITCH_DRYING_name(device: Device) -> str:
     if device.device_type == DeviceTypeEnum.SPLIT_AC_FRESH_AIR:
         return "Mildewproof Switch"
     return "Drying Switch"
+
+
+def get_portable_max_wind_speed(device: Device) -> int:
+    """Return the windSpeed value that represents the highest fan speed.
+
+    The raw windSpeed value that means "highest" differs per portable variant
+    and by whether the unit has an Auto mode (signalled by the swingWind
+    property / MODE_AC_AUTO feature). These numbers mirror the mappings used in
+    select.py / device_enums.py so Turbo and the Wind Speed select stay in sync:
+
+      4-value with Auto:    0=Auto 1=Low 2=Medium 3=High  -> max = 3
+      4-value without Auto:       0=Low 1=Medium 2=High    -> max = 2
+      2-value with Auto:    0=Auto 1=Low 2=High            -> max = 2
+      2-value without Auto:       0=Low 1=High             -> max = 1
+    """
+    has_auto = DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features
+    if DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in device.supported_features:
+        return 3 if has_auto else 2
+    return 2 if has_auto else 1
+
+
+def get_portable_turbo_is_on(device: Device) -> bool:
+    """Whether the Turbo switch should read as "on".
+
+    There is no native turbo flag on portable ACs, so Turbo is derived: it is
+    "on" when the device currently sits at the maximum fan speed AND the minimum
+    target temperature - exactly the state the Turbo macro applies. This also
+    makes the switch reflect Turbo set from the physical remote.
+    """
+    if not device or not device.data:
+        return False
+    min_temp = safe_get_value(device.storage, "user_config.settings.min_temp", 18)
+    return (
+        device.data.wind_speed == get_portable_max_wind_speed(device)
+        and device.data.target_temperature == min_temp
+    )
 
 
 class DesiredStateHandlerForSwitch:
@@ -63,6 +100,8 @@ class DesiredStateHandlerForSwitch:
                 return await self.SWITCH_SWING_WIND(value=value)
             case DeviceFeatureEnum.SWITCH_SLEEP:
                 return await self.SWITCH_SLEEP(value=value)
+            case DeviceFeatureEnum.SWITCH_PORTABLE_TURBO:
+                return await self.SWITCH_PORTABLE_TURBO(value=value)
             case DeviceFeatureEnum.SWITCH_AI_ECO:
                 return await self.SWITCH_AI_ECO(value=value)
             case DeviceFeatureEnum.SWITCH_8_C_HEATING:
@@ -115,6 +154,13 @@ class DesiredStateHandlerForSwitch:
                     return False
                 else:
                     return True
+            case DeviceFeatureEnum.SWITCH_PORTABLE_TURBO:
+                # Turbo only makes sense as a cooling boost: it needs the unit
+                # powered on and in Cool mode (min temperature is meaningless in
+                # Fan / Dehumidification). Greyed out otherwise.
+                if self.device and self.device.data and self.device.data.power_switch == 0:
+                    return False
+                return mode == ModeEnum.COOL
             case DeviceFeatureEnum.SWITCH_ECO:
                 if (
                     mode == ModeEnum.FAN
@@ -279,6 +325,65 @@ class DesiredStateHandlerForSwitch:
         desired_state = {"sleep": value}
         if self.device.device_type == DeviceTypeEnum.PORTABLE_AC:
             desired_state["windSpeed"] = 1 if value == 1 else 2
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, desired_state
+        )
+
+    async def SWITCH_PORTABLE_TURBO(self, value: int):
+        """Turbo for portable ACs: a macro that mirrors the remote's Turbo button.
+
+        The portable AC has no native turbo property, so enabling it just sets
+        the maximum fan speed together with the minimum target temperature.
+        The previous fan speed / temperature are remembered so they can be
+        restored when Turbo is switched off.
+        """
+        stored_data = await get_stored_data(self.hass, self.device.device_id)
+        min_temp = safe_get_value(stored_data, "user_config.settings.min_temp", 18)
+        max_wind_speed = get_portable_max_wind_speed(self.device)
+
+        if value == 1:
+            # Remember the pre-turbo state, but only when we are not already in
+            # a turbo-equivalent state (so we never overwrite the real values).
+            if not get_portable_turbo_is_on(self.device):
+                stored_data, _ = safe_set_value(
+                    stored_data,
+                    "non_user_config.turbo.prev_wind_speed",
+                    self.device.data.wind_speed,
+                    overwrite_if_exists=True,
+                )
+                stored_data, _ = safe_set_value(
+                    stored_data,
+                    "non_user_config.turbo.prev_target_temperature",
+                    self.device.data.target_temperature,
+                    overwrite_if_exists=True,
+                )
+                await set_stored_data(self.hass, self.device.device_id, stored_data)
+            target_temp = min_temp
+            wind_speed = max_wind_speed
+        else:
+            # Turning Turbo off: restore the remembered pre-turbo values. If none
+            # were stored (e.g. Turbo was engaged from the remote, or storage was
+            # cleared), fall back to the lowest fan speed (0) and the last known
+            # Cool target temperature so we leave the unit in a sane state.
+            default_target_temp = safe_get_value(
+                stored_data, "target_temperature.Cool.value", 22
+            )
+            wind_speed = safe_get_value(
+                stored_data, "non_user_config.turbo.prev_wind_speed", 0
+            )
+            target_temp = safe_get_value(
+                stored_data,
+                "non_user_config.turbo.prev_target_temperature",
+                default_target_temp,
+            )
+
+        # Set both Celsius and Fahrenheit targets together - the portable AC
+        # firmware tracks both and expects them to stay consistent.
+        desired_state = {
+            "windSpeed": wind_speed,
+            "targetCelsiusDegree": target_temp,
+            "targetFahrenheitDegree": celsius_to_fahrenheit(target_temp),
+        }
         return await self.coordinator.get_aws_iot().async_set_desired_state(
             self.device.device_id, desired_state
         )
@@ -567,6 +672,29 @@ async def async_setup_entry(
                     name="Sleep",
                     icon_fn=lambda device: "mdi:sleep",
                     is_on_fn=lambda device: device.data.sleep,
+                )
+            )
+
+        # Turbo switch. The feature is only present for portable AC models whose
+        # remote actually has a Turbo button (gated by product_key in
+        # device_features.py), so no extra device-type check is needed here.
+        # DynamicSwitchHandler is used so availability follows is_allowed()
+        # (powered on + Cool mode).
+        if DeviceFeatureEnum.SWITCH_PORTABLE_TURBO in device.supported_features:
+            switches.append(
+                DynamicSwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_PORTABLE_TURBO,
+                    type="PortableTurbo",
+                    name="Turbo",
+                    icon_fn=lambda device: (
+                        "mdi:fan-plus"
+                        if get_portable_turbo_is_on(device)
+                        else "mdi:fan"
+                    ),
+                    is_on_fn=lambda device: get_portable_turbo_is_on(device),
                 )
             )
 

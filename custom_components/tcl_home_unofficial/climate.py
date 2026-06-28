@@ -20,12 +20,14 @@ from .device_enums import (
     LeftAndRightAirSupplyVectorEnum,
     ModeEnum,
     PortableWind4ValueSeedEnum,
+    PortableWindSeedEnum,
     UpAndDownAirSupplyVectorEnum,
     WindowAcWindSeedEnum,
     WindSeed7GearEnum,
     WindSeedEnum,
     getLeftAndRightAirSupplyVector,
     getPortableWind4ValueSeed,
+    getPortableWindSeed,
     getUpAndDownAirSupplyVector,
     getWindowAcWindSeed,
     getWindSeed7Gear,
@@ -43,6 +45,8 @@ _LOGGER = logging.getLogger(__name__)
 
 
 def get_fan_speed_feature(device: Device) -> str:
+    # Pick the wind-speed feature that drives the climate entity's fan modes.
+    # The order matters: each device type exposes exactly one of these variants.
     if DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in device.supported_features:
         return DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR
 
@@ -51,16 +55,39 @@ def get_fan_speed_feature(device: Device) -> str:
 
     if DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in device.supported_features:
         return DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED
+
+    # Portable ACs reported via the RN probe as 2-speed (Low/High[/Auto]) use the
+    # SELECT_PORTABLE_WIND_SPEED variant. Without this branch they would fall
+    # through to the generic SELECT_WIND_SPEED below, whose handlers read
+    # turbo / silence_switch - fields that do not exist on the portable AC data
+    # model (TCL_PortableAC_DeviceData) and would raise AttributeError.
+    if DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED in device.supported_features:
+        return DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED
     return DeviceFeatureEnum.SELECT_WIND_SPEED
 
 
 def get_current_fan_speed_fn(device: Device) -> str:
+    # Translate the raw windSpeed value into the human-readable fan mode that the
+    # climate card shows, using the mapping that matches the device's variant.
     if DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in device.supported_features:
         return getWindSeed7Gear(device.data.wind_speed_7_gear)
     if DeviceFeatureEnum.SELECT_WINDOW_AS_WIND_SPEED in device.supported_features:
         return getWindowAcWindSeed(device.data.wind_speed)
     if DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in device.supported_features:
         return getPortableWind4ValueSeed(device.data.wind_speed)
+    # 2-speed portable AC. has_auto_mode shifts the windSpeed->label mapping
+    # (e.g. with Auto: 0=Auto/1=Low/2=High; without: 0=Low/1=High), so it must
+    # match what the separate Wind Speed select entity reports. Auto only exists
+    # when the device actually has an Auto mode (signalled by MODE_AC_AUTO).
+    if DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED in device.supported_features:
+        return getPortableWindSeed(
+            device.data.wind_speed,
+            has_auto_mode=(
+                DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features
+            ),
+        )
+    # Generic split-AC style wind speed. Only reached for non-portable devices,
+    # whose data model has the turbo / silence_switch fields.
     return getWindSpeed(
         wind_speed=device.data.wind_speed,
         turbo=device.data.turbo,
@@ -69,12 +96,25 @@ def get_current_fan_speed_fn(device: Device) -> str:
 
 
 def get_options_fan_speed(device: Device) -> list[str]:
+    # The list of selectable fan modes for the climate entity, per variant.
     if DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in device.supported_features:
         return [e.value for e in WindSeed7GearEnum]
     if DeviceFeatureEnum.SELECT_WINDOW_AS_WIND_SPEED in device.supported_features:
         return [e.value for e in WindowAcWindSeedEnum]
     if DeviceFeatureEnum.SELECT_PORTABLE_WIND_4VALUE_SPEED in device.supported_features:
         return [e.value for e in PortableWind4ValueSeedEnum]
+    # 2-speed portable AC: offer Low/High, and only add Auto when the device
+    # genuinely supports an Auto mode. Listing every PortableWindSeedEnum value
+    # unconditionally would expose a non-functional "Auto" option on units that
+    # only have Low/High.
+    if DeviceFeatureEnum.SELECT_PORTABLE_WIND_SPEED in device.supported_features:
+        options = [
+            PortableWindSeedEnum.LOW.value,
+            PortableWindSeedEnum.HIGH.value,
+        ]
+        if DeviceFeatureEnum.MODE_AC_AUTO in device.supported_features:
+            options.append(PortableWindSeedEnum.AUTO.value)
+        return options
     return [e.value for e in WindSeedEnum]
 
 

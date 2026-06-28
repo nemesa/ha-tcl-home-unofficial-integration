@@ -90,6 +90,7 @@ class Device:
                                 self.device_type,
                                 aws_thing["state"]["reported"],
                                 self.storage,
+                                self.product_key,
                             )
                         except Exception as e:
                             _LOGGER.error("Error while getSupportedFeatures for device %s: %s",self.device_id,str(e),)

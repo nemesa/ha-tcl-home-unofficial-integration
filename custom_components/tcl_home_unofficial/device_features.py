@@ -47,6 +47,7 @@ class DeviceFeatureEnum(StrEnum):
     SWITCH_LIGHT_SENSE = "switch.lightSense"
     SWITCH_SWING_WIND = "switch.swingWind"
     SWITCH_SLEEP = "switch.sleep"
+    SWITCH_PORTABLE_TURBO = "switch.portableTurbo"
     SWITCH_8_C_HEATING = "switch.8CHeating"
     SWITCH_SOFT_WIND = "switch.softWind"
     SWITCH_FRESH_AIR = "switch.freshAir"
@@ -98,9 +99,27 @@ def has_property(aws_thing_state_reported: dict[str, any], propertyName: str) ->
     return propertyName in aws_thing_state_reported
 
 
+# Model-specific overrides keyed by TCL product_key.
+# Portable AC models whose physical remote has a Turbo button (max fan + min
+# temperature). The portable AC has no native turbo property, so it is exposed
+# as a switch macro only for these known models.
+PORTABLE_AC_TURBO_PRODUCT_KEYS = {
+    "tIgozLZHRcSBif9W",  # TCL TAC-09CPB/PSLWS
+}
+
+# Portable AC models that do not report energy consumption / work time to the
+# TCL cloud (the API always returns zeros), so those sensors are not created.
+PORTABLE_AC_NO_ENERGY_REPORTING_PRODUCT_KEYS = {
+    "tIgozLZHRcSBif9W",  # TCL TAC-09CPB/PSLWS
+}
+
+
 def getSupportedFeatures(
-    device_type: DeviceTypeEnum,aws_thing_state_reported: dict[str, any],device_storage: dict[str, any] | None = None,
+    device_type: DeviceTypeEnum,aws_thing_state_reported: dict[str, any],device_storage: dict[str, any] | None = None,product_key: str | None = None,
 ) -> list[DeviceFeatureEnum]:
+    # product_key identifies the device MODEL (shared by every unit of the same
+    # model, unlike the per-unit device_id). It is used for model-specific
+    # behaviour - see the PORTABLE_AC_*_PRODUCT_KEYS sets above.
     try:
         capabilities = aws_thing_state_reported.get("capabilities", [])
         has_power_consumption_data = False
@@ -439,9 +458,19 @@ def getSupportedFeatures(
                     DeviceFeatureEnum.USER_CONFIG_SETTINGS_MIN_TEMP,
                     DeviceFeatureEnum.USER_CONFIG_SETTINGS_MAX_TEMP,
                 ]
-                if has_power_consumption_data:
+
+                # Turbo is only exposed for models whose remote has the button.
+                if product_key in PORTABLE_AC_TURBO_PRODUCT_KEYS:
+                    features.append(DeviceFeatureEnum.SWITCH_PORTABLE_TURBO)
+
+                # Skip energy / work-time sensors for models that never report
+                # this data to the cloud (would always show 0).
+                reports_energy = (
+                    product_key not in PORTABLE_AC_NO_ENERGY_REPORTING_PRODUCT_KEYS
+                )
+                if has_power_consumption_data and reports_energy:
                     features.append(DeviceFeatureEnum.SENSOR_POWER_CONSUMPTION_DAILY)
-                if has_work_time_data:
+                if has_work_time_data and reports_energy:
                     features.append(DeviceFeatureEnum.SENSOR_WORK_TIME_DAILY)
 
                 if has_rn_probe_data:

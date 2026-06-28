@@ -16,6 +16,7 @@ from .config_entry import (
 )
 from .coordinator import IotDeviceCoordinator
 from .device import Device, get_device_storage, store_rn_prode_data
+from .device_features import PORTABLE_AC_NO_ENERGY_REPORTING_PRODUCT_KEYS
 from .device_types import is_implemented_by_integration
 from .device_rn_probe import fetch_and_parse_config
 from .data_storage import (
@@ -107,7 +108,27 @@ async def async_setup_entry(
             use_fakes=safe_get_value(internal_settings, "fake.use_fake_data", False)
         )
         storage_data = await store_rn_prode_data(hass, device_id, probe_result)
-        
+
+        # Models that never report energy / work-time to the cloud: disable the
+        # polling entirely so we don't make pointless hourly requests. Marking
+        # init_done also skips the one-time probe below.
+        if thing.product_key in PORTABLE_AC_NO_ENERGY_REPORTING_PRODUCT_KEYS:
+            need_save = False
+            for path in (
+                "non_user_config.power_consumption.enabled",
+                "non_user_config.work_time.enabled",
+            ):
+                storage_data, changed = safe_set_value(storage_data, path, False, True)
+                need_save = need_save or changed
+            for path in (
+                "non_user_config.power_consumption.init_done",
+                "non_user_config.work_time.init_done",
+            ):
+                storage_data, changed = safe_set_value(storage_data, path, True, True)
+                need_save = need_save or changed
+            if need_save:
+                storage_data = await set_stored_data(hass, device_id, storage_data)
+
         power_consumption_init_done= safe_get_value(storage_data, "non_user_config.power_consumption.init_done", False)
         if configData.verbose_setup_logging:
             _LOGGER.info("_init_.power_consumption_init_done - %s",power_consumption_init_done)
