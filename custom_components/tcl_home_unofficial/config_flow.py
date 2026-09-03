@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict
 
+import httpx
 import voluptuous as vol
 
 from homeassistant.config_entries import (
@@ -32,6 +33,7 @@ from .const import (
     DOMAIN,
 )
 from .session_manager import SessionManager
+from .tcl import TclApiError
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -59,13 +61,24 @@ async def isUserCanLogIn(hass: HomeAssistant, data: dict[str, Any]) -> dict:
         ),
     )
 
-    await sessionManager.clear_storage()
-    await sessionManager.async_load()
+    try:
+        await sessionManager.clear_storage()
+        await sessionManager.async_load()
 
-    authResult = await sessionManager.async_get_auth_data(allowInvalid=True)
+        authResult = await sessionManager.async_get_auth_data(allowInvalid=True)
+    except httpx.HTTPError:
+        _LOGGER.exception("Could not reach the TCL login service at %s", data["app_login_url"])
+        return {"success": False, "error": "cannot_connect"}
+    except TclApiError:
+        _LOGGER.exception("The TCL login service answered with something unusable")
+        return {"success": False, "error": "cannot_connect"}
+    except Exception:  # noqa: BLE001 - anything else would surface as "Unknown error"
+        _LOGGER.exception("Unexpected error while logging in to the TCL Home account")
+        return {"success": False, "error": "unknown"}
+
     if authResult is not None and authResult.token:
-        return {"success": True}
-    return {"success": False}
+        return {"success": True, "error": None}
+    return {"success": False, "error": "invalid_auth"}
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
@@ -84,7 +97,7 @@ class TclHomeUnofficialConfigFlow(ConfigFlow, domain=DOMAIN):
     _input_data: dict[str, Any] = {}
     _title: str
 
-    _has_invalid_auth: bool = False
+    _login_error: str | None = None
 
     @staticmethod
     @callback
@@ -97,8 +110,8 @@ class TclHomeUnofficialConfigFlow(ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         _LOGGER.info("Starting config flow for TCL Home Unofficial integration")
         errors: dict[str, str] = {}
-        if self._has_invalid_auth:
-            errors["base"] = "invalid_auth"
+        if self._login_error:
+            errors["base"] = self._login_error
         user_name = DEFAULT_USER
         user_password = DEFAULT_PW
 
@@ -119,7 +132,7 @@ class TclHomeUnofficialConfigFlow(ConfigFlow, domain=DOMAIN):
             self._input_data = user_input
 
             # Call the next step
-            self._has_invalid_auth = False
+            self._login_error = None
             return await self.async_step_settings_of_app()
 
         return self.async_show_form(
@@ -139,7 +152,7 @@ class TclHomeUnofficialConfigFlow(ConfigFlow, domain=DOMAIN):
 
             canUserLoginResult = await isUserCanLogIn(self.hass, self._input_data)
             if canUserLoginResult["success"] is False:
-                self._has_invalid_auth = True
+                self._login_error = canUserLoginResult.get("error") or "unknown"
                 return await self.async_step_user()
             else:
                 return await self.async_step_settings_of_logs()

@@ -13,6 +13,36 @@ from homeassistant.helpers.httpx_client import get_async_client
 
 _LOGGER = logging.getLogger(__name__)
 
+# The TCL gateway compresses the response body with whatever encoding the request
+# advertises. When brotli (or zstd) is advertised the gateway can answer with a body
+# that Home Assistant's httpx has no decoder for, and the still-compressed bytes then
+# fail inside response.json() - which the config flow could only report as
+# "Unknown error". Asking for JSON + gzip keeps every answer decodable.
+JSON_ACCEPT_HEADERS = {
+    "accept": "application/json",
+    "accept-encoding": "gzip",
+}
+
+
+class TclApiError(Exception):
+    """A TCL endpoint answered with something we cannot use."""
+
+
+def parse_json_response(response, context: str) -> dict:
+    """Parse a TCL response body, reporting what actually arrived when it is not JSON."""
+    try:
+        return response.json()
+    except ValueError as err:
+        # UnicodeDecodeError is a ValueError, so an undecodable (still compressed)
+        # body lands here too.
+        raise TclApiError(
+            f"{context}: HTTP {response.status_code} body was not JSON"
+            f" (content-type={response.headers.get('content-type')},"
+            f" content-encoding={response.headers.get('content-encoding')}):"
+            f" {response.content[:200]!r}"
+        ) from err
+
+
 
 def getValue(data: dict, keys: list[str]) -> str:
     """Get value from dictionary with fallback."""
@@ -332,18 +362,35 @@ async def do_account_auth(
         "th_appbulid": "830",
         "user-agent": "Android",
         "content-type": "application/json; charset=UTF-8",
+        **JSON_ACCEPT_HEADERS,
     }
 
     httpx_client = get_async_client(hass)
     response = await httpx_client.post(login_url, json=payload, headers=headers, timeout=15)
 
-    response_obj = response.json()
+    if response.status_code != 200:
+        _LOGGER.error(
+            "TCL-Service.do_account_auth: login failed with HTTP %s: %s",
+            response.status_code,
+            response.text[:500],
+        )
+        return None
+
+    response_obj = parse_json_response(response, "TCL-Service.do_account_auth")
     if verbose_logging:
         _LOGGER.info("TCL-Service.do_account_auth response: %s", response_obj)
-    if response.status_code == 200:
-        authResponse = DoAccountAuthResponse(response_obj)
-        if authResponse.status == 1:
-            return authResponse
+
+    authResponse = DoAccountAuthResponse(response_obj)
+    if authResponse.status == 1:
+        return authResponse
+
+    # TCL answers 200 with a status/msg pair when it refuses the credentials,
+    # e.g. {"status": 3, "msg": "Username is invalid"}.
+    _LOGGER.error(
+        "TCL-Service.do_account_auth: TCL refused the login (status=%s, msg=%s)",
+        getValue(response_obj, ["status"]),
+        getValue(response_obj, ["msg", "message"]),
+    )
     return None
 
 
@@ -362,16 +409,31 @@ async def get_cloud_urls(
     headers = {
         "user-agent": "Android",
         "content-type": "application/json; charset=UTF-8",
+        **JSON_ACCEPT_HEADERS,
     }
 
     httpx_client = get_async_client(hass)
     response = await httpx_client.post(cloud_urls, json=payload, headers=headers, timeout=15)
-    response_obj = response.json()
+    if response.status_code != 200:
+        _LOGGER.error(
+            "TCL-Service.get_cloud_urls: failed with HTTP %s: %s",
+            response.status_code,
+            response.text[:500],
+        )
+        return None
+
+    response_obj = parse_json_response(response, "TCL-Service.get_cloud_urls")
     if verbose_logging:
         _LOGGER.info("TCL-Service.get_cloud_urls response: %s", response_obj)
-    if response.status_code == 200:
-        return CloudUrlsResponse(response_obj)
-    return None
+
+    cloudUrls = CloudUrlsResponse(response_obj)
+    if cloudUrls.data.cloud_url is None:
+        # Without cloud_url every later call would be built against "None/v3/...".
+        raise TclApiError(
+            f"TCL-Service.get_cloud_urls: no cloud_url in the response"
+            f" (code={cloudUrls.code}, message={cloudUrls.message})"
+        )
+    return cloudUrls
 
 
 async def refreshTokens(
@@ -395,17 +457,23 @@ async def refreshTokens(
     headers = {
         "user-agent": "Android",
         "content-type": "application/json; charset=UTF-8",
-        "accept-encoding": "gzip, deflate, br",
+        **JSON_ACCEPT_HEADERS,
     }
 
     httpx_client = get_async_client(hass)
     response = await httpx_client.post(url, json=payload, headers=headers, timeout=15)
-    response_obj = response.json()
+    if response.status_code != 200:
+        _LOGGER.error(
+            "TCL-Service.refreshTokens: failed with HTTP %s: %s",
+            response.status_code,
+            response.text[:500],
+        )
+        return None
+
+    response_obj = parse_json_response(response, "TCL-Service.refreshTokens")
     if verbose_logging:
         _LOGGER.info("TCL-Service.refreshTokens response: %s", response_obj)
-    if response.status_code == 200:
-        return RefreshTokensResponse(response_obj)
-    return None
+    return RefreshTokensResponse(response_obj)
 
 
 async def get_aws_credentials(
@@ -429,16 +497,23 @@ async def get_aws_credentials(
         "User-agent": "aws-sdk-android/2.22.6 Linux/6.1.23-android14-4-00257-g7e35917775b8-ab9964412 Dalvik/2.1.0/0 en_US",
         "X-Amz-Target": "AWSCognitoIdentityService.GetCredentialsForIdentity",
         "content-type": "application/x-amz-json-1.1",
+        "accept-encoding": "gzip",
     }
 
     httpx_client = get_async_client(hass)
     response = await httpx_client.post(url, json=payload, headers=headers, timeout=15)
-    response_obj = response.json()
+    if response.status_code != 200:
+        _LOGGER.error(
+            "TCL-Service.get_aws_credentials: failed with HTTP %s: %s",
+            response.status_code,
+            response.text[:500],
+        )
+        return None
+
+    response_obj = parse_json_response(response, "TCL-Service.get_aws_credentials")
     if verbose_logging:
         _LOGGER.info("TCL-Service.get_aws_credentials response: %s", response_obj)
-    if response.status_code == 200:
-        return GetAwsCredentialsResponse(response_obj)
-    return None
+    return GetAwsCredentialsResponse(response_obj)
 
 
 async def get_things(
@@ -469,7 +544,7 @@ async def get_things(
         "sign": sign,
         "user-agent": "Android",
         "content-type": "application/json; charset=UTF-8",
-        "accept-encoding": "gzip, deflate, br",
+        **JSON_ACCEPT_HEADERS,
     }    
 
     httpx_client = get_async_client(hass)
@@ -477,7 +552,7 @@ async def get_things(
     response = await httpx_client.post(url, json={}, headers=headers, timeout=15)
     if response.status_code != 200:
         raise Exception("Error at get_things: " + response.text)
-    response_obj = response.json()
+    response_obj = parse_json_response(response, "TCL-Service.get_things")
     # _LOGGER.info("TCL-Service.get_things: %s", response_obj)
     if verbose_logging:
         _LOGGER.info("TCL-Service.get_things response: %s", response_obj)
@@ -517,7 +592,7 @@ async def get_work_time(
         "sign": sign,
         "user-agent": "Android",
         "appversion": "5.4.1",
-        "accept-encoding": "gzip, deflate, br",
+        **JSON_ACCEPT_HEADERS,
         "accept-language": "en",
         "accesstoken": saas_token,        
     }    
@@ -527,7 +602,7 @@ async def get_work_time(
     response = await httpx_client.get(url, headers=headers, timeout=15)
     if response.status_code != 200:
         raise Exception("Error at get_work_time: " + response.text)
-    response_obj = response.json()
+    response_obj = parse_json_response(response, "TCL-Service.get_work_time")
     # _LOGGER.info("TCL-Service.get_work_time: %s", response_obj)
     if verbose_logging:
         _LOGGER.info("TCL-Service.get_work_time response: %s", response_obj)
@@ -567,7 +642,7 @@ async def get_energy_consumption(
         "sign": sign,
         "user-agent": "Android",
         "appversion": "5.4.1",
-        "accept-encoding": "gzip, deflate, br",
+        **JSON_ACCEPT_HEADERS,
         "accept-language": "en",
         "accesstoken": saas_token,   
     }    
@@ -577,7 +652,7 @@ async def get_energy_consumption(
     response = await httpx_client.get(url, headers=headers, timeout=15)
     if response.status_code != 200:
         raise Exception("Error at get_energy_consumption: " + response.text)
-    response_obj = response.json()
+    response_obj = parse_json_response(response, "TCL-Service.get_energy_consumption")
     # _LOGGER.info("TCL-Service.get_energy_consumption: %s", response_obj)
     if verbose_logging:
         _LOGGER.info("TCL-Service.get_energy_consumption response: %s", response_obj)
@@ -634,7 +709,7 @@ async def get_config(
         "sign": sign,
         "user-agent": "Android",
         "content-type": "application/json; charset=UTF-8",
-        "accept-encoding": "gzip, deflate, br",
+        **JSON_ACCEPT_HEADERS,
     }
 
     httpx_client = get_async_client(hass)
@@ -648,7 +723,7 @@ async def get_config(
             )
         return None
 
-    resp_json = response.json()
+    resp_json = parse_json_response(response, "TCL-Service.get_config")
     if verbose_logging:
         _LOGGER.info("TCL-Service.get_config response: %s", resp_json)
 
