@@ -14,6 +14,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .aws_iot import AwsIot
 from .const import DEFAULT_SCAN_INTERVAL, DOMAIN
 from .device import Device
+from .device_types import calculateDeviceType
 from .data_storage import get_stored_data
 from .config_entry import ConfigData
 
@@ -66,7 +67,12 @@ class IotDeviceCoordinator(DataUpdateCoordinator):
                 aws_thing = None
                 storage = None    
                 extra_tcl_data={}            
-                if tcl_thing.is_online:
+                # Unsupported devices (e.g. TVs) may have no AWS IoT shadow.
+                # Keep their metadata for the NotImplemented diagnostic entity.
+                if (
+                    tcl_thing.is_online
+                    and calculateDeviceType(tcl_thing.device_name) is not None
+                ):
                     aws_thing = await self.aws_iot.async_get_thing(tcl_thing.device_id)
                     storage = await get_stored_data(self.hass, tcl_thing.device_id)
                     extra_tcl_data=await self.aws_iot.get_extra_tcl_data(storage,tcl_thing.device_id)
