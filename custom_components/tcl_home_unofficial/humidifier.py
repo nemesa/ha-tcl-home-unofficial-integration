@@ -11,7 +11,7 @@ from homeassistant.components.humidifier import (
     HumidifierEntityFeature,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .config_entry import New_NameConfigEntry
@@ -151,7 +151,7 @@ class DeHumidifierHandler(TclEntityBase, HumidifierEntity):
 
         
         self._attr_is_on = self.is_on_fn(device)
-        self._attr_action = HumidifierAction.DRYING,
+        self._attr_action = HumidifierAction.DRYING
         self._attr_supported_features = HumidifierEntityFeature(0)
 
         if options_mode != None and len(options_mode) > 0:
@@ -164,6 +164,20 @@ class DeHumidifierHandler(TclEntityBase, HumidifierEntity):
         self._attr_current_humidity = self.current_humidity_fn(device)        
         self._attr_device_class = HumidifierDeviceClass.DEHUMIDIFIER
 
+    @callback
+	def _handle_coordinator_update(self) -> None:
+		device = self.coordinator.get_device_by_id(self.device.device_id)
+		if device is not None and device.data is not None:
+			self.device = device
+			self._attr_is_on = self.is_on_fn(device)
+			self._attr_mode = map_mode_to_humidifier_mode(self.current_mode_fn(device))
+			self._attr_target_humidity = self.target_humidity_fn(device)
+			self._attr_current_humidity = self.current_humidity_fn(device)
+			self._attr_action = (
+				HumidifierAction.DRYING if self._attr_is_on else HumidifierAction.OFF
+			)
+		self.async_write_ha_state()
+        
     def refresh_device(self) -> None:
         self.device = self.coordinator.get_device_by_id(self.device.device_id)
         self.iot_handler_power.refreshDevice(self.device)
