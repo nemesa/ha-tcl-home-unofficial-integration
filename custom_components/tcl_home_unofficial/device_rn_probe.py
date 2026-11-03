@@ -175,7 +175,7 @@ async def fetch_and_parse_config(
             return probe_result
 
         httpx = get_async_client(hass)
-        resp = await httpx.get(url)
+        resp = await httpx.get(url, timeout=15)
         if resp.status_code != 200:
             probe_result.probing_messages.append("non-200 response for fetching bundle")
             return probe_result
