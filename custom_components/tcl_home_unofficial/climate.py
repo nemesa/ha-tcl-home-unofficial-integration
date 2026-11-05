@@ -41,6 +41,12 @@ from .data_storage import safe_get_value
 
 _LOGGER = logging.getLogger(__name__)
 
+# Home Assistant 2026.11 renamed the climate temperature properties to native_*
+# and warns about entities that still provide the old names, which stop working
+# in 2027.11. Older releases only know the old names, so provide one set or the
+# other, never both.
+_NATIVE_TEMPERATURES = hasattr(ClimateEntity, "native_current_temperature")
+
 
 def get_fan_speed_feature(device: Device) -> str:
     if DeviceFeatureEnum.SELECT_WIND_SPEED_7_GEAR in device.supported_features:
@@ -306,7 +312,10 @@ class ClimateHandler(TclEntityBase, ClimateEntity):
         self._hvac_modes = options_mode + [HVACMode.OFF]
 
         self._hvac_action = None
-        self._attr_temperature_unit = UnitOfTemperature.CELSIUS
+        if _NATIVE_TEMPERATURES:
+            self._attr_native_temperature_unit = UnitOfTemperature.CELSIUS
+        else:
+            self._attr_temperature_unit = UnitOfTemperature.CELSIUS
 
         self._target_temperature = self.current_target_temp_fn(device)
         self._attr_min_temp = safe_get_value(self.device.storage,"user_config.settings.min_temp",18)
@@ -324,15 +333,20 @@ class ClimateHandler(TclEntityBase, ClimateEntity):
         if self.horizontal_air_direction_select_feature is not None:
             self.iot_handler_horizontal_air_direction.refreshDevice(self.device)
 
-    @property
-    def current_temperature(self) -> float:
+    def _current_temperature(self) -> float:
         self.refresh_device()
         return float(self.current_temp_fn(self.device))
 
-    @property
-    def target_temperature(self) -> float | None:
+    def _target_temperature(self) -> float | None:
         self.refresh_device()
         return float(self.current_target_temp_fn(self.device))
+
+    if _NATIVE_TEMPERATURES:
+        native_current_temperature = property(_current_temperature)
+        native_target_temperature = property(_target_temperature)
+    else:
+        current_temperature = property(_current_temperature)
+        target_temperature = property(_target_temperature)
 
     @property
     def hvac_mode(self) -> HVACMode:
