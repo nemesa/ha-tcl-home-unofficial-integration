@@ -12,6 +12,7 @@ class DeviceTypeEnum(StrEnum):
     AIR_PURIFIER_BREEVA_A2 = "Breeva A2"
     AIR_PURIFIER_BREEVA_A3 = "Breeva A3"
     AIR_PURIFIER_BREEVA_A5 = "Breeva A5"
+    ATW_HEAT_PUMP = "ATW Heat Pump"
 
 def is_device_with_number(original_device_type: str, device_type_to_check: str) -> bool:
     if device_type_to_check.lower().startswith(original_device_type.lower()+"-"):
@@ -57,6 +58,8 @@ def calculateDeviceType(device_type: str) -> DeviceTypeEnum | None:
         return DeviceTypeEnum.AIR_PURIFIER_BREEVA_A3
     elif device_type == "breeva A5":
         return DeviceTypeEnum.AIR_PURIFIER_BREEVA_A5
+    elif device_type == "ATW Heat Pump":
+        return DeviceTypeEnum.ATW_HEAT_PUMP
     else:
         for known_device_str in DeviceTypeEnum:
             if is_device_with_number(known_device_str, device_type):

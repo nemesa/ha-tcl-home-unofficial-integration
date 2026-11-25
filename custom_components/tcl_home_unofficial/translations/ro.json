@@ -1,0 +1,57 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Dispozitivul este deja configurat"
+    },
+    "error": {
+      "cannot_connect": "Conectare eșuată",
+      "invalid_auth": "Autentificare incorectă (email sau parolă greșită)",
+      "unknown": "Eroare neașteptată"
+    },
+    "flow_title": "TCL Heat Pump",
+    "step": {
+      "user": {
+        "title": "Cont TCL Home",
+        "description": "Introduceți credențialele contului TCL Home pentru conectare prin cloud-ul oficial.",
+        "data": {
+          "username": "Email cont TCL Home",
+          "password": "Parolă cont TCL Home"
+        }
+      },
+      "settings_of_app": {
+        "title": "Setări Avansate Cloud",
+        "description": "Opțional: Puteți lăsa aceste valori implicite.",
+        "data": {
+          "app_login_url": "URL Login Aplicație",
+          "cloud_urls": "URL-uri Cloud Aplicație",
+          "app_id": "ID Aplicație"
+        }
+      },
+      "settings_of_logs": {
+        "title": "Setări Jurnalizare (Logs)",
+        "description": "Puteți activa jurnalizarea detaliată pentru depanare.",
+        "data": {
+          "verbose_device_logging": "Jurnale dispozitiv și stări JSON brute",
+          "verbose_session_logging": "Jurnale sesiune și token-uri",
+          "verbose_setup_logging": "Jurnale inițializare"
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opțiuni",
+        "description": "Orice modificare va re-autentifica integrarea în aplicația TCL Home."
+      },
+      "option_page_account": {
+        "title": "Cont",
+        "description": "Modificați credențialele contului TCL Home.",
+        "data": {
+          "username": "Email cont TCL Home",
+          "password": "Parolă cont TCL Home"
+        }
+      }
+    }
+  }
+}

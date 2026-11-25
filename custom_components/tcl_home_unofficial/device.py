@@ -40,6 +40,8 @@ from .tcl_device_window_ac import (TCL_WindowAC_DeviceData,
 from .tcl_device_cylindrical_ac import (TCL_CylindricalAC_DeviceData,
                                         get_stored_cylindrical_ac_data,
                                         handle_cylindrical_ac_mode_change)
+from .tcl_device_atw_heat_pump import (TCL_ATW_HeatPump_DeviceData,
+                                       get_stored_atw_heat_pump_data)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -173,6 +175,12 @@ class Device:
                         aws_thing_state=aws_thing["state"]["reported"],
                         delta=aws_thing["state"].get("delta", {}),
                     )
+                case DeviceTypeEnum.ATW_HEAT_PUMP:
+                    self.data = TCL_ATW_HeatPump_DeviceData(
+                        device_id=self.device_id,
+                        aws_thing_state=aws_thing["state"]["reported"],
+                        delta=aws_thing["state"].get("delta", {}),
+                    )
 
                 case _:
                     self.data = None
@@ -205,6 +213,7 @@ class Device:
         | TCL_Dehumidifier_DF_DeviceData
         | TCL_DuctAC_DeviceData
         | TCL_Breeva_DeviceData
+        | TCL_ATW_HeatPump_DeviceData
         | None
     ) = None
 
@@ -389,7 +398,8 @@ async def get_device_storage(hass: HomeAssistant, device: Device) -> None:
         return await get_stored_breeva_data(hass, device.device_id)
     elif device.device_type == DeviceTypeEnum.AIR_PURIFIER_BREEVA_A5:
         return await get_stored_breeva_data(hass, device.device_id)
-
+    elif device.device_type == DeviceTypeEnum.ATW_HEAT_PUMP:
+        return await get_stored_atw_heat_pump_data(hass, device.device_id)
 
 def get_desired_state_for_mode_change(
     device: Device, stored_data: dict, value: ModeEnum
