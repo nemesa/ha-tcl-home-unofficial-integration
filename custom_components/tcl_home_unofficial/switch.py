@@ -81,6 +81,30 @@ class DesiredStateHandlerForSwitch:
                 return await self.SWITCH_CHILD_LOCK_SWITCH(value=value)
             case DeviceFeatureEnum.SWITCH_SCREEN_SWITCH:
                 return await self.SWITCH_SCREEN_SWITCH(value=value)
+            case DeviceFeatureEnum.SWITCH_ATW_ZONE1_POWER:
+                return await self.coordinator.get_aws_iot().async_set_desired_state(
+                    self.device.device_id, {"pwrSw1": value}
+                )
+            case DeviceFeatureEnum.SWITCH_ATW_DHW_POWER:
+                return await self.coordinator.get_aws_iot().async_set_desired_state(
+                    self.device.device_id, {"lvHWtSw": value}
+                )
+            case DeviceFeatureEnum.SWITCH_ATW_ECO:
+                return await self.coordinator.get_aws_iot().async_set_desired_state(
+                    self.device.device_id, {"ECOStatus": value}
+                )
+            case DeviceFeatureEnum.SWITCH_ATW_ECO_TIMER:
+                return await self.coordinator.get_aws_iot().async_set_desired_state(
+                    self.device.device_id, {"ECOTmSw": value}
+                )
+            case DeviceFeatureEnum.SWITCH_ATW_PTC:
+                return await self.coordinator.get_aws_iot().async_set_desired_state(
+                    self.device.device_id, {"PTC": value}
+                )
+            case DeviceFeatureEnum.SWITCH_ATW_WEATHER_CONTROL_1:
+                return await self.coordinator.get_aws_iot().async_set_desired_state(
+                    self.device.device_id, {"wthCtlSw1": value}
+                )
 
     def is_allowed(self) -> bool:
         mode = self.device.mode_value_to_enum_mapp.get(
@@ -322,6 +346,85 @@ async def async_setup_entry(
                         else "mdi:power-plug-off"
                     ),
                     is_on_fn=lambda device: device.data.power_switch,
+                )
+            )
+
+        if DeviceFeatureEnum.SWITCH_ATW_ZONE1_POWER in device.supported_features:
+            switches.append(
+                SwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_ATW_ZONE1_POWER,
+                    type="ATWZone1Power",
+                    name="Zone 1 Power Switch",
+                    icon_fn=lambda device: "mdi:heat-pump" if device and device.data and device.data.pwr_sw_1 == 1 else "mdi:heat-pump-outline",
+                    is_on_fn=lambda device: device.data.pwr_sw_1,
+                )
+            )
+        if DeviceFeatureEnum.SWITCH_ATW_DHW_POWER in device.supported_features:
+            switches.append(
+                SwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_ATW_DHW_POWER,
+                    type="ATWDHWPower",
+                    name="Domestic Hot Water Switch",
+                    icon_fn=lambda device: "mdi:water-boiler" if device and device.data and device.data.dhw_switch == 1 else "mdi:water-boiler-off",
+                    is_on_fn=lambda device: device.data.dhw_switch,
+                )
+            )
+        if DeviceFeatureEnum.SWITCH_ATW_ECO in device.supported_features:
+            switches.append(
+                SwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_ATW_ECO,
+                    type="ATWECO",
+                    name="ECO Mode Switch",
+                    icon_fn=lambda device: "mdi:leaf" if device and device.data and device.data.eco_status == 1 else "mdi:leaf-off",
+                    is_on_fn=lambda device: device.data.eco_status,
+                )
+            )
+        if DeviceFeatureEnum.SWITCH_ATW_ECO_TIMER in device.supported_features:
+            switches.append(
+                SwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_ATW_ECO_TIMER,
+                    type="ATWEcoTimer",
+                    name="Energy Saving Timer",
+                    icon_fn=lambda device: "mdi:timer-outline" if device and device.data and getattr(device.data, "eco_timer", 0) == 1 else "mdi:timer-off-outline",
+                    is_on_fn=lambda device: getattr(device.data, "eco_timer", 0),
+                )
+            )
+        if DeviceFeatureEnum.SWITCH_ATW_PTC in device.supported_features:
+            switches.append(
+                SwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_ATW_PTC,
+                    type="ATWPTC",
+                    name="PTC Electric Heater Switch",
+                    icon_fn=lambda device: "mdi:heating-coil" if device and device.data and device.data.ptc == 1 else "mdi:radiator-off",
+                    is_on_fn=lambda device: device.data.ptc,
+                )
+            )
+        if DeviceFeatureEnum.SWITCH_ATW_WEATHER_CONTROL_1 in device.supported_features:
+            switches.append(
+                SwitchHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.SWITCH_ATW_WEATHER_CONTROL_1,
+                    type="ATWWeatherControl1",
+                    name="Weather Compensation Curve Zone 1 Switch",
+                    icon_fn=lambda device: "mdi:chart-bell-curve" if device and device.data and device.data.weather_control_sw_1 == 1 else "mdi:chart-bell-curve-cumulative",
+                    is_on_fn=lambda device: device.data.weather_control_sw_1,
                 )
             )
 

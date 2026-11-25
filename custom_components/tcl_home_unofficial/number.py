@@ -45,8 +45,30 @@ class DesiredStateHandlerForNumber:
                 return await self.NUMBER_TARGET_DEGREE(value=value)
             case DeviceFeatureEnum.NUMBER_DEHUMIDIFIER_HUMIDITY:
                 return await self.NUMBER_DEHUMIDIFIER_HUMIDITY(value=value)
+            case DeviceFeatureEnum.NUMBER_ATW_HEAT_Z1_TARGET:
+                return await self.coordinator.get_aws_iot().async_set_desired_state(
+                    self.device.device_id, {"htWtTWd1": int(value)}
+                )
+            case DeviceFeatureEnum.NUMBER_ATW_ROOM_Z1_TARGET:
+                return await self.coordinator.get_aws_iot().async_set_desired_state(
+                    self.device.device_id, {"htEvTGd1": int(value)}
+                )
+            case DeviceFeatureEnum.NUMBER_ATW_DHW_TARGET:
+                return await self.coordinator.get_aws_iot().async_set_desired_state(
+                    self.device.device_id, {"lvHWtT": int(value)}
+                )
+            case DeviceFeatureEnum.NUMBER_ATW_HEATING_CURVE_1:
+                return await self.coordinator.get_aws_iot().async_set_desired_state(
+                    self.device.device_id, {"htWthCtl1": int(value)}
+                )
+            case DeviceFeatureEnum.NUMBER_ATW_COOLING_CURVE_1:
+                return await self.coordinator.get_aws_iot().async_set_desired_state(
+                    self.device.device_id, {"clWthCtl1": int(value)}
+                )
 
     async def store_target_temp(self, value: int | float):
+        if self.device.device_type == DeviceTypeEnum.ATW_HEAT_PUMP:
+            return
         stored_data = await get_stored_data(self.hass, self.device.device_id)
         mode = self.device.mode_value_to_enum_mapp.get(
             self.device.data.work_mode, ModeEnum.AUTO
@@ -244,7 +266,133 @@ async def async_setup_entry(
                 )
             )
 
+        if DeviceFeatureEnum.NUMBER_ATW_HEAT_Z1_TARGET in device.supported_features:
+            z1_handler = TemperatureHandler(
+                hass=hass,
+                coordinator=coordinator,
+                device=device,
+                deviceFeature=DeviceFeatureEnum.NUMBER_ATW_HEAT_Z1_TARGET,
+                name="Set Heating Water Temp Zone 1",
+                type="SetATWHeatZ1Target",
+                available_fn=lambda device: True,
+                current_value_fn=lambda device: int(device.data.target_temp_heat_z1),
+            )
+            z1_handler._attr_native_min_value = 20
+            z1_handler._attr_native_max_value = 65
+            z1_handler._attr_native_step = 1
+            customEntities.append(z1_handler)
+
+        if DeviceFeatureEnum.NUMBER_ATW_ROOM_Z1_TARGET in device.supported_features:
+            room_handler = TemperatureHandler(
+                hass=hass,
+                coordinator=coordinator,
+                device=device,
+                deviceFeature=DeviceFeatureEnum.NUMBER_ATW_ROOM_Z1_TARGET,
+                name="Set Room Temp Zone 1",
+                type="SetATWRoomZ1Target",
+                available_fn=lambda device: True,
+                current_value_fn=lambda device: int(device.data.target_temp_room_z1),
+            )
+            room_handler._attr_native_min_value = 16
+            room_handler._attr_native_max_value = 32
+            room_handler._attr_native_step = 1
+            customEntities.append(room_handler)
+
+        if DeviceFeatureEnum.NUMBER_ATW_DHW_TARGET in device.supported_features:
+            dhw_handler = TemperatureHandler(
+                hass=hass,
+                coordinator=coordinator,
+                device=device,
+                deviceFeature=DeviceFeatureEnum.NUMBER_ATW_DHW_TARGET,
+                name="Set Domestic Hot Water Temp",
+                type="SetATWDHWTarget",
+                available_fn=lambda device: True,
+                current_value_fn=lambda device: int(device.data.target_temp_domestic),
+            )
+            dhw_handler._attr_native_min_value = 30
+            dhw_handler._attr_native_max_value = 60
+            dhw_handler._attr_native_step = 1
+            customEntities.append(dhw_handler)
+
+        if DeviceFeatureEnum.NUMBER_ATW_HEATING_CURVE_1 in device.supported_features:
+            customEntities.append(
+                CurveNumberHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.NUMBER_ATW_HEATING_CURVE_1,
+                    name="Heating Weather Curve Zone 1",
+                    type="SetATWHeatingCurve1",
+                    current_value_fn=lambda device: int(device.data.heating_curve_1),
+                    min_val=1,
+                    max_val=18,
+                )
+            )
+
+        if DeviceFeatureEnum.NUMBER_ATW_COOLING_CURVE_1 in device.supported_features:
+            customEntities.append(
+                CurveNumberHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.NUMBER_ATW_COOLING_CURVE_1,
+                    name="Cooling Weather Curve Zone 1",
+                    type="SetATWCoolingCurve1",
+                    current_value_fn=lambda device: int(device.data.cooling_curve_1),
+                    min_val=1,
+                    max_val=8,
+                )
+            )
+
     async_add_entities(customEntities)
+
+
+class CurveNumberHandler(TclEntityBase, NumberEntity):
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        coordinator: IotDeviceCoordinator,
+        device: Device,
+        type: str,
+        name: str,
+        deviceFeature: DeviceFeatureEnum,
+        current_value_fn: lambda device: int,
+        min_val: int = 1,
+        max_val: int = 9,
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, type, name, device)
+        self.hass = hass
+        self.device = device
+        self.iot_handler = DesiredStateHandlerForNumber(
+            hass=hass,
+            coordinator=coordinator,
+            deviceFeature=deviceFeature,
+            device=self.device,
+        )
+        self.current_value_fn = current_value_fn
+        self._attr_available = True
+        self._attr_assumed_state = False
+        self._attr_mode = NumberMode.BOX
+        self._attr_native_min_value = min_val
+        self._attr_native_max_value = max_val
+        self._attr_native_step = 1
+
+    @property
+    def icon(self):
+        return "mdi:chart-bell-curve"
+
+    @property
+    def native_value(self) -> int:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        self.iot_handler.refreshDevice(self.device)
+        return self.current_value_fn(self.device)
+
+    async def async_set_native_value(self, value: float) -> None:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        self.iot_handler.refreshDevice(self.device)
+        await self.iot_handler.call_set_number(int(value))
+        await self.coordinator.async_refresh()
+        self.async_write_ha_state()
 
 
 class TemperatureHandler(TclEntityBase, NumberEntity):

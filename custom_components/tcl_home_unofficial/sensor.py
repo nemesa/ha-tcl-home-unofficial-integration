@@ -1,5 +1,6 @@
 """Interfaces with the Integration 101 Template api sensors."""
 import logging
+from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity,SensorStateClass
 from homeassistant.const import UnitOfEnergy, UnitOfTemperature, UnitOfTime, PERCENTAGE
@@ -9,7 +10,12 @@ from .config_entry import New_NameConfigEntry
 from .coordinator import IotDeviceCoordinator
 from .device import Device
 from .device_features import DeviceFeatureEnum
+from .device_types import DeviceTypeEnum
 from .tcl_entity_base import TclEntityBase
+from .weather_curves import (
+    get_heating_curve_attributes,
+    get_heating_curve_name,
+)
 _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -21,13 +27,145 @@ async def async_setup_entry(
     sensors = []
     for device in config_entry.devices:
         if DeviceFeatureEnum.SENSOR_CURRENT_TEMPERATURE in device.supported_features:
+            s_name = "Room Temperature Zone 1" if device.device_type == DeviceTypeEnum.ATW_HEAT_PUMP else "Current Temperature"
             sensors.append(
                 TemperatureSensor(
                     coordinator=coordinator,
                     device=device,
                     type="CurrentTemperature",
-                    name="Current Temperature",
+                    name=s_name,
                     value_fn=lambda device: device.data.current_temperature,
+                )
+            )
+        if DeviceFeatureEnum.SENSOR_ATW_ZONE2_TEMPERATURE in device.supported_features:
+            sensors.append(
+                TemperatureSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="Zone2Temperature",
+                    name="Zone 2 Temperature",
+                    value_fn=lambda device: device.data.current_temp_2,
+                )
+            )
+        if DeviceFeatureEnum.SENSOR_ATW_ZONE3_TEMPERATURE in device.supported_features:
+            sensors.append(
+                TemperatureSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="Zone3Temperature",
+                    name="Zone 3 Temperature",
+                    value_fn=lambda device: device.data.current_temp_3,
+                )
+            )
+        if DeviceFeatureEnum.SENSOR_ATW_DHW_TEMPERATURE in device.supported_features:
+            sensors.append(
+                TemperatureSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="DomesticHotWaterTemperature",
+                    name="Domestic Hot Water Temperature",
+                    value_fn=lambda device: device.data.current_temp_domestic,
+                )
+            )
+        if DeviceFeatureEnum.SENSOR_ATW_DHW_TARGET_TEMPERATURE in device.supported_features:
+            sensors.append(
+                TemperatureSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="TargetDomesticHotWaterTemperature",
+                    name="Target Domestic Hot Water Temperature",
+                    value_fn=lambda device: device.data.target_temp_domestic,
+                )
+            )
+        if DeviceFeatureEnum.SENSOR_ATW_HEAT_Z1_TARGET_TEMPERATURE in device.supported_features:
+            sensors.append(
+                TemperatureSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="TargetHeatingWaterTempZone1",
+                    name="Target Heating Water Temp Zone 1",
+                    value_fn=lambda device: device.data.target_temp_heat_z1,
+                )
+            )
+        if DeviceFeatureEnum.SENSOR_ATW_ROOM_Z1_TARGET in device.supported_features:
+            sensors.append(
+                TemperatureSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="TargetRoomTempZone1",
+                    name="Target Room Temperature Zone 1",
+                    value_fn=lambda device: device.data.target_temp_room_z1,
+                )
+            )
+        if DeviceFeatureEnum.SENSOR_ATW_HEATING_CURVE_1 in device.supported_features:
+            sensors.append(
+                WeatherCurveSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="ATWHeatingCurve1",
+                    name="Heating Weather Curve Zone 1",
+                )
+            )
+        if DeviceFeatureEnum.SENSOR_ATW_CURVE_TARGET_WATER_TEMP_1 in device.supported_features:
+            sensors.append(
+                TemperatureSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="CurveTargetWaterTempZone1",
+                    name="Curve Target Flow Temp Zone 1",
+                    value_fn=lambda device: device.data.target_temp_curve_z1,
+                )
+            )
+        if (
+            DeviceFeatureEnum.SENSOR_ATW_WATER_TEMP_FLOW_1 in device.supported_features
+            or DeviceFeatureEnum.SENSOR_ATW_WATER_TEMP_RETURN_1 in device.supported_features
+        ):
+            sensors.append(
+                TemperatureSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="WaterFlowTempZone1",
+                    name="Water Flow Temp Zone 1",
+                    value_fn=lambda device: device.data.temp_water_flow_z1,
+                )
+            )
+        if DeviceFeatureEnum.SENSOR_ATW_ESTIMATED_RETURN_WATER_TEMP_1 in device.supported_features:
+            sensors.append(
+                TemperatureSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="EstimatedReturnWaterTempZone1",
+                    name="Estimated Return Water Temp Zone 1",
+                    value_fn=lambda device: round(
+                        (device.data.temp_water_flow_z1 - 4.0)
+                        if device.data.temp_water_flow_z1 > 10
+                        else device.data.temp_water_flow_z1,
+                        1,
+                    ),
+                )
+            )
+        if DeviceFeatureEnum.SENSOR_ATW_ROOM_TEMP_RETURN_1 in device.supported_features:
+            sensors.append(
+                TemperatureSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="ReturnRoomTempZone1",
+                    name="Return Room Temp Zone 1",
+                    value_fn=lambda device: device.data.temp_room_return_z1,
+                )
+            )
+        if DeviceFeatureEnum.SENSOR_ATW_COOLING_CURVE_1 in device.supported_features:
+            sensors.append(
+                IntNumberSensor(
+                    coordinator=coordinator,
+                    device=device,
+                    type="ATWCoolingCurve1",
+                    name="Cooling Weather Curve Zone 1 Sensor",
+                    device_classification=None,
+                    state_classification=None,
+                    icon_fn=lambda device: "mdi:chart-bell-curve",
+                    native_unit_of_measurement="",
+                    value_fn=lambda device: device.data.cooling_curve_1,
                 )
             )
         if DeviceFeatureEnum.SENSOR_INTERNAL_UNIT_COIL_TEMPERATURE in device.supported_features:
@@ -383,3 +521,41 @@ class EnergyConsumptionSensor(TclEntityBase, SensorEntity):
     @property
     def state_class(self) -> str | None:
         return SensorStateClass.TOTAL_INCREASING
+
+
+class WeatherCurveSensor(TclEntityBase, SensorEntity):
+    def __init__(
+        self,
+        coordinator: IotDeviceCoordinator,
+        device: Device,
+        type: str,
+        name: str,
+    ) -> None:
+        TclEntityBase.__init__(self, coordinator, type, name, device)
+
+    @property
+    def icon(self):
+        return "mdi:chart-bell-curve"
+
+    @property
+    def native_value(self) -> str:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        idx = int(getattr(self.device.data, "heating_curve_1", 1))
+        return get_heating_curve_name(idx)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        self.device = self.coordinator.get_device_by_id(self.device.device_id)
+        idx = int(getattr(self.device.data, "heating_curve_1", 1))
+        ambient = getattr(self.device.data, "current_temperature", None)
+        attrs = get_heating_curve_attributes(idx, ambient)
+        attrs["grid_target_water_temp"] = getattr(self.device.data, "target_temp_curve_z1", 0)
+        attrs["water_flow_temp"] = getattr(self.device.data, "temp_water_flow_z1", 0)
+        attrs["estimated_return_water_temp"] = (
+            round(attrs["water_flow_temp"] - 4.0, 1) if attrs["water_flow_temp"] > 10 else attrs["water_flow_temp"]
+        )
+        attrs["estimated_delta_t"] = 4.0 if attrs["water_flow_temp"] > 10 else 0.0
+        attrs["weather_control_active"] = (
+            getattr(self.device.data, "weather_control_sw_1", 0) == 1
+        )
+        return attrs

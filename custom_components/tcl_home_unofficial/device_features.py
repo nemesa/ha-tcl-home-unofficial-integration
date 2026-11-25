@@ -36,6 +36,33 @@ class DeviceFeatureEnum(StrEnum):
     SENSOR_PM25_SENSOR_LEVEL = "sensor.PM25SensorLevel"
     SENSOR_VOC_SENSOR_LEVEL = "sensor.VOCSensorLevel"
     SENSOR_WORK_TIME_DAILY = "sensor.work_time.daily"
+    SENSOR_ATW_ZONE2_TEMPERATURE = "sensor.atw.zone2_temperature"
+    SENSOR_ATW_ZONE3_TEMPERATURE = "sensor.atw.zone3_temperature"
+    SENSOR_ATW_DHW_TEMPERATURE = "sensor.atw.dhw_temperature"
+    SENSOR_ATW_DHW_TARGET_TEMPERATURE = "sensor.atw.dhw_target_temperature"
+    SENSOR_ATW_HEAT_Z1_TARGET_TEMPERATURE = "sensor.atw.heat_z1_target_temperature"
+    SWITCH_ATW_ZONE1_POWER = "switch.atw.zone1_power"
+    SWITCH_ATW_DHW_POWER = "switch.atw.dhw_power"
+    SWITCH_ATW_ECO = "switch.atw.eco"
+    SELECT_ATW_ECO_MODE = "select.atw.eco_mode"
+    SELECT_ATW_WORK_MODE = "select.atw.work_mode"
+    SWITCH_ATW_ECO_TIMER = "switch.atw.eco_timer"
+    SWITCH_ATW_PTC = "switch.atw.ptc"
+    NUMBER_ATW_HEAT_Z1_TARGET = "number.atw.heat_z1_target"
+    NUMBER_ATW_ROOM_Z1_TARGET = "number.atw.room_z1_target"
+    NUMBER_ATW_DHW_TARGET = "number.atw.dhw_target"
+    SENSOR_ATW_ROOM_Z1_TARGET = "sensor.atw.room_z1_target"
+    SWITCH_ATW_WEATHER_CONTROL_1 = "switch.atw.weather_control_1"
+    NUMBER_ATW_HEATING_CURVE_1 = "number.atw.heating_curve_1"
+    NUMBER_ATW_COOLING_CURVE_1 = "number.atw.cooling_curve_1"
+    SENSOR_ATW_HEATING_CURVE_1 = "sensor.atw.heating_curve_1"
+    SENSOR_ATW_COOLING_CURVE_1 = "sensor.atw.cooling_curve_1"
+    SELECT_ATW_HEATING_CURVE_1 = "select.atw.heating_curve_1"
+    SENSOR_ATW_CURVE_TARGET_WATER_TEMP_1 = "sensor.atw.curve_target_water_temp_1"
+    SENSOR_ATW_WATER_TEMP_FLOW_1 = "sensor.atw.water_temp_flow_1"
+    SENSOR_ATW_ESTIMATED_RETURN_WATER_TEMP_1 = "sensor.atw.estimated_return_water_temp_1"
+    SENSOR_ATW_WATER_TEMP_RETURN_1 = "sensor.atw.water_temp_return_1"
+    SENSOR_ATW_ROOM_TEMP_RETURN_1 = "sensor.atw.room_temp_return_1"
     SWITCH_POWER = "switch.powerSwitch"
     SWITCH_BEEP = "switch.beepSwitch"
     SWITCH_ECO = "switch.eco"
@@ -508,6 +535,43 @@ def getSupportedFeatures(
                 if has_property(aws_thing_state_reported, "panelLightAutoOFF"):
                     features.append(DeviceFeatureEnum.SWITCH_PANEL_LIGHT_AUTO_OFF)
 
+                return features
+            case DeviceTypeEnum.ATW_HEAT_PUMP:
+                features = [
+                    DeviceFeatureEnum.SENSOR_IS_ONLINE,
+                    DeviceFeatureEnum.SENSOR_CURRENT_TEMPERATURE,
+                    DeviceFeatureEnum.SENSOR_ATW_ZONE2_TEMPERATURE,
+                    DeviceFeatureEnum.SENSOR_ATW_ZONE3_TEMPERATURE,
+                    DeviceFeatureEnum.SENSOR_ATW_DHW_TEMPERATURE,
+                    DeviceFeatureEnum.SENSOR_ATW_DHW_TARGET_TEMPERATURE,
+                    DeviceFeatureEnum.SENSOR_ATW_HEAT_Z1_TARGET_TEMPERATURE,
+                    DeviceFeatureEnum.SENSOR_ATW_ROOM_Z1_TARGET,
+                    DeviceFeatureEnum.SWITCH_ATW_ZONE1_POWER,
+                    DeviceFeatureEnum.SWITCH_ATW_DHW_POWER,
+                    DeviceFeatureEnum.SWITCH_ATW_ECO,
+                    DeviceFeatureEnum.SELECT_ATW_ECO_MODE,
+                    DeviceFeatureEnum.SELECT_ATW_WORK_MODE,
+                    DeviceFeatureEnum.SWITCH_ATW_ECO_TIMER,
+                    DeviceFeatureEnum.SWITCH_ATW_PTC,
+                    DeviceFeatureEnum.SWITCH_ATW_WEATHER_CONTROL_1,
+                    DeviceFeatureEnum.NUMBER_ATW_HEAT_Z1_TARGET,
+                    DeviceFeatureEnum.NUMBER_ATW_ROOM_Z1_TARGET,
+                    DeviceFeatureEnum.NUMBER_ATW_DHW_TARGET,
+                    DeviceFeatureEnum.NUMBER_ATW_HEATING_CURVE_1,
+                    DeviceFeatureEnum.NUMBER_ATW_COOLING_CURVE_1,
+                    DeviceFeatureEnum.SELECT_ATW_HEATING_CURVE_1,
+                    DeviceFeatureEnum.SENSOR_ATW_HEATING_CURVE_1,
+                    DeviceFeatureEnum.SENSOR_ATW_COOLING_CURVE_1,
+                    DeviceFeatureEnum.SENSOR_ATW_CURVE_TARGET_WATER_TEMP_1,
+                    DeviceFeatureEnum.SENSOR_ATW_WATER_TEMP_FLOW_1,
+                    DeviceFeatureEnum.SENSOR_ATW_ESTIMATED_RETURN_WATER_TEMP_1,
+                    DeviceFeatureEnum.SENSOR_ATW_WATER_TEMP_RETURN_1,
+                    DeviceFeatureEnum.SENSOR_ATW_ROOM_TEMP_RETURN_1,
+                ]
+                if has_power_consumption_data:
+                    features.append(DeviceFeatureEnum.SENSOR_POWER_CONSUMPTION_DAILY)
+                if has_work_time_data:
+                    features.append(DeviceFeatureEnum.SENSOR_WORK_TIME_DAILY)
                 return features
 
             case _:

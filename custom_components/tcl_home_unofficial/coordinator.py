@@ -64,19 +64,25 @@ class IotDeviceCoordinator(DataUpdateCoordinator):
             tcl_things = await self.aws_iot.get_all_things()
             for tcl_thing in tcl_things.data:
                 aws_thing = None
-                storage = None    
-                extra_tcl_data={}            
+                storage = None
+                extra_tcl_data = {}
                 if tcl_thing.is_online:
-                    aws_thing = await self.aws_iot.async_get_thing(tcl_thing.device_id)
-                    storage = await get_stored_data(self.hass, tcl_thing.device_id)
-                    extra_tcl_data=await self.aws_iot.get_extra_tcl_data(storage,tcl_thing.device_id)
-                    
+                    try:
+                        aws_thing = await self.aws_iot.async_get_thing(tcl_thing.device_id)
+                        storage = await get_stored_data(self.hass, tcl_thing.device_id)
+                        extra_tcl_data = await self.aws_iot.get_extra_tcl_data(storage, tcl_thing.device_id)
+                    except Exception as thing_err:
+                        if "ResourceNotFoundException" in str(thing_err):
+                            _LOGGER.debug("Skipping device %s without AWS shadow", tcl_thing.device_id)
+                            continue
+                        raise thing_err
+
                 d = Device(
                     tcl_thing=tcl_thing,
                     aws_thing=aws_thing,
                     device_storage=storage,
                     extra_tcl_data=extra_tcl_data
-                )                
+                )
                 devices.append(d)
         except Exception as err:
             raise UpdateFailed(f"Error communicating with API: {err}") from err

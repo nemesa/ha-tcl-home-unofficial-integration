@@ -31,8 +31,42 @@ from .device_enums import (AirPurifierFanWindSpeedStrEnum,
 from .device_features import DeviceFeatureEnum
 from .device_types import DeviceTypeEnum
 from .tcl_entity_base import TclEntityBase
+from .weather_curves import (
+    get_heating_curve_index,
+    get_heating_curve_name,
+    get_heating_curve_options,
+)
 
 _LOGGER = logging.getLogger(__name__)
+
+
+ATW_WORK_MODE_OPTIONS = ["Auto", "Heat", "Cool"]
+ATW_WORK_MODE_MAP = {
+    0: "Auto",
+    1: "Heat",
+    2: "Cool",
+}
+ATW_WORK_MODE_REVERSE_MAP = {
+    "Auto": 0,
+    "Heat": 1,
+    "Cool": 2,
+}
+
+
+ATW_ECO_MODE_OPTIONS = ["Standard", "ECO", "Turbo", "Auto"]
+
+
+def get_atw_eco_mode_name(index: int) -> str:
+    if 0 <= index < len(ATW_ECO_MODE_OPTIONS):
+        return ATW_ECO_MODE_OPTIONS[index]
+    return ATW_ECO_MODE_OPTIONS[0]
+
+
+def get_atw_eco_mode_index(name: str) -> int:
+    try:
+        return ATW_ECO_MODE_OPTIONS.index(name)
+    except ValueError:
+        return 0
 
 
 class DesiredStateHandlerForSelect:
@@ -95,6 +129,12 @@ class DesiredStateHandlerForSelect:
                 return await self.SELECT_FRESH_AIR(value=value)
             case DeviceFeatureEnum.SELECT_WORK_MODE:
                 return await self.SELECT_WORK_MODE(value=value)
+            case DeviceFeatureEnum.SELECT_ATW_HEATING_CURVE_1:
+                return await self.SELECT_ATW_HEATING_CURVE_1(value=value)
+            case DeviceFeatureEnum.SELECT_ATW_ECO_MODE:
+                return await self.SELECT_ATW_ECO_MODE(value=value)
+            case DeviceFeatureEnum.SELECT_ATW_WORK_MODE:
+                return await self.SELECT_ATW_WORK_MODE(value=value)
 
     def current_state(self) -> str:
         match self.deviceFeature:
@@ -181,6 +221,17 @@ class DesiredStateHandlerForSelect:
                 return getTemperatureType(self.device.data.temperature_type)
             case DeviceFeatureEnum.SELECT_WORK_MODE:
                 return getAirPurifierWorkMode(self.device.data.work_mode)
+            case DeviceFeatureEnum.SELECT_ATW_HEATING_CURVE_1:
+                return get_heating_curve_name(
+                    getattr(self.device.data, "heating_curve_1", 1)
+                )
+            case DeviceFeatureEnum.SELECT_ATW_ECO_MODE:
+                return get_atw_eco_mode_name(
+                    getattr(self.device.data, "eco_mode", 0)
+                )
+            case DeviceFeatureEnum.SELECT_ATW_WORK_MODE:
+                work_mode = getattr(self.device.data, "work_mode", 0)
+                return ATW_WORK_MODE_MAP.get(work_mode, "Auto")
 
     def options_values(self) -> str:
         match self.deviceFeature:
@@ -221,6 +272,30 @@ class DesiredStateHandlerForSelect:
                 return [e.value for e in TemperatureTypeEnum]
             case DeviceFeatureEnum.SELECT_WORK_MODE:
                 return [e.value for e in AirPurifierWorkModeStrEnum]
+            case DeviceFeatureEnum.SELECT_ATW_HEATING_CURVE_1:
+                return get_heating_curve_options()
+            case DeviceFeatureEnum.SELECT_ATW_ECO_MODE:
+                return ATW_ECO_MODE_OPTIONS
+            case DeviceFeatureEnum.SELECT_ATW_WORK_MODE:
+                return ATW_WORK_MODE_OPTIONS
+
+    async def SELECT_ATW_HEATING_CURVE_1(self, value: str):
+        curve_idx = get_heating_curve_index(value)
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, {"htWthCtl1": curve_idx}
+        )
+
+    async def SELECT_ATW_ECO_MODE(self, value: str):
+        mode_idx = get_atw_eco_mode_index(value)
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, {"ECOMode": mode_idx}
+        )
+
+    async def SELECT_ATW_WORK_MODE(self, value: str):
+        mode_val = ATW_WORK_MODE_REVERSE_MAP.get(value, 0)
+        return await self.coordinator.get_aws_iot().async_set_desired_state(
+            self.device.device_id, {"workMode": mode_val}
+        )
 
     async def SELECT_SLEEP_MODE(self, value: SleepModeEnum):
         desired_state = {}
@@ -1205,6 +1280,47 @@ async def async_setup_entry(
                     type="TemperatureType",
                     name="Temperature Type",
                     icon_fn=lambda device: "mdi:home-thermometer",
+                )
+            )
+
+        if DeviceFeatureEnum.SELECT_ATW_HEATING_CURVE_1 in device.supported_features:
+            switches.append(
+                SelectHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.SELECT_ATW_HEATING_CURVE_1,
+                    type="HeatingWeatherCurve1",
+                    name="Heating Weather Curve Zone 1",
+                    icon_fn=lambda device: "mdi:chart-bell-curve",
+                )
+            )
+        if DeviceFeatureEnum.SELECT_ATW_ECO_MODE in device.supported_features:
+            switches.append(
+                SelectHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.SELECT_ATW_ECO_MODE,
+                    type="ATWEcoMode",
+                    name="Energy Saving Mode",
+                    icon_fn=lambda device: "mdi:leaf",
+                )
+            )
+        if DeviceFeatureEnum.SELECT_ATW_WORK_MODE in device.supported_features:
+            switches.append(
+                SelectHandler(
+                    hass=hass,
+                    coordinator=coordinator,
+                    device=device,
+                    deviceFeature=DeviceFeatureEnum.SELECT_ATW_WORK_MODE,
+                    type="ATWWorkMode",
+                    name="Operating Mode",
+                    icon_fn=lambda device: (
+                        "mdi:fire" if device and device.data and getattr(device.data, "work_mode", 0) == 1
+                        else "mdi:snowflake" if device and device.data and getattr(device.data, "work_mode", 0) == 2
+                        else "mdi:refresh-auto"
+                    ),
                 )
             )
 

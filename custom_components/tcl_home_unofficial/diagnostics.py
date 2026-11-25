@@ -34,7 +34,7 @@ async def async_get_device_diagnostics(
     device_id = next(
         identifier[1]
         for identifier in device.identifiers
-        if identifier[0] == "tcl_home_unofficial"
+        if identifier[0] in ("tcl_home_unofficial", "tcl_home_unofficial")
     ).split("-")[1]
     
 
